@@ -409,6 +409,13 @@ select.btn{color:var(--text);background:var(--panel2);border:1px solid var(--lin
 @keyframes wx-lightning{0%,44%,48%,100%{opacity:.25}45%,47%{opacity:1}}
 @media(prefers-reduced-motion:reduce){.wx-icon *{animation:none!important}}
 
+
+/* City photo / current conditions: restore the original static weather emoji */
+.city-current .weather-symbol{
+ display:block!important;flex:0 0 auto;width:auto;height:auto;
+ font-size:clamp(54px,7vw,82px)!important;line-height:1.2;
+}
+
 </style>
 </head>
 <body>
@@ -674,6 +681,7 @@ let lat=37.9838,lon=23.7275,city="Αθήνα, Ελλάδα",isF=false,map,marker
 let forecastSeries=null,forecastDaily=null,forecastParam='temperature',forecastHours=24;
 let europeChart=null,europeRows=[],europeSort='windy';
 const codeText=c=>({0:"Αίθριος",1:"Κυρίως αίθριος",2:"Μερική νέφωση",3:"Νεφελώδης",45:"Ομίχλη",48:"Παγωμένη ομίχλη",51:"Ασθενής ψιχάλα",53:"Ψιχάλα",55:"Ισχυρή ψιχάλα",61:"Ασθενής βροχή",63:"Βροχή",65:"Ισχυρή βροχή",71:"Ασθενής χιονόπτωση",73:"Χιονόπτωση",75:"Ισχυρή χιονόπτωση",80:"Μπόρες",81:"Ισχυρές μπόρες",82:"Έντονες μπόρες",95:"Καταιγίδα",96:"Καταιγίδα με χαλάζι",99:"Ισχυρή καταιγίδα"})[c]||"Μεταβλητός καιρός";
+const staticWeatherIcon=c=>c===0?"☀️":c<=2?"🌤️":c===3?"☁️":c<=48?"🌫️":c<=67?"🌧️":c<=77?"🌨️":c<=82?"🌦️":"⛈️";
 const icon=c=>{
  const kind=c===0?'sun':c<=2?'partly':c===3?'cloud':c<=48?'fog':c<=67?'rain':c<=77?'snow':c<=82?'showers':'storm';
  const cloud='<path class="wx-cloud" d="M12 29.5h22.2a7.3 7.3 0 0 0 .1-14.6 11.1 11.1 0 0 0-21.1-1.8 8.5 8.5 0 0 0-1.2 16.4Z"/>';
@@ -1291,7 +1299,7 @@ async function loadWeather(){
  $('tempStat').innerHTML=`${temp(c.temperature_2m)}°<span class="unit">${isF?'F':'C'}</span>`;$('windStat').innerHTML=`${Math.round(c.wind_speed_10m*(isF?0.621371:1))} <span class="unit">${isF?'mph':'km/h'}</span>`;
  $('humidityStat').innerHTML=`${c.relative_humidity_2m}<span class="unit">%</span>`;$('rainStat').innerHTML=`${h.precipitation_probability[0]}<span class="unit">%</span>`;
  $('feels').textContent=`Αίσθηση: ${temp(c.apparent_temperature)}°`; $('windDir').textContent=`Διεύθυνση: ${dir(c.wind_direction_10m)} (${c.wind_direction_10m}°)`;
- $('cityName').textContent=city;updateCityLandmark(city);$('condition').textContent=codeText(c.weather_code);$('currentTemp').textContent=temp(c.temperature_2m)+'°';$('weatherIcon').textContent=icon(c.weather_code);
+ $('cityName').textContent=city;updateCityLandmark(city);$('condition').textContent=codeText(c.weather_code);$('currentTemp').textContent=temp(c.temperature_2m)+'°';$('weatherIcon').textContent=staticWeatherIcon(c.weather_code);
  $('updated').textContent='Ενημέρωση: '+new Date(c.time).toLocaleString('el-GR',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'short'});
  $('feels2').textContent=temp(c.apparent_temperature)+'°'+(isF?'F':'C');$('dew').textContent=temp(h.dew_point_2m?.[0] ?? c.temperature_2m)+'°'+(isF?'F':'C');$('pressure').textContent=Math.round(c.surface_pressure)+' hPa';$('visibility').textContent='—';
  const currentHourIndex=Array.isArray(h.time)?Math.max(0,h.time.reduce((best,t,i)=>Math.abs(new Date(t)-new Date(c.time))<Math.abs(new Date(h.time[best])-new Date(c.time))?i:best,0)):0;
