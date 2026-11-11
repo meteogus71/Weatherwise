@@ -1230,7 +1230,4 @@ loadMeteoAlarmAlerts();
 setInterval(loadMeteoAlarmAlerts,5*60*1000);
 
 initMap();
-let moveDebounce;map.on('moveend',()=>{const active=document.querySelector('#layerBar button.active')?.dataset.layer;if(active&&['cloudforecast','rainforecast','wind'].includes(active)){clearTimeout(moveDebounce);moveDebounce=setTimeout(()=>drawForecastGrid(active),450)}});
-loadWeather();
-</script>
-</body></html>
+let moveDebo
