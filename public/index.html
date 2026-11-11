@@ -211,31 +211,6 @@ select.btn{color:var(--text);background:var(--panel2);border:1px solid var(--lin
 .gfs-loop{display:flex;align-items:center;gap:5px;margin-left:5px;color:#a9c3d5;font-size:11px}
 .gfs-player-note{color:#89a7bc;font-size:10px;text-align:center}
 @media(max-width:520px){.gfs-player{padding:11px}.gfs-player-controls{gap:5px}.gfs-player-controls button{min-width:33px}.gfs-player-controls .gfs-player-play{min-width:43px}}
-
-/* MeteoAlarm warning cards – severity-coloured, visual-first layout */
-.meteoalarm-alert-card{--alert-accent:#94a3b8;--alert-tint:rgba(148,163,184,.13);position:relative;overflow:hidden;border:1px solid color-mix(in srgb,var(--alert-accent) 48%,transparent);border-left:0;border-radius:15px;padding:0;background:var(--panel2);box-shadow:0 8px 22px rgba(0,0,0,.16);margin:12px 0}
-.meteoalarm-alert-card.yellow{--alert-accent:#f2d229;--alert-tint:rgba(242,210,41,.16)}
-.meteoalarm-alert-card.orange{--alert-accent:#ff8b32;--alert-tint:rgba(255,139,50,.16)}
-.meteoalarm-alert-card.red{--alert-accent:#ef4444;--alert-tint:rgba(239,68,68,.17)}
-.meteoalarm-alert-card.unknown{--alert-accent:#94a3b8;--alert-tint:rgba(148,163,184,.12)}
-.meteoalarm-alert-hero{min-height:128px;padding:20px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px;color:#fff;background:linear-gradient(115deg,color-mix(in srgb,var(--alert-accent) 88%,#172b3c),color-mix(in srgb,var(--alert-accent) 66%,#263849))}
-.meteoalarm-alert-hero-main{min-width:0}
-.meteoalarm-alert-country{font-size:11px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;opacity:.9;margin-bottom:8px}
-.meteoalarm-alert-title{font-size:clamp(19px,3vw,27px);line-height:1.18;font-weight:800;overflow-wrap:anywhere}
-.meteoalarm-alert-area{font-size:14px;font-weight:650;margin-top:8px;color:rgba(255,255,255,.94)}
-.meteoalarm-alert-icon{flex:0 0 92px;width:92px;height:92px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.42);font-size:52px;line-height:1}
-.meteoalarm-alert-badge{display:inline-flex;align-items:center;gap:6px;font-size:10px;font-weight:900;letter-spacing:.06em;border-radius:6px;padding:6px 9px;margin-bottom:9px;background:rgba(20,30,40,.24);color:#fff;border:1px solid rgba(255,255,255,.45)}
-.meteoalarm-alert-body{padding:17px 20px 18px;background:linear-gradient(180deg,var(--alert-tint),transparent 90%)}
-.meteoalarm-alert-times{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.meteoalarm-alert-time{background:var(--panel);border:1px solid color-mix(in srgb,var(--alert-accent) 35%,transparent);border-radius:10px;padding:11px 13px;min-width:0}
-.meteoalarm-alert-time-label{font-size:10px;font-weight:850;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
-.meteoalarm-alert-time-value{font-size:clamp(14px,2vw,18px);font-weight:850;color:var(--text);font-variant-numeric:tabular-nums;line-height:1.3}
-.meteoalarm-alert-time-zone{font-size:10px;color:var(--muted);margin-top:3px}
-.meteoalarm-alert-description{font-size:13px;line-height:1.6;white-space:pre-line;margin:13px 0 6px;color:var(--text)}
-.meteoalarm-alert-meta{font-size:11px;color:var(--muted);margin-top:9px}
-.meteoalarm-alert-link{display:inline-block;margin-top:12px;font-size:11px;font-weight:750;color:var(--cyan);text-decoration:none}
-@media(max-width:520px){.meteoalarm-alert-hero{min-height:112px;padding:16px}.meteoalarm-alert-icon{flex-basis:70px;width:70px;height:70px;font-size:40px}.meteoalarm-alert-body{padding:13px}.meteoalarm-alert-times{gap:7px}.meteoalarm-alert-time{padding:9px}.meteoalarm-alert-time-label{font-size:9px}.meteoalarm-alert-time-value{font-size:14px}}
-
 </style>
 </head>
 <body>
@@ -985,59 +960,12 @@ function meteoAlarmDate(value){
 function meteoAlarmSafe(value){
  return String(value||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
-function meteoAlarmPhenomenonIcon(event,headline,description){
- const t=`${event||''} ${headline||''} ${description||''}`.toLowerCase();
- if(/thunder|storm|καταιγ|κεραυν|lightning/.test(t))return '⛈️';
- if(/snow|χιον|sleet|χιονόνερο/.test(t))return '❄️';
- if(/rain|precip|βροχ|υετ|καταιγ/.test(t))return '🌧️';
- if(/wind|άνεμ|θυελλ|gust|ριπή/.test(t))return '💨';
- if(/heat|hot|καύσων|υψηλ.*θερμοκρασ/.test(t))return '🌡️';
- if(/cold|παγετ|ψύχος|χαμηλ.*θερμοκρασ/.test(t))return '🥶';
- if(/fog|ομίχλ/.test(t))return '🌫️';
- if(/coast|sea|θαλάσσ|κυματ|παράκτι/.test(t))return '🌊';
- if(/fire|wildfire|πυρκαγ/.test(t))return '🔥';
- return '⚠️';
-}
-function meteoAlarmLocalDateTime(value){
- if(!value)return {date:'—',time:'—'};
- const d=new Date(value);if(isNaN(d))return {date:String(value),time:'—'};
- const opts={timeZone:'Europe/Athens'};
- return {
-  date:new Intl.DateTimeFormat('el-GR',{...opts,day:'2-digit',month:'2-digit',year:'numeric'}).format(d),
-  time:new Intl.DateTimeFormat('el-GR',{...opts,hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(d)
- };
-}
 function renderMeteoAlarmAlerts(entries){
  const host=$('meteoAlarmAlertsList');
  if(!entries.length){
   host.innerHTML='<div class="notice">Η ροή MeteoAlarm ενημερώθηκε επιτυχώς: δεν βρέθηκαν ενεργές προειδοποιήσεις για την Ελλάδα. Για επιβεβαίωση, ανοίξτε την επίσημη σελίδα προειδοποιήσεων της ΕΜΥ.</div>';return;
  }
- host.innerHTML=entries.map(a=>{
-  const start=meteoAlarmLocalDateTime(a.effective||a.onset||a.sent);
-  const end=meteoAlarmLocalDateTime(a.expires);
-  const icon=meteoAlarmPhenomenonIcon(a.event,a.headline,a.description);
-  const level=a.level||'unknown';
-  return `<article class="meteoalarm-alert-card ${meteoAlarmSafe(level)}">
-   <div class="meteoalarm-alert-hero">
-    <div class="meteoalarm-alert-hero-main">
-     <div class="meteoalarm-alert-country">Ελλάδα · MeteoAlarm</div>
-     <span class="meteoalarm-alert-badge">${meteoAlarmGreekSeverity(level)} ΠΡΟΕΙΔΟΠΟΙΗΣΗ</span>
-     <div class="meteoalarm-alert-title">${meteoAlarmSafe(a.headline||a.event||'Προειδοποίηση καιρού')}</div>
-     ${a.area?`<div class="meteoalarm-alert-area">${meteoAlarmSafe(a.area)}</div>`:''}
-    </div>
-    <div class="meteoalarm-alert-icon" role="img" aria-label="${meteoAlarmSafe(a.event||'Καιρικό φαινόμενο')}">${icon}</div>
-   </div>
-   <div class="meteoalarm-alert-body">
-    <div class="meteoalarm-alert-times">
-     <div class="meteoalarm-alert-time"><div class="meteoalarm-alert-time-label">Έναρξη</div><div class="meteoalarm-alert-time-value">${meteoAlarmSafe(start.date)}</div><div class="meteoalarm-alert-time-value">${meteoAlarmSafe(start.time)}</div><div class="meteoalarm-alert-time-zone">Τοπική ώρα Ελλάδας</div></div>
-     <div class="meteoalarm-alert-time"><div class="meteoalarm-alert-time-label">Λήξη</div><div class="meteoalarm-alert-time-value">${meteoAlarmSafe(end.date)}</div><div class="meteoalarm-alert-time-value">${meteoAlarmSafe(end.time)}</div><div class="meteoalarm-alert-time-zone">Τοπική ώρα Ελλάδας</div></div>
-    </div>
-    ${a.description?`<div class="meteoalarm-alert-description">${meteoAlarmSafe(a.description)}</div>`:''}
-    <div class="meteoalarm-alert-meta">Φαινόμενο: ${meteoAlarmSafe(a.event||'—')} · Βεβαιότητα: ${meteoAlarmSafe(a.certainty||'—')} · Έκδοση: ${meteoAlarmSafe(meteoAlarmDate(a.sent||a.updated))}</div>
-    ${a.url?`<a class="meteoalarm-alert-link" href="${meteoAlarmSafe(a.url)}" target="_blank" rel="noopener">Περισσότερες πληροφορίες ↗</a>`:''}
-   </div>
-  </article>`;
- }).join('');
+ host.innerHTML=entries.map(a=>`<article class="meteoalarm-alert-card ${a.level}"><div class="meteoalarm-alert-head"><div class="meteoalarm-alert-title">${meteoAlarmSafe(a.headline||a.event||'Προειδοποίηση καιρού')}</div><span class="meteoalarm-alert-badge ${a.level}">${meteoAlarmGreekSeverity(a.level)}</span></div><div class="meteoalarm-alert-meta">Έκδοση: ${meteoAlarmSafe(meteoAlarmDate(a.sent||a.updated))} · Έναρξη: ${meteoAlarmSafe(meteoAlarmDate(a.effective||a.onset))} · Λήξη: ${meteoAlarmSafe(meteoAlarmDate(a.expires))}</div>${a.description?`<div class="meteoalarm-alert-description">${meteoAlarmSafe(a.description)}</div>`:''}${a.area?`<div class="meteoalarm-alert-area">Περιοχές: ${meteoAlarmSafe(a.area)}</div>`:''}<div class="meteoalarm-alert-meta">Φαινόμενο: ${meteoAlarmSafe(a.event||'—')} · Βεβαιότητα: ${meteoAlarmSafe(a.certainty||'—')}</div>${a.url?`<a href="${meteoAlarmSafe(a.url)}" target="_blank" rel="noopener">Περισσότερες πληροφορίες ↗</a>`:''}</article>`).join('');
 }
 async function loadMeteoAlarmAlerts(){
  const statusEl=$('meteoAlarmFeedStatus'),updatedEl=$('meteoAlarmUpdated'),host=$('meteoAlarmAlertsList');
