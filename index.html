@@ -1,0 +1,943 @@
+<!doctype html>
+<html lang="el">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WeatherWise — Μετεωρολογικό Κέντρο</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+:root{--bg:#0b1220;--panel:#111c2e;--panel2:#152238;--line:#26364d;--muted:#8fa3bc;--text:#e9f1fb;--cyan:#48c8e8;--blue:#438cf5;--green:#44d6a1;--amber:#f6bd60}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:"DM Sans",sans-serif}button,input{font:inherit}
+.shell{display:flex;min-height:100vh}.sidebar{width:244px;flex:0 0 244px;background:#0e1929;border-right:1px solid var(--line);padding:22px 14px;display:flex;flex-direction:column;min-height:100vh;position:sticky;top:0;height:100vh}
+.brand{display:flex;align-items:center;gap:11px;padding:4px 10px 25px;font:800 20px Manrope}.brandmark{width:34px;height:34px;border-radius:11px;background:linear-gradient(135deg,#48c8e8,#3578df);display:grid;place-items:center;color:#071525;font-size:20px}
+.group-label{color:#6f849e;font-size:10px;font-weight:700;letter-spacing:1.5px;padding:17px 11px 8px}.nav{display:flex;align-items:center;gap:12px;padding:11px 12px;color:#9fb0c6;border-radius:9px;margin:2px 0;cursor:pointer;font-size:13px;transition:.2s}.nav:hover,.nav.active{background:#1a2b43;color:#f4f8ff}.nav.active{box-shadow:inset 3px 0 var(--cyan)}.nav .ico{width:18px;text-align:center;font-size:16px}.side-bottom{margin-top:auto;border-top:1px solid var(--line);padding:15px 8px 0;color:#7f93ad;font-size:11px;line-height:1.6}
+.main{min-width:0;flex:1;padding:26px 30px 40px;max-width:1800px;margin:0 auto}.topbar{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:26px}.eyebrow{font-size:10px;color:var(--cyan);font-weight:700;letter-spacing:1.7px;text-transform:uppercase}.topbar h1{font:800 25px Manrope;margin:5px 0 0}.top-actions{display:flex;align-items:center;gap:10px}.search{background:#111c2e;border:1px solid var(--line);border-radius:9px;padding:10px 13px;color:var(--text);width:220px;outline:none}.btn{border:1px solid var(--line);background:#142238;color:#dce8f7;padding:10px 13px;border-radius:9px;cursor:pointer}.btn.primary{background:#1b7090;border-color:#258eae;color:white}.grid{display:grid;gap:16px}.stats{grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:16px}.card{background:linear-gradient(145deg,#142238,#101b2d);border:1px solid var(--line);border-radius:14px;padding:17px;min-width:0;box-shadow:0 8px 24px #00000012}.card-head{display:flex;justify-content:space-between;align-items:center;color:#91a6bf;font-size:12px;margin-bottom:13px}.metric{font:700 28px Manrope;letter-spacing:-1px}.unit{font-size:14px;color:#9cb0c7;font-weight:500}.small{font-size:11px;color:#8499b4}.positive{color:var(--green)}.weather-layout{grid-template-columns:minmax(300px,1.45fr) minmax(260px,.8fr);margin-bottom:16px}.current{display:flex;align-items:center;justify-content:space-between;gap:18px;min-height:175px}.place{font:700 19px Manrope}.condition{color:#9db0c7;font-size:13px;margin-top:5px}.bigtemp{font:800 56px Manrope;letter-spacing:-3px;margin-top:10px}.weather-symbol{font-size:72px;filter:drop-shadow(0 8px 18px #48c8e833)}.details{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.detail{background:#0e1929;border:1px solid #22344b;border-radius:10px;padding:12px}.detail span{display:block;color:#8fa3bc;font-size:11px}.detail b{display:block;font-size:16px;margin-top:5px}.content-grid{grid-template-columns:minmax(0,1.5fr) minmax(280px,.8fr)}.map-card{padding:0;overflow:hidden}.map-title{padding:16px 18px;display:flex;justify-content:space-between;align-items:center}.map-title h3,.card h3{font:700 14px Manrope;margin:0}.map-tools{display:flex;gap:6px}.map-tools button{font-size:11px;padding:7px 9px}.map{height:390px;background:#142238}
+.layerbar{display:flex;gap:7px;flex-wrap:wrap;padding:0 16px 13px}
+.layerbar button{font-size:11px;padding:7px 10px;border:1px solid #30445f;background:#0e1929;color:#a9bdd3;border-radius:7px;cursor:pointer}
+.layerbar button.active{background:#17445a;border-color:#48c8e8;color:#e8faff}
+.layer-status{font-size:10px;color:#91a6bf;padding:0 18px 10px;min-height:20px}
+.leaflet-container{font-family:"DM Sans",sans-serif}
+.wind-arrow{font-size:18px;color:#c6f6ff;text-shadow:0 1px 5px #071525,0 0 8px #48c8e8;font-weight:700}
+.layer-legend{display:flex;gap:10px;align-items:center;flex-wrap:wrap;color:#8fa3bc;font-size:10px;margin-top:9px}
+.legend-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px}.forecast-list{display:flex;flex-direction:column;gap:0}.forecast-row{display:grid;grid-template-columns:1fr 34px 48px 48px;align-items:center;gap:8px;padding:13px 0;border-bottom:1px solid #24354b;font-size:12px}.forecast-row:last-child{border:0}.forecast-row .day{color:#aebed0}.forecast-row .symbol{text-align:center;font-size:19px}.forecast-row strong{text-align:right}.chart-card{margin-top:16px}.chart-wrap{height:210px;margin-top:10px}.section{display:none}.section.active{display:block}.notice{border:1px solid #28465c;background:#10283a;border-radius:10px;padding:12px 14px;color:#a9c7d9;font-size:12px;margin-top:14px}.search-results{position:absolute;right:30px;top:76px;background:#17263b;border:1px solid var(--line);border-radius:10px;padding:8px;z-index:1000;display:none;max-height:260px;overflow:auto;width:240px}.search-results button{display:block;width:100%;text-align:left;background:none;border:0;color:#e9f1fb;padding:9px;border-radius:6px;cursor:pointer}.search-results button:hover{background:#263b56}.mobile-head{display:none}
+@media(max-width:1000px){.sidebar{width:205px;flex-basis:205px}.main{padding:22px 18px}.stats{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:700px){.shell{display:block}.sidebar{position:fixed;z-index:120;left:-250px;transition:left .25s;width:240px;height:100vh}.sidebar.open{left:0}.mobile-head{display:inline-block}.main{padding:18px 13px}.topbar{align-items:flex-start}.topbar h1{font-size:20px}.top-actions .search{width:145px}.top-actions .btn{display:none}.weather-layout,.content-grid{grid-template-columns:1fr}.stats{gap:9px}.card{padding:13px}.metric{font-size:24px}.map{height:300px}.current{min-height:150px}.bigtemp{font-size:48px}}
+
+.forecast-toolbar{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}.forecast-toolbar h3{margin:0 0 5px;font-size:15px;letter-spacing:.4px}
+.range-tabs,.forecast-tabs{display:flex;gap:6px;flex-wrap:wrap}.range-btn,.forecast-tab{border:1px solid var(--line);background:#14243a;color:#aebed0;padding:8px 13px;border-radius:8px;cursor:pointer;font:inherit;font-size:12px}
+.range-btn.active,.forecast-tab.active{background:#17617b;border-color:#39b9d6;color:#fff}.forecast-tabs{margin-top:18px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+.forecast-chart-heading{display:flex;justify-content:space-between;align-items:center;margin-top:16px;color:#eaf3fb;font-size:13px}.forecast-chart-heading span{color:#9eb4c9;font-size:12px}
+.forecast-large-chart{height:330px;margin-top:12px;position:relative}.forecast-footnote{font-size:11px;color:#8fa5bb;margin-top:8px;line-height:1.5}.forecast-days-card{margin-top:16px}
+@media(max-width:650px){.forecast-large-chart{height:270px}.range-btn,.forecast-tab{padding:8px 10px}}
+
+/* Seven-day outlook inspired by the supplied reference */
+.outlook-shell{width:100%;padding:20px 22px;background:linear-gradient(145deg,#17243a,#1c2c45);border:1px solid #344760;border-radius:16px;overflow:hidden}
+.outlook-title{font-family:Georgia,serif;font-size:30px;color:#f0f4fb;letter-spacing:-.5px;margin:0 0 4px}
+.outlook-subtitle{font-size:11px;color:#9eb1c9;margin-bottom:12px}
+.outlook-row{display:grid;grid-template-columns:92px 34px minmax(105px,1fr) 42px minmax(90px,1.2fr) 42px 142px 82px 76px;align-items:center;gap:10px;min-height:67px;border-bottom:1px solid #3a4b62;color:#c4d2e5;font-family:Georgia,serif;font-size:14px}
+.outlook-row:last-child{border-bottom:0}
+.outlook-date{display:flex;flex-direction:column;gap:2px}.outlook-date strong{font-size:17px;color:#f0f4fb}.outlook-date span{font-size:12px;color:#9eb1c9}
+.outlook-icon{text-align:center;font-size:22px;color:#91b6ec}.outlook-condition{font-size:14px;color:#afc5e8;white-space:nowrap}
+.outlook-low{text-align:right;color:#9db5db;font-size:15px}.outlook-high{font-size:15px;color:#f2f5fa}
+.outlook-tempbar{height:10px;position:relative;border-radius:10px;overflow:hidden;background:#34445a}
+.outlook-track{position:absolute;inset:0;background:#34445a}.outlook-range{position:absolute;top:0;bottom:0;border-radius:10px;background:linear-gradient(90deg,#7ea8e7,#d2a34c)}
+.outlook-metric{font-family:"DM Sans",sans-serif;font-size:12px;color:#a9c0e3;white-space:nowrap}.outlook-metric span{display:inline-block}
+@media(max-width:1050px){.outlook-shell{padding:16px}.outlook-row{grid-template-columns:78px 28px minmax(80px,1fr) 34px minmax(65px,1fr) 34px 112px 65px 58px;gap:6px;font-size:12px}.outlook-date strong{font-size:15px}.outlook-metric{font-size:10px}}
+@media(max-width:720px){.outlook-shell{padding:13px 12px}.outlook-title{font-size:25px}.outlook-row{grid-template-columns:62px 25px 1fr 30px 1fr 30px;gap:5px;min-height:66px}.outlook-condition{font-size:11px;white-space:normal}.outlook-date strong{font-size:13px}.outlook-date span{font-size:10px}.outlook-metric{grid-column:3 / span 4;font-size:10px;display:inline-block;margin-top:-12px}.outlook-row .outlook-metric:nth-last-child(2){display:none}.outlook-row .outlook-metric:last-child{display:none}.outlook-low,.outlook-high{font-size:12px}.outlook-tempbar{height:8px}}
+
+
+#forecastOutlookPanel{margin-top:4px}
+#forecastOutlookList .outlook-shell{margin-top:14px}
+
+.europe-card{padding:24px 26px;background:linear-gradient(145deg,#17243a,#1d2c43);border:1px solid #344760}
+.europe-head{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;flex-wrap:wrap}
+.europe-head h2{font:500 clamp(25px,3vw,38px) Georgia,serif;color:#f0f3f9;margin:0 0 5px}
+.europe-head p{margin:0;color:#a9c0e3;font:16px Georgia,serif}
+.europe-sort{display:flex;gap:4px;padding:4px;background:#27364a;border-radius:10px}
+.europe-sort-btn{border:0;background:transparent;color:#c0cde0;padding:10px 13px;border-radius:7px;cursor:pointer;font-size:13px}
+.europe-sort-btn.active{background:#e7e8e2;color:#1c2940;box-shadow:0 2px 6px #0003}
+.europe-meta{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:24px 0 8px;color:#9eb1c9;font-size:11px}
+.europe-chart-wrap{height:790px;position:relative}
+.europe-foot{color:#8198b4;font-size:11px;margin-top:8px}
+@media(max-width:700px){.europe-card{padding:16px 12px}.europe-head p{font-size:13px}.europe-sort{width:100%}.europe-sort-btn{flex:1;padding:9px 5px;font-size:11px}.europe-chart-wrap{height:700px}}
+
+/* Editorial serif typography inspired by the supplied "Hourly forecast" reference */
+:root{--editorial-font:"DM Serif Display",Georgia,serif}
+.topbar h1,.card h3,.map-title h3,.forecast-toolbar h3,
+.forecast-chart-heading,.outlook-title,.outlook-date strong,
+.outlook-date span,.outlook-condition,.outlook-low,.outlook-high,
+.outlook-metric,.range-btn,.forecast-tab,.europe-head h2,
+.europe-head p,.europe-sort-btn{
+ font-family:var(--editorial-font)!important;
+ font-weight:400!important;
+ letter-spacing:0!important;
+}
+.forecast-toolbar h3{font-size:clamp(25px,3vw,38px)!important;color:#edf2fb}
+.forecast-toolbar .small{font-family:var(--editorial-font);font-size:16px;color:#a9c0e3}
+.forecast-tab,.range-btn{font-size:17px!important}
+.forecast-chart-heading{font-size:19px!important}
+.outlook-title{font-size:32px!important}
+.outlook-date strong{font-size:19px!important}
+.outlook-date span,.outlook-condition,.outlook-metric{font-size:14px!important}
+.europe-head h2{font-size:clamp(26px,3vw,40px)!important}
+
+
+.europe-temp-legend{display:flex;align-items:center;gap:9px;justify-content:flex-end;margin:-1px 2px 8px;color:#aebed0;font-size:11px}
+.europe-temp-legend i{display:block;width:150px;height:9px;border-radius:99px;background:linear-gradient(90deg,#2563eb 0%,#22b4dc 25%,#74be96 50%,#f5ae41 75%,#dc3737 100%);box-shadow:0 0 0 1px #ffffff18}
+@media(max-width:700px){.europe-temp-legend{justify-content:flex-start}.europe-temp-legend i{width:115px}}
+
+.city-current{position:relative;isolation:isolate;overflow:hidden;min-height:285px!important;padding:26px!important;background:#355d7e!important;border-radius:16px!important}
+.city-landmark{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 48%;z-index:-2;opacity:.82;transition:opacity .35s}
+.city-current-shade{position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,rgba(7,18,32,.78) 0%,rgba(7,18,32,.43) 48%,rgba(7,18,32,.2) 100%),linear-gradient(0deg,rgba(7,18,32,.42),transparent 60%)}
+.city-current-copy{position:relative;z-index:1;max-width:70%}
+.city-current .eyebrow{color:#e3edf8}.city-current .place{font-family:var(--editorial-font,Georgia,serif)!important;font-size:clamp(28px,4vw,48px)!important;color:#fff;font-weight:400!important}
+.city-current .condition,.city-current .small{color:#edf4fb}.city-current .bigtemp{font-family:var(--editorial-font,Georgia,serif)!important;font-size:clamp(60px,8vw,94px)!important;color:#fff;font-weight:400!important;letter-spacing:-3px}
+.city-current .weather-symbol{position:relative;z-index:1;color:#fff;opacity:.88;font-size:clamp(54px,7vw,82px);filter:drop-shadow(0 4px 15px #10243b)}
+.city-landmark-caption{position:absolute;right:24px;bottom:16px;z-index:1;color:#fff;font:14px var(--editorial-font,Georgia,serif);text-shadow:0 1px 5px #071525aa;opacity:.9}
+@media(max-width:650px){.city-current{min-height:250px!important;padding:20px!important}.city-current-copy{max-width:78%}.city-landmark-caption{right:14px;bottom:10px;font-size:11px}}
+
+
+/* Appearance settings and custom background */
+body.has-custom-background{background-size:cover;background-position:center;background-attachment:fixed}
+body.has-custom-background:before{content:"";position:fixed;inset:0;z-index:-1;background:rgba(4,12,24,var(--bg-dim, .35));pointer-events:none}
+.theme-preset{min-height:100px;border-color:var(--line);color:var(--text);line-height:1.7}
+.theme-preset .small{color:#c0cede}
+/* Theme selector */
+.theme-control{display:flex;align-items:center;gap:7px;padding:5px 8px;border:1px solid var(--line);border-radius:9px;background:var(--panel);color:var(--muted);font-size:11px;white-space:nowrap}
+.theme-control select{background:transparent;border:0;color:var(--text);font:600 11px "DM Sans",sans-serif;outline:none;cursor:pointer;max-width:112px}
+.theme-control option{background:#142238;color:#fff}
+body[data-theme="arctic"]{--bg:#edf2f7;--panel:#ffffff;--panel2:#e4ebf3;--line:#cbd5e1;--muted:#53657a;--text:#172338;--cyan:#087eaa;--blue:#2868c7;--green:#16845d;--amber:#b7791f;background:var(--bg);color:var(--text)}
+body[data-theme="arctic"] .sidebar{background:#e2eaf3;border-color:var(--line)}
+body[data-theme="arctic"] .nav{color:#52657c}body[data-theme="arctic"] .nav:hover,body[data-theme="arctic"] .nav.active{background:#d1dfed;color:#14243a}
+body[data-theme="arctic"] .card{background:linear-gradient(145deg,#fff,#f3f7fb);box-shadow:0 8px 24px #19324b10}
+body[data-theme="arctic"] .search,body[data-theme="arctic"] .btn,body[data-theme="arctic"] .theme-control{background:#fff;color:#172338;border-color:#cbd5e1}
+body[data-theme="arctic"] .detail,body[data-theme="arctic"] .layerbar button{background:#edf3f8;border-color:#cbd5e1;color:#334a63}
+body[data-theme="arctic"] .layerbar button.active{background:#d7edf5;color:#07516d;border-color:#4da7c5}
+body[data-theme="arctic"] .outlook-shell{background:linear-gradient(145deg,#f4f7fb,#e7edf5);border-color:#cbd5e1}
+body[data-theme="arctic"] .outlook-title,body[data-theme="arctic"] .outlook-date strong,body[data-theme="arctic"] .outlook-high{color:#172338}
+body[data-theme="arctic"] .outlook-row{border-color:#cbd5e1;color:#40546c}
+body[data-theme="arctic"] .outlook-track{background:#dce4ed}
+body[data-theme="ocean"]{--bg:#071c2a;--panel:#0b2b3d;--panel2:#104057;--line:#1b536c;--muted:#8db9c9;--text:#e4f7fb;--cyan:#55d6e8;--blue:#3a9bd8;--green:#5de0b2;--amber:#ffc66d}
+body[data-theme="ocean"] .sidebar{background:#082333}
+body[data-theme="ocean"] .card{background:linear-gradient(145deg,#104057,#0b2b3d)}
+body[data-theme="ocean"] .detail,body[data-theme="ocean"] .layerbar button{background:#082333;border-color:#1b536c}
+body[data-theme="ocean"] .nav:hover,body[data-theme="ocean"] .nav.active{background:#12445b}
+body[data-theme="aurora"]{--bg:#151329;--panel:#211d3a;--panel2:#2b2850;--line:#46416f;--muted:#aaa5cc;--text:#f3efff;--cyan:#75e0db;--blue:#9a8cff;--green:#75d6b0;--amber:#f5bd76}
+body[data-theme="aurora"] .sidebar{background:#1b1831}
+body[data-theme="aurora"] .card{background:linear-gradient(145deg,#2b2850,#201d3b)}
+body[data-theme="aurora"] .detail,body[data-theme="aurora"] .layerbar button{background:#1b1831;border-color:#46416f}
+body[data-theme="aurora"] .nav:hover,body[data-theme="aurora"] .nav.active{background:#39345e}
+body[data-theme="graphite"]{--bg:#17191d;--panel:#22262c;--panel2:#2b3038;--line:#3b424c;--muted:#a2aab5;--text:#edf0f4;--cyan:#a8c7d8;--blue:#829eb7;--green:#8bc5a7;--amber:#d4b078}
+body[data-theme="graphite"] .sidebar{background:#1d2025}
+body[data-theme="graphite"] .card{background:linear-gradient(145deg,#2b3038,#22262c)}
+body[data-theme="graphite"] .detail,body[data-theme="graphite"] .layerbar button{background:#1d2025;border-color:#3b424c}
+body[data-theme="graphite"] .nav:hover,body[data-theme="graphite"] .nav.active{background:#343b44}
+body[data-theme="contrast"]{--bg:#000;--panel:#080808;--panel2:#111;--line:#777;--muted:#e0e0e0;--text:#fff;--cyan:#00e5ff;--blue:#5b9dff;--green:#00ff9d;--amber:#ffd000}
+body[data-theme="contrast"] .sidebar{background:#050505}
+body[data-theme="contrast"] .card{background:#080808;border:1px solid #777}
+body[data-theme="contrast"] .detail,body[data-theme="contrast"] .layerbar button{background:#000;border-color:#777;color:#fff}
+body[data-theme="contrast"] .nav{color:#eee}
+body[data-theme="contrast"] .nav:hover,body[data-theme="contrast"] .nav.active{background:#202020;color:#fff}
+/* Glassmorphism: translucent layered surfaces with restrained blur */
+body[data-theme="glass"]{--bg:#081827;--panel:rgba(17,39,61,.62);--panel2:rgba(36,68,96,.55);--line:rgba(160,211,235,.24);--muted:#a8c5d8;--text:#edf8ff;--cyan:#70e3f2;--blue:#66aef5;--green:#79e0bd;--amber:#ffd18a;background:radial-gradient(ellipse at 15% 0%,#17466a 0%,transparent 45%),linear-gradient(135deg,#071321,#102b43 55%,#101d35);color:var(--text)}
+body[data-theme="glass"] .sidebar{background:rgba(7,24,40,.72);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-color:var(--line)}
+body[data-theme="glass"] .card,body[data-theme="glass"] .detail,body[data-theme="glass"] .layerbar button,body[data-theme="glass"] .search,body[data-theme="glass"] .btn,body[data-theme="glass"] .theme-control{background:rgba(24,53,78,.52);border:1px solid rgba(177,222,244,.22);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:0 10px 30px rgba(0,0,0,.16),inset 0 1px rgba(255,255,255,.07)}
+body[data-theme="glass"] .nav:hover,body[data-theme="glass"] .nav.active{background:rgba(91,190,224,.16);color:#fff}
+body[data-theme="glass"] .outlook-shell{background:rgba(18,48,73,.58);backdrop-filter:blur(14px);border-color:var(--line)}
+/* Weather Intelligence: operational meteo command-centre palette */
+body[data-theme="intelligence"]{--bg:#07111e;--panel:#101f31;--panel2:#172c42;--line:#29445e;--muted:#91a9bf;--text:#e8f2fb;--cyan:#42d7e8;--blue:#579cff;--green:#55d6a5;--amber:#ffbd66;background:radial-gradient(ellipse at 80% 0%,#153752 0%,transparent 42%),linear-gradient(145deg,#050d18,#0b1c2d 65%,#10243a);color:var(--text)}
+body[data-theme="intelligence"] .sidebar{background:linear-gradient(180deg,#0a1929,#0d2236);border-color:#29445e}
+body[data-theme="intelligence"] .card{background:linear-gradient(145deg,#142a40,#0e1d2e);border-color:#29445e;box-shadow:0 8px 28px #0005}
+body[data-theme="intelligence"] .detail,body[data-theme="intelligence"] .layerbar button{background:#0c1b2b;border-color:#29445e}
+body[data-theme="intelligence"] .nav:hover,body[data-theme="intelligence"] .nav.active{background:#153c56;color:#7deafa}
+body[data-theme="intelligence"] .btn.primary,body[data-theme="intelligence"] .layerbar button.active{background:#123e58;border-color:#36bcd4;color:#a5f4ff}
+@media(max-width:760px){.theme-control span{display:none}.theme-control{padding:8px 5px}.theme-control select{max-width:90px}}
+
+
+select.btn{color:var(--text);background:var(--panel2);border:1px solid var(--line);padding:8px 12px;border-radius:8px}
+#layerBarLarge{margin:12px 0}
+#layerBarLarge button{margin:3px}
+.gfs-source{font-size:10px;color:var(--muted)}
+/* Community weather observations */
+.report-layout{display:grid;grid-template-columns:minmax(280px,1fr) minmax(280px,.9fr);gap:16px}
+.report-form{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.report-form .field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.report-form .wide{grid-column:1/-1}
+.report-form label{font-size:11px;color:#9db0c7}
+.report-form input,.report-form select,.report-form textarea{width:100%;box-sizing:border-box;background:#0e1929;color:var(--text);border:1px solid #2a4059;border-radius:9px;padding:11px;font:inherit;outline:none}
+.report-form textarea{min-height:110px;resize:vertical}
+.report-form input:focus,.report-form select:focus,.report-form textarea:focus{border-color:var(--cyan)}
+.photo-previews{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.photo-previews img{width:88px;height:72px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
+.report-item{border:1px solid var(--line);border-radius:11px;padding:13px;margin-top:10px;background:#0e192955}
+.report-item-head{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:7px}
+.report-item img{width:100px;height:76px;object-fit:cover;border-radius:7px;margin:8px 7px 0 0}
+.report-meta{font-size:10px;color:#8fa3bc}
+@media(max-width:800px){.report-layout{grid-template-columns:1fr}}
+@media(max-width:520px){.report-form{grid-template-columns:1fr}.report-form .wide{grid-column:auto}}
+
+
+/* Official EMY / MeteoAlarm alerts */
+.alert-toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:12px 0}
+.alert-level-guide{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}
+.alert-level{font-size:10px;font-weight:700;padding:7px 10px;border-radius:7px;background:#243246}
+.alert-level.green{background:#174c39;color:#a8f0c7}.alert-level.yellow{background:#685316;color:#ffe49a}
+.alert-level.orange{background:#713b16;color:#ffd0a2}.alert-level.red{background:#702c36;color:#ffc0c7}
+.emy-alerts-list{display:grid;gap:12px}
+.meteoalarm-alert-card{border:1px solid var(--line);border-left:5px solid #64748b;border-radius:11px;padding:14px;background:var(--panel2)}
+.meteoalarm-alert-card.yellow{border-left-color:#eab308}.meteoalarm-alert-card.orange{border-left-color:#f97316}.meteoalarm-alert-card.red{border-left-color:#ef4444}
+.meteoalarm-alert-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap}
+.meteoalarm-alert-title{font-weight:800;font-size:15px}.meteoalarm-alert-badge{font-size:10px;font-weight:800;border-radius:6px;padding:5px 8px;background:#334155;color:#e2e8f0}
+.meteoalarm-alert-badge.yellow{background:#6b5510;color:#fff1b5}.meteoalarm-alert-badge.orange{background:#783b13;color:#ffe0bf}.meteoalarm-alert-badge.red{background:#7f1d2d;color:#ffe0e5}
+.meteoalarm-alert-meta{font-size:11px;color:var(--muted);margin:8px 0}.meteoalarm-alert-description{font-size:13px;line-height:1.6;white-space:pre-line;margin:8px 0}
+.meteoalarm-alert-area{font-size:12px;font-weight:700;color:var(--cyan);margin-top:8px}
+.alert-source-links{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px;font-size:11px}
+.alert-source-links a{color:var(--cyan);text-decoration:none}
+
+</style>
+</head>
+<body>
+<div class="shell">
+<aside class="sidebar" id="sidebar">
+  <div class="brand"><div class="brandmark">✦</div><span>WeatherWise</span></div>
+  <div class="group-label">ΚΕΝΤΡΙΚΟ ΜΕΝΟΥ</div>
+  <div class="nav active" data-section="overview"><span class="ico">◫</span>Επισκόπηση</div>
+  <div class="nav" data-section="maps"><span class="ico">◎</span>Διαδραστικοί χάρτες</div>
+  <div class="nav" data-section="forecast"><span class="ico">☁</span>Προγνώσεις</div>
+  <div class="nav" data-section="europe"><span class="ico">▥</span>Ευρώπη τώρα</div>
+  <div class="nav" data-section="cameras"><span class="ico">▣</span>Κάμερες καιρού</div>
+  <div class="nav" data-section="alerts"><span class="ico">⚡</span>Προειδοποιήσεις</div>
+  <div class="nav" data-section="community"><span class="ico">📷</span>Αναφορές πολιτών</div>
+  <div class="group-label">ΜΕΤΕΩΡΟΛΟΓΙΚΑ ΕΡΓΑΛΕΙΑ</div>
+  <div class="nav" data-section="satellite"><span class="ico">◉</span>Δορυφορική εικόνα</div>
+  <div class="nav" data-section="rain"><span class="ico">▤</span>Υετός / Radar</div>
+  <div class="nav" data-section="wind"><span class="ico">≋</span>Άνεμος</div>
+  <div class="nav" data-section="about"><span class="ico">ⓘ</span>Σχετικά</div>
+  <div class="group-label">ΠΡΟΣΩΠΙΚΕΣ ΡΥΘΜΙΣΕΙΣ</div>
+  <div class="nav" data-section="settings"><span class="ico">⚙</span>Settings · Appearance</div>
+  <div class="side-bottom">WEATHER INTELLIGENCE<br><span style="color:#526983">Live atmospheric monitoring</span><br><br>Δεδομένα πρόγνωσης: Open-Meteo</div>
+</aside>
+<main class="main">
+  <header class="topbar">
+    <div><div class="eyebrow">ΚΕΝΤΡΟ ΜΕΤΕΩΡΟΛΟΓΙΚΗΣ ΠΛΗΡΟΦΟΡΗΣΗΣ</div><h1 id="pageTitle">Μετεωρολογική Επισκόπηση</h1></div>
+    <div class="top-actions"><input class="search" id="citySearch" placeholder="Αναζήτηση πόλης…"><button class="btn" id="refresh">↻ Ανανέωση</button><button class="btn primary" id="units">°C</button><label class="theme-control" title="Επιλογή εμφάνισης"><span>Θέμα</span><select id="themeSelect" aria-label="Επιλογή θέματος"><option value="midnight">Midnight</option><option value="arctic">Arctic Light</option><option value="ocean">Ocean Blue</option><option value="aurora">Aurora</option><option value="graphite">Graphite</option><option value="contrast">High Contrast</option><option value="glass">Glassmorphism</option><option value="intelligence">Weather Intelligence</option></select></label><button class="btn mobile-head" id="menuBtn">☰</button></div>
+    <div class="search-results" id="searchResults"></div>
+  </header>
+
+
+  <section class="section" id="community">
+    <div class="card" style="margin-bottom:16px">
+      <div class="eyebrow">COMMUNITY WEATHER NETWORK</div>
+      <h2 style="font:800 22px Manrope;margin:7px 0">Αναφορές καιρού από την κοινότητα</h2>
+      <p class="small">Μοιραστείτε τις πραγματικές καιρικές συνθήκες που επικρατούν στην περιοχή σας. Προσθέστε περιγραφή και φωτογραφίες, ώστε να συμβάλετε στην τοπική εικόνα του καιρού.</p>
+      <div class="notice">Οι αναφορές σε αυτή την έκδοση αποθηκεύονται τοπικά στη συγκεκριμένη συσκευή/φυλλομετρητή. Για να εμφανίζονται σε όλους τους χρήστες και να γίνεται κεντρική συλλογή φωτογραφιών, απαιτείται σύνδεση με κοινόχρηστο backend/API.</div>
+    </div>
+    <div class="report-layout">
+      <div class="card">
+        <div class="card-head"><h3>ΝΕΑ ΑΝΑΦΟΡΑ</h3><span>USER OBSERVATION</span></div>
+        <form id="weatherReportForm" class="report-form">
+          <div class="field wide"><label for="reportLocation">Περιοχή / Τοποθεσία *</label><input id="reportLocation" name="location" required maxlength="120" placeholder="π.χ. Γαλάτσι, Αθήνα"></div>
+          <div class="field"><label for="reportType">Καιρικό φαινόμενο *</label><select id="reportType" name="type" required><option value="">Επιλέξτε…</option><option>Βροχή</option><option>Καταιγίδα</option><option>Χιονόπτωση</option><option>Χαλάζι</option><option>Ισχυρός άνεμος</option><option>Ομίχλη</option><option>Ηλιοφάνεια</option><option>Νεφοκάλυψη</option><option>Άλλο</option></select></div>
+          <div class="field"><label for="reportIntensity">Ένταση φαινομένου</label><select id="reportIntensity"><option>Ασθενής</option><option selected>Μέτρια</option><option>Ισχυρή</option><option>Πολύ ισχυρή</option></select></div>
+          <div class="field"><label for="reportObservedAt">Ώρα παρατήρησης</label><input id="reportObservedAt" type="datetime-local"></div>
+          <div class="field"><label for="reportTemperature">Θερμοκρασία (°C), προαιρετικά</label><input id="reportTemperature" type="number" min="-60" max="60" step="0.1" placeholder="π.χ. 18"></div>
+          <div class="field wide"><label for="reportDescription">Περιγραφή συνθηκών *</label><textarea id="reportDescription" required maxlength="1200" placeholder="Περιγράψτε τι παρατηρείτε: ένταση βροχής, ορατότητα, ριπές ανέμου, διάρκεια κ.λπ."></textarea></div>
+          <div class="field wide"><label for="reportPhotos">Φωτογραφίες (έως 4)</label><input id="reportPhotos" type="file" accept="image/*" multiple><div class="small">Μόνο φωτογραφίες που τραβήξατε ή έχετε δικαίωμα να μοιραστείτε. Αποφύγετε πρόσωπα και προσωπικά στοιχεία.</div><div id="reportPhotoPreviews" class="photo-previews"></div></div>
+          <div class="field wide"><label style="display:flex;gap:8px;align-items:flex-start"><input id="reportConsent" type="checkbox" required style="width:auto;margin-top:2px"> Επιβεβαιώνω ότι η αναφορά είναι ακριβής κατά την παρατήρησή μου και επιτρέπω την προβολή του περιεχομένου στην κοινότητα.</label></div>
+          <div class="field wide"><button class="btn primary" type="submit">Υποβολή αναφοράς</button><div id="reportStatus" class="small" role="status"></div></div>
+        </form>
+      </div>
+      <div class="card">
+        <div class="card-head"><h3>ΠΡΟΣΦΑΤΕΣ ΑΝΑΦΟΡΕΣ</h3><span id="reportCount">0</span></div>
+        <p class="small">Τοπικό ιστορικό αναφορών αυτής της συσκευής.</p>
+        <div id="communityReports"><div class="notice">Δεν υπάρχουν ακόμη αναφορές. Γίνετε οι πρώτοι που θα μοιραστούν τις καιρικές συνθήκες της περιοχής τους.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="settings">
+    <div class="card" style="margin-bottom:16px">
+      <div class="eyebrow">PERSONALIZATION</div><h2 style="font:800 22px Manrope;margin:7px 0">Appearance</h2>
+      <p class="small">Προσαρμόστε την εμφάνιση του WeatherWise. Οι επιλογές θέματος αποθηκεύονται αυτόματα.</p>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-head"><h3>THEME / ΘΕΜΑ</h3><span>LIVE PREVIEW</span></div>
+      <label for="appearanceTheme" class="small" style="display:block;margin-bottom:8px">Επιλέξτε χρωματικό θέμα</label>
+      <select id="appearanceTheme" class="search" style="width:min(100%,360px)">
+        <option value="ocean">Deep Ocean Dark</option><option value="midnight">Midnight</option><option value="arctic">Arctic Light</option><option value="aurora">Aurora</option><option value="graphite">Graphite</option><option value="contrast">High Contrast</option><option value="glass">Glassmorphism</option><option value="intelligence">Weather Intelligence</option>
+      </select>
+      <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-top:16px">
+        <button class="btn theme-preset" data-theme="ocean" style="text-align:left;padding:13px;background:linear-gradient(135deg,#104057,#071c2a)">🌊<br><b>Deep Ocean</b><br><span class="small">Blue / Cyan</span></button>
+        <button class="btn theme-preset" data-theme="midnight" style="text-align:left;padding:13px;background:linear-gradient(135deg,#142238,#0b1422)">🌙<br><b>Midnight</b><br><span class="small">Navy / Dark</span></button>
+        <button class="btn theme-preset" data-theme="arctic" style="text-align:left;padding:13px;background:linear-gradient(135deg,#fff,#dce8f3);color:#172338">❄️<br><b>Arctic Light</b><br><span class="small" style="color:#53657a">White / Ice</span></button>
+        <button class="btn theme-preset" data-theme="aurora" style="text-align:left;padding:13px;background:linear-gradient(135deg,#39345e,#151329)">✨<br><b>Aurora</b><br><span class="small">Violet / Teal</span></button>
+        <button class="btn theme-preset" data-theme="graphite" style="text-align:left;padding:13px;background:linear-gradient(135deg,#3b424c,#17191d)">◼<br><b>Graphite</b><br><span class="small">Charcoal</span></button>
+        <button class="btn theme-preset" data-theme="contrast" style="text-align:left;padding:13px;background:#000;border-color:#777">◐<br><b>High Contrast</b><br><span class="small">Black / White</span></button>
+        <button class="btn theme-preset" data-theme="glass" style="text-align:left;padding:13px;background:linear-gradient(135deg,rgba(79,157,196,.78),rgba(13,29,53,.88));border:1px solid #8bcce8;backdrop-filter:blur(8px)">◇<br><b>Glassmorphism</b><br><span class="small">Frosted Glass / Blue</span></button>
+        <button class="btn theme-preset" data-theme="intelligence" style="text-align:left;padding:13px;background:linear-gradient(135deg,#17425e,#07111e);border-color:#42d7e8">⌁<br><b>Weather Intelligence</b><br><span class="small">Command Centre / Cyan</span></button>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-head"><h3>CUSTOM BACKGROUND</h3><span>OPTIONAL</span></div>
+      <p class="small">Χρησιμοποιήστε δική σας εικόνα ως φόντο της εφαρμογής.</p>
+      <input id="backgroundUpload" type="file" accept="image/*" class="search" style="width:min(100%,420px);height:auto">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px"><button class="btn" id="removeBackground">Αφαίρεση εικόνας</button><span class="small" id="backgroundStatus" style="align-self:center">Χωρίς προσαρμοσμένη εικόνα</span></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>DISPLAY</h3><span>INTERFACE</span></div>
+      <label class="small" for="backgroundDimmer">Ένταση επικάλυψης φόντου <b id="dimValue">35%</b></label>
+      <input id="backgroundDimmer" type="range" min="0" max="80" value="35" style="width:min(100%,420px);display:block;margin-top:12px;accent-color:var(--cyan)">
+      <p class="small" style="margin-top:10px">Η ρύθμιση βοηθά να παραμένουν ευανάγνωστα τα panels και τα μετεωρολογικά δεδομένα.</p>
+    </div>
+  </section>
+
+  <section class="section active" id="overview">
+    <div class="grid stats">
+      <div class="card"><div class="card-head">ΘΕΡΜΟΚΡΑΣΙΑ <span>◉</span></div><div class="metric" id="tempStat">--°<span class="unit">C</span></div><div class="small" id="feels">Αίσθηση: --°</div></div>
+      <div class="card"><div class="card-head">ΑΝΕΜΟΣ <span>↗</span></div><div class="metric" id="windStat">-- <span class="unit">km/h</span></div><div class="small" id="windDir">Διεύθυνση: --</div></div>
+      <div class="card"><div class="card-head">ΥΓΡΑΣΙΑ <span>◌</span></div><div class="metric" id="humidityStat">--<span class="unit">%</span></div><div class="small">Σχετική υγρασία</div></div>
+      <div class="card"><div class="card-head">ΠΙΘΑΝΟΤΗΤΑ ΥΕΤΟΥ <span>⌁</span></div><div class="metric" id="rainStat">--<span class="unit">%</span></div><div class="small">Επόμενες ώρες</div></div>
+    </div>
+    <div class="grid weather-layout">
+      <div class="card current city-current">
+        <img class="city-landmark" id="cityLandmark" alt="" aria-hidden="true">
+        <div class="city-current-shade"></div>
+        <div class="city-current-copy"><div class="eyebrow">ΤΡΕΧΟΥΣΕΣ ΣΥΝΘΗΚΕΣ</div><div class="place" id="cityName">Αθήνα, Ελλάδα</div><div class="condition" id="condition">Φόρτωση μετεωρολογικών δεδομένων…</div><div class="bigtemp" id="currentTemp">--°</div><div class="small" id="updated">Τελευταία ενημέρωση —</div></div>
+        <div class="city-landmark-caption" id="cityLandmarkCaption"></div>
+        <div class="weather-symbol" id="weatherIcon">🌤️</div>
+      </div>
+      <div class="card"><div class="card-head">ΑΤΜΟΣΦΑΙΡΙΚΑ ΣΤΟΙΧΕΙΑ <span>LIVE</span></div><div class="details">
+        <div class="detail"><span>Αίσθηση θερμοκρασίας</span><b id="feels2">--°C</b></div>
+        <div class="detail"><span>Σημείο δρόσου</span><b id="dew">--°C</b></div>
+        <div class="detail"><span>Πίεση</span><b id="pressure">-- hPa</b></div>
+        <div class="detail"><span>Ορατότητα</span><b id="visibility">-- km</b></div>
+      </div></div>
+    </div>
+    <div class="grid content-grid">
+      <div class="card map-card"><div class="map-title"><h3>ΖΩΝΤΑΝΟΣ ΧΑΡΤΗΣ ΚΑΙΡΟΥ</h3><div class="map-tools"><button class="btn" id="mapStandard">Χάρτης</button><button class="btn" id="mapTerrain">Ανάγλυφο</button></div></div>
+      <div class="layerbar" id="layerBar">
+        <button data-layer="satellite">🛰 MTG GeoColour</button>
+        <button data-layer="cloudtype">☁ Τύπος νεφών</button>
+        <button data-layer="radar">🌧 Radar</button>
+        <button data-layer="cloudforecast">☁ Νεφοκάλυψη GFS</button>
+        <button data-layer="rainforecast">💧 Υετός GFS</button>
+        <button data-layer="gfs-temp">🌡 Θερμοκρασία GFS</button>
+        <button data-layer="gfs-cape">⛈ CAPE GFS</button>
+        <button data-layer="gfs-pressure">〰 Πίεση MSL GFS</button>
+        <button data-layer="wind">➤ Άνεμος GFS</button>
+        <button data-layer="none" class="active">Καθαρός χάρτης</button>
+      </div>
+      <div class="map-tools" style="margin:8px 0"><label class="small" for="gfsLead">Πρόγνωση:</label><select id="gfsLead" class="btn"><option value="0">+0h</option><option value="6">+6h</option><option value="12">+12h</option><option value="24" selected>+24h</option><option value="48">+48h</option><option value="72">+72h</option></select></div>
+      <div class="layer-status" id="layerStatus">Επίλεξε ένα επίπεδο GFS για απεικόνιση στον χάρτη.</div>
+      <div id="map" class="map"></div>
+      <div class="layer-legend" id="layerLegend"></div></div>
+      <div class="card"><div class="card-head"><h3>ΠΡΟΓΝΩΣΗ 5 ΗΜΕΡΩΝ</h3><span>ΗΜΕΡΗΣΙΑ</span></div><div class="forecast-list" id="forecastList"></div></div>
+    </div>
+    <div class="card chart-card"><div class="card-head"><h3>ΕΞΕΛΙΞΗ ΘΕΡΜΟΚΡΑΣΙΑΣ</h3><span>ΕΠΟΜΕΝΕΣ 24 ΩΡΕΣ</span></div><div class="chart-wrap"><canvas id="tempChart"></canvas></div></div>
+    <div class="notice">Οι τρέχουσες συνθήκες και οι λοιπές προγνώσεις παρέχονται από Open-Meteo. Τα προγνωστικά πεδία χαρτών χρησιμοποιούν NOAA GFS μέσω Open-Meteo. Η σελίδα δεν αποτελεί επίσημη υπηρεσία προειδοποιήσεων.</div>
+  </section>
+
+  <section class="section" id="maps">
+ <div class="card">
+  <div class="map-title"><div><h3>ΔΙΑΔΡΑΣΤΙΚΟΙ ΠΡΟΓΝΩΣΤΙΚΟΙ ΧΑΡΤΕΣ GFS</h3><p class="small">Παγκόσμιο μοντέλο NOAA GFS · επιλέξτε μετεωρολογικό πεδίο και χρονικό ορίζοντα.</p></div></div>
+  <div class="forecast-toolbar" style="margin:12px 0">
+   <label class="small" for="gfsLeadLarge">Χρόνος πρόγνωσης</label>
+   <select id="gfsLeadLarge" class="btn"><option value="0">Τώρα / +0h</option><option value="6">+6 ώρες</option><option value="12">+12 ώρες</option><option value="24" selected>+24 ώρες</option><option value="48">+48 ώρες</option><option value="72">+72 ώρες</option></select>
+   <span id="gfsRunLarge" class="small">Πηγή: NOAA GFS μέσω Open-Meteo</span>
+  </div>
+  <div class="layerbar" id="layerBarLarge">
+   <button data-layer="gfs-temp">🌡 Θερμοκρασία 2m</button><button data-layer="rainforecast">💧 Υετός</button><button data-layer="cloudforecast">☁ Νεφοκάλυψη</button><button data-layer="wind">➤ Άνεμος 10m</button><button data-layer="gfs-cape">⛈ CAPE</button><button data-layer="gfs-pressure">〰 Πίεση MSL</button><button data-layer="none" class="active">Καθαρός χάρτης</button>
+  </div>
+  <div class="layer-status" id="layerStatusLarge">Επιλέξτε πεδίο GFS για να εμφανιστεί στον χάρτη.</div>
+  <div id="mapLarge" class="map" style="height:650px;margin-top:12px;border-radius:10px"></div>
+  <div class="layer-legend" id="layerLegendLarge"></div>
+  <div class="notice" style="margin-top:12px">Τα πεδία είναι αριθμητικά προγνωστικά δεδομένα GFS και όχι παρατηρήσεις ή επίσημες προειδοποιήσεις. Η ανάλυση του παγκόσμιου GFS είναι περίπου 13–25 km και η συχνότητα νέου κύκλου περίπου 6 ώρες.</div>
+ </div>
+</section>
+  <section class="section" id="forecast">
+<div class="card">
+ <div class="forecast-toolbar"><div><h3>ΑΝΑΛΥΤΙΚΗ ΠΡΟΓΝΩΣΗ</h3><p class="small">Ωριαία διαγράμματα · πρόγνωση για το επιλεγμένο σημείο</p></div>
+ <div class="range-tabs"><button class="range-btn active" data-hours="24">24h</button><button class="range-btn" data-hours="48">48h</button><button class="range-btn" data-hours="72">72h</button><button class="range-btn" data-hours="168">7 ημέρες</button></div></div>
+ <div class="forecast-tabs"><button class="forecast-tab active" data-param="temperature">Θερμοκρασία</button><button class="forecast-tab" data-param="wind">Άνεμος</button><button class="forecast-tab" data-param="humidity">Υγρασία</button><button class="forecast-tab" data-param="rain">Ύψος υετού</button></div>
+ <div id="forecastChartPanel">
+  <div class="forecast-chart-heading"><strong id="forecastChartTitle">Θερμοκρασία αέρα & αισθητή</strong><span id="forecastChartUnit">°C</span></div>
+  <div class="chart-wrap forecast-large-chart"><canvas id="forecastChart"></canvas></div><div class="forecast-footnote" id="forecastFootnote">Θερμοκρασία αέρα και αισθητή θερμοκρασία ανά ώρα.</div>
+ </div>
+ 
+</div>
+<div class="card forecast-days-card"><div class="card-head"><h3>ΗΜΕΡΗΣΙΑ ΣΥΝΟΨΗ</h3><span>ΕΠΟΜΕΝΕΣ ΗΜΕΡΕΣ</span></div><div class="forecast-list" id="forecastList2"></div></div>
+</section>
+  <section class="section" id="europe">
+    <div class="card europe-card">
+      <div class="europe-head">
+        <div><h2>Σε όλη την Ευρώπη τώρα</h2><p>Ζωντανές μετρήσεις από 24 πρωτεύουσες και μεγάλες πόλεις. Επίλεξε μια μπάρα για να ανοίξεις την πόλη.</p></div>
+        <div class="europe-sort" role="group" aria-label="Ταξινόμηση πόλεων">
+          <button class="europe-sort-btn" data-sort="warmest">Θερμότερες</button>
+          <button class="europe-sort-btn" data-sort="coldest">Ψυχρότερες</button>
+          <button class="europe-sort-btn active" data-sort="windy">Πιο ανεμώδεις</button>
+        </div>
+      </div>
+      <div class="europe-meta"><span id="europeStatus">Φόρτωση ευρωπαϊκών μετρήσεων…</span><span>Open-Meteo · Τρέχουσες συνθήκες</span></div>
+      <div class="europe-temp-legend"><span>Ψυχρότερο</span><i></i><span>Θερμότερο</span></div>
+      <div class="europe-chart-wrap"><canvas id="europeChart"></canvas></div>
+      <div class="europe-foot">Οι τιμές αφορούν την τελευταία διαθέσιμη μέτρηση κάθε πόλης. Κλικ σε μπάρα για μετάβαση στην τοπική πρόγνωση.</div>
+    </div>
+  </section>
+  <section class="section" id="cameras"><div class="card"><h3>Κάμερες καιρού</h3><p class="small">Εδώ μπορεί να συνδεθεί κατάλογος live μετεωρολογικών καμερών και τα σημεία τους στον χάρτη.</p><div class="notice">Δεν έχουν προστεθεί ακόμη πηγές καμερών. Απαιτούνται συγκεκριμένα δημόσια camera feeds.</div></div></section>
+  <section class="section" id="alerts">
+ <div class="card">
+  <div class="card-head"><h3>ΠΡΟΕΙΔΟΠΟΙΗΣΕΙΣ METEOALARM</h3><span id="meteoAlarmFeedStatus">ΣΥΝΔΕΣΗ…</span></div>
+  <p class="small">Ενεργές προειδοποιήσεις για επικίνδυνα καιρικά φαινόμενα στην Ελλάδα, όπως δημοσιεύονται στο επίσημο σύστημα MeteoAlarm. Εθνικός πάροχος προειδοποιήσεων: ΕΜΥ/ΕΜΚ.</p>
+  <div class="alert-toolbar">
+   <button class="btn primary" id="meteoAlarmRefresh">↻ Ανανέωση</button>
+   <span class="small" id="meteoAlarmUpdated">Δεν έχει γίνει ενημέρωση</span>
+   <a class="btn" href="https://www.emy.gr/warnings" target="_blank" rel="noopener">Άνοιγμα ΕΜΥ ↗</a>
+  </div>
+  <div class="alert-level-guide">
+   <span class="alert-level green">Πράσινο · Χωρίς προειδοποίηση</span>
+   <span class="alert-level yellow">Κίτρινο · Ενημερωθείτε</span>
+   <span class="alert-level orange">Πορτοκαλί · Προετοιμαστείτε</span>
+   <span class="alert-level red">Κόκκινο · Λάβετε μέτρα</span>
+  </div>
+  <div id="meteoAlarmAlertsList" class="emy-alerts-list"><div class="notice">Γίνεται λήψη των επίσημων προειδοποιήσεων…</div></div>
+  <div class="notice" style="margin-top:14px">Οι προειδοποιήσεις αντλούνται από την επίσημη ροή CAP/Atom του MeteoAlarm για την Ελλάδα. Τα δεδομένα GFS δεν χρησιμοποιούνται για την έκδοση ή την αλλαγή επιπέδου προειδοποίησης. Σε περίπτωση κινδύνου ακολουθείτε τις οδηγίες των αρμόδιων αρχών.</div>
+  <div class="alert-source-links">
+   <a href="https://www.emy.gr/warnings" target="_blank" rel="noopener">ΕΜΥ – Εθνικός πάροχος προειδοποιήσεων ↗</a>
+   <a href="https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-atom-greece" target="_blank" rel="noopener">MeteoAlarm – Ροή προειδοποιήσεων Ελλάδας (CAP/Atom) ↗</a>
+   <a href="https://www.emy.gr/warnings?tab=sea-regions" target="_blank" rel="noopener">ΕΜΥ – Ναυτιλιακές προειδοποιήσεις ↗</a>
+  </div>
+ </div>
+</section>
+  <section class="section" id="satellite"><div class="card"><h3>Δορυφορική εικόνα</h3><p class="small">Χώρος προβολής δορυφορικών προϊόντων MTG / EUMETSAT.</p><div class="notice">Η ζωντανή δορυφορική στρώση μπορεί να προστεθεί με έγκυρο WMS endpoint και διαθέσιμη χρονική σήμανση.</div></div></section>
+  <section class="section" id="rain"><div class="card"><h3>Υετός / Radar</h3><p class="small">Χώρος προβολής radar και προγνωστικών πεδίων υετού.</p><div class="notice">Απαιτείται σύνδεση με πάροχο radar ή αριθμητικό μοντέλο πρόγνωσης για πραγματικά πεδία υετού.</div></div></section>
+  <section class="section" id="wind"><div class="card"><h3>Πεδίο ανέμου</h3><p class="small">Χώρος προβολής διεύθυνσης και έντασης ανέμου.</p><div class="notice">Μπορεί να επεκταθεί με πεδίο ανέμου, κινούμενα σωματίδια ροής και ισογραμμές.</div></div></section>
+  <section class="section" id="about"><div class="card"><h3>WeatherWise</h3><p>Πλατφόρμα μετεωρολογικής απεικόνισης με διάταξη dashboard, πλευρική πλοήγηση και κεντρικό χώρο εργασίας, βασισμένη στη δομή του αρχείου αναφοράς.</p></div></section>
+</main></div>
+<script>
+const $=id=>document.getElementById(id);
+let lat=37.9838,lon=23.7275,city="Αθήνα, Ελλάδα",isF=false,map,marker,largeMap,chart,forecastChart;
+let forecastSeries=null,forecastDaily=null,forecastParam='temperature',forecastHours=24;
+let europeChart=null,europeRows=[],europeSort='windy';
+const codeText=c=>({0:"Αίθριος",1:"Κυρίως αίθριος",2:"Μερική νέφωση",3:"Νεφελώδης",45:"Ομίχλη",48:"Παγωμένη ομίχλη",51:"Ασθενής ψιχάλα",53:"Ψιχάλα",55:"Ισχυρή ψιχάλα",61:"Ασθενής βροχή",63:"Βροχή",65:"Ισχυρή βροχή",71:"Ασθενής χιονόπτωση",73:"Χιονόπτωση",75:"Ισχυρή χιονόπτωση",80:"Μπόρες",81:"Ισχυρές μπόρες",82:"Έντονες μπόρες",95:"Καταιγίδα",96:"Καταιγίδα με χαλάζι",99:"Ισχυρή καταιγίδα"})[c]||"Μεταβλητός καιρός";
+const icon=c=>c===0?"☀️":c<=2?"🌤️":c===3?"☁️":c<=48?"🌫️":c<=67?"🌧️":c<=77?"🌨️":c<=82?"🌦️":"⛈️";
+const dir=d=>["Β","ΒΒΑ","ΒΑ","ΑΒΑ","Α","ΑΝΑ","ΝΑ","ΝΝΑ","Ν","ΝΝΔ","ΝΔ","ΔΝΔ","Δ","ΔΒΔ","ΒΔ","ΒΒΔ"][Math.round(d/22.5)%16];
+const temp=v=>Math.round(isF?v*9/5+32:v);
+let baseLayer,terrainLayer,activeOverlay=null,radarLayer=null,gridLayer=L.layerGroup(),windLayer=L.layerGroup(),radarTimer=null,gridTimer=null,mainGfsActive='none',largeGfsActive='none',largeGfsArea=null,largeGfsVectors=null;
+const WMS='https://view.eumetsat.int/geoserver/wms';
+
+
+const europeCities=[
+ {name:'Ρέικιαβικ',label:'Reykjavik',lat:64.1466,lon:-21.9426},
+ {name:'Λισαβόνα',label:'Lisbon',lat:38.7223,lon:-9.1393},
+ {name:'Λονδίνο',label:'London',lat:51.5072,lon:-0.1276},
+ {name:'Βρυξέλλες',label:'Brussels',lat:50.8503,lon:4.3517},
+ {name:'Ελσίνκι',label:'Helsinki',lat:60.1699,lon:24.9384},
+ {name:'Κίεβο',label:'Kyiv',lat:50.4501,lon:30.5234},
+ {name:'Δουβλίνο',label:'Dublin',lat:53.3498,lon:-6.2603},
+ {name:'Άμστερνταμ',label:'Amsterdam',lat:52.3676,lon:4.9041},
+ {name:'Μαδρίτη',label:'Madrid',lat:40.4168,lon:-3.7038},
+ {name:'Στοκχόλμη',label:'Stockholm',lat:59.3293,lon:18.0686},
+ {name:'Ρώμη',label:'Rome',lat:41.9028,lon:12.4964},
+ {name:'Βαλέτα',label:'Valletta',lat:35.8992,lon:14.5141},
+ {name:'Βιέννη',label:'Vienna',lat:48.2082,lon:16.3738},
+ {name:'Πράγα',label:'Prague',lat:50.0755,lon:14.4378},
+ {name:'Βερολίνο',label:'Berlin',lat:52.52,lon:13.405},
+ {name:'Παρίσι',label:'Paris',lat:48.8566,lon:2.3522},
+ {name:'Βουδαπέστη',label:'Budapest',lat:47.4979,lon:19.0402},
+ {name:'Βουκουρέστι',label:'Bucharest',lat:44.4268,lon:26.1025},
+ {name:'Σόφια',label:'Sofia',lat:42.6977,lon:23.3219},
+ {name:'Αθήνα',label:'Athens',lat:37.9838,lon:23.7275},
+ {name:'Βαρσοβία',label:'Warsaw',lat:52.2297,lon:21.0122},
+ {name:'Βελιγράδι',label:'Belgrade',lat:44.7866,lon:20.4489},
+ {name:'Κοπεγχάγη',label:'Copenhagen',lat:55.6761,lon:12.5683},
+ {name:'Όσλο',label:'Oslo',lat:59.9139,lon:10.7522}
+];
+async function loadEuropeWeather(){
+ const statusEl=$('europeStatus');if(statusEl)statusEl.textContent='Ανάκτηση ζωντανών μετρήσεων…';
+ try{
+  const lats=europeCities.map(c=>c.lat).join(','),lons=europeCities.map(c=>c.lon).join(',');
+  const url=`https://api.open-meteo.com/v1/forecast?latitude=${lats}&longitude=${lons}&current=temperature_2m,wind_speed_10m&timezone=auto`;
+  const response=await fetch(url);if(!response.ok)throw Error('HTTP '+response.status);
+  const payload=await response.json(),items=Array.isArray(payload)?payload:[payload];
+  europeRows=europeCities.map((city,i)=>({ ...city,temp:items[i]?.current?.temperature_2m,wind:items[i]?.current?.wind_speed_10m,time:items[i]?.current?.time }))
+    .filter(x=>Number.isFinite(x.temp)&&Number.isFinite(x.wind));
+  renderEuropeChart();
+  if(statusEl)statusEl.textContent=`Ενημερώθηκαν ${europeRows.length} από ${europeCities.length} πόλεις · ${new Date().toLocaleTimeString('el-GR',{hour:'2-digit',minute:'2-digit'})}`;
+ }catch(err){if(statusEl)statusEl.textContent='Δεν ήταν δυνατή η λήψη των ευρωπαϊκών μετρήσεων. Δοκίμασε ανανέωση.';console.error(err)}
+}
+function renderEuropeChart(){
+ const canvas=$('europeChart');if(!canvas||!europeRows.length)return;
+ const key=europeSort==='warmest'?'temp':europeSort==='coldest'?'temp':'wind';
+ const rows=[...europeRows].sort((a,b)=>europeSort==='warmest'?b.temp-a.temp:europeSort==='coldest'?a.temp-b.temp:b.wind-a.wind);
+ const values=rows.map(r=>+(r[key]*(key==='wind'&&isF?.621371:1)).toFixed(1));
+ const unit=key==='temp'?(isF?'°F':'°C'):(isF?'mph':'km/h');
+ const tMin=Math.min(...europeRows.map(r=>r.temp)),tMax=Math.max(...europeRows.map(r=>r.temp));
+ const ramp=[{p:0,c:[37,99,235]},{p:.25,c:[34,180,220]},{p:.5,c:[116,190,150]},{p:.75,c:[245,174,65]},{p:1,c:[220,55,55]}];
+ const tempColor=t=>{
+   const q=tMax===tMin?.5:(t-tMin)/(tMax-tMin);
+   let k=0;while(k<ramp.length-2&&q>ramp[k+1].p)k++;
+   const a=ramp[k],b=ramp[k+1],f=Math.max(0,Math.min(1,(q-a.p)/(b.p-a.p)));
+   const rgb=a.c.map((v,i)=>Math.round(v+(b.c[i]-v)*f));
+   return `rgb(${rgb.join(',')})`;
+ };
+ const barColors=rows.map(r=>tempColor(r.temp));
+ if(europeChart)europeChart.destroy();
+ europeChart=new Chart(canvas,{type:'bar',data:{labels:rows.map(r=>r.label),datasets:[{data:values,backgroundColor:barColors,hoverBackgroundColor:barColors.map(c=>c.replace('rgb','rgba').replace(')',',0.78)')),borderRadius:8,borderSkipped:false,barThickness:22}]},
+ options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,onClick:(evt,elements)=>{if(!elements.length)return;const city=rows[elements[0].index];lat=city.lat;lon=city.lon;cityNameSet(city);document.querySelector('.nav[data-section="overview"]').click();loadWeather();},
+ plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.parsed.x} ${unit} · ${c.label===' ' ? '' : 'Θερμοκρασία '+rows[c.dataIndex].temp+'°C'}`}}},
+ scales:{x:{beginAtZero:key==='wind',grid:{color:'rgba(150,175,200,.15)',borderDash:[4,5]},ticks:{color:'#9eb1c9',callback:v=>v+' '+unit}},y:{grid:{display:false},ticks:{color:'#c4d2e5',font:{size:12}}}}
+ }});
+}
+const cityLandmarks=[
+ {keys:['athens','αθήνα','αθηνα'],title:'Ακρόπολη · Παρθενώνας',file:'Parthenon.jpg'},
+ {keys:['paris','παρίσι','παρισ'],title:'Πύργος του Άιφελ',file:'Eiffel_Tower_in_Paris,_France.jpg'},
+ {keys:['london','λονδίνο','λονδινο'],title:'Big Ben · Westminster',file:'Big_Ben,_London.jpg'},
+ {keys:['rome','ρώμη','ρωμη'],title:'Κολοσσαίο',file:'Colosseum_in_Rome,_Italy_-_April_2007.jpg'},
+ {keys:['lisbon','λισαβόνα','λισαβωνα'],title:'Πύργος Μπελέμ',file:'Torre_de_Belém_-_Lisboa.jpg'},
+ {keys:['brussels','βρυξέλλες','βρυξελλες'],title:'Atomium',file:'Atomium_Brussels_Belgium.jpg'},
+ {keys:['amsterdam','άμστερνταμ','αμστερνταμ'],title:'Κανάλια Άμστερνταμ',file:'Amsterdam_Canals.jpg'},
+ {keys:['madrid','μαδρίτη','μαδριτη'],title:'Βασιλικό Παλάτι',file:'Royal_Palace_of_Madrid.jpg'},
+ {keys:['berlin','βερολίνο','βερολινο'],title:'Πύλη του Βρανδεμβούργου',file:'Brandenburger_Tor_abends.jpg'},
+ {keys:['prague','πράγα','πραγα'],title:'Γέφυρα του Καρόλου',file:'Charles_Bridge_Prague.jpg'},
+ {keys:['vienna','βιέννη','βιεννη'],title:'Ανάκτορα Schönbrunn',file:'Schönbrunn_Palace_Vienna.jpg'},
+ {keys:['stockholm','στοκχόλμη','στοκχολμη'],title:'Δημαρχείο Στοκχόλμης',file:'Stockholm_City_Hall.jpg'},
+ {keys:['helsinki','ελσίνκι','ελσινκι'],title:'Καθεδρικός Ελσίνκι',file:'Helsinki_Cathedral.jpg'},
+ {keys:['dublin','δουβλίνο','δουβλινο'],title:'Ha’penny Bridge',file:'Ha_penny_Bridge_Dublin.jpg'},
+ {keys:['reykjavik','ρέικιαβικ','ρεικιαβικ'],title:'Hallgrímskirkja',file:'Hallgrímskirkja_in_Reykjavík.jpg'},
+ {keys:['valletta','βαλέτα','βαλετα'],title:'Grand Harbour',file:'Valletta_Grand_Harbour.jpg'},
+ {keys:['kyiv','κίεβο','κιεβο'],title:'Μνημείο Motherland',file:'Motherland_Monument_Kyiv.jpg'},
+ {keys:['oslo','όσλο','οσλο'],title:'Όπερα του Όσλο',file:'Oslo_Opera_House.jpg'},
+ {keys:['copenhagen','κοπεγχάγη','κοπεγχαγη'],title:'Nyhavn',file:'Nyhavn_Copenhagen.jpg'},
+ {keys:['warsaw','βαρσοβία','βαρσοβια'],title:'Παλαιά Πόλη Βαρσοβίας',file:'Warsaw_Old_Town.jpg'},
+ {keys:['budapest','βουδαπέστη','βουδαπεστη'],title:'Κοινοβούλιο Βουδαπέστης',file:'Hungarian_Parliament_Building_Budapest.jpg'},
+ {keys:['bucharest','βουκουρέστι','βουκουρεστι'],title:'Παλάτι του Κοινοβουλίου',file:'Palace_of_the_Parliament_Bucharest.jpg'},
+ {keys:['sofia','σόφια','σοφια'],title:'Καθεδρικός Alexander Nevsky',file:'Alexander_Nevsky_Cathedral_Sofia.jpg'},
+ {keys:['belgrade','βελιγράδι','βελιγραδι'],title:'Φρούριο Βελιγραδίου',file:'Belgrade_Fortress.jpg'}
+];
+function updateCityLandmark(cityText){
+ const img=$('cityLandmark'),caption=$('cityLandmarkCaption');if(!img)return;
+ const value=String(cityText||'').toLocaleLowerCase('el');
+ const match=cityLandmarks.find(item=>item.keys.some(k=>value.includes(k)));
+ if(!match){img.style.opacity='0';if(caption)caption.textContent='';return;}
+ img.onload=()=>{img.style.opacity='.82';};
+ img.onerror=()=>{img.style.opacity='0';if(caption)caption.textContent='';};
+ img.alt=match.title;
+ img.src='https://commons.wikimedia.org/wiki/Special:FilePath/'+encodeURIComponent(match.file)+'?width=1600';
+ if(caption)caption.textContent=match.title;
+}
+
+
+function renderForecastDetail(){
+ const chartPanel=$('forecastChartPanel'),outlookPanel=$('forecastOutlookPanel');
+ if(chartPanel)chartPanel.style.display='block';
+ if(outlookPanel)outlookPanel.style.display='none';
+ const dailyMode=forecastHours===168;
+ const a=dailyMode?forecastDaily:forecastSeries;
+ if(!a||!$('forecastChart'))return;
+ const required=dailyMode?
+   (forecastParam==='temperature'?[a.temperatureMin,a.temperatureMax]:forecastParam==='wind'?[a.windSpeed,a.windGusts,a.windDirection]:forecastParam==='humidity'?[a.humidity,a.cloudCover]:[a.rain,a.rainChance]):
+   (forecastParam==='temperature'?[a.temperature,a.apparent]:forecastParam==='wind'?[a.windSpeed,a.windGusts,a.windDirection]:forecastParam==='humidity'?[a.humidity,a.cloudCover]:[a.rain,a.rainChance]);
+ if(!a.time?.length||required.some(v=>!Array.isArray(v)))return;
+ const n=Math.min(a.time.length,dailyMode?7:forecastHours);
+ const labels=a.time.slice(0,n).map(t=>dailyMode?new Date(t+'T12:00:00').toLocaleDateString('el-GR',{weekday:'short',day:'numeric',month:'short'}):new Date(t).toLocaleString('el-GR',{weekday:'short',hour:'2-digit',minute:'2-digit'}));
+ const ds=(label,data,color,fill=false)=>({label,data:data.slice(0,n),borderColor:color,backgroundColor:fill?color+'22':'transparent',fill,tension:.28,pointRadius:0,pointHoverRadius:4,borderWidth:2});
+ let datasets=[],title='',unit='',note='',type='line';
+ if(forecastParam==='temperature'){title=dailyMode?'Θερμοκρασία ελάχιστη / μέγιστη':'Θερμοκρασία αέρα & αισθητή';unit=isF?'°F':'°C';note=dailyMode?'Ημερήσια ελάχιστη και μέγιστη θερμοκρασία για τις επόμενες 7 ημέρες.':'Ωριαία θερμοκρασία αέρα και αισθητή θερμοκρασία.';datasets=dailyMode?[ds('Ελάχιστη θερμοκρασία',a.temperatureMin.map(temp),'#43c7e8',true),ds('Μέγιστη θερμοκρασία',a.temperatureMax.map(temp),'#f4a261')]:[ds('Θερμοκρασία αέρα',a.temperature.map(temp),'#43c7e8',true),ds('Αισθητή θερμοκρασία',a.apparent.map(temp),'#f4a261')];}
+ else if(forecastParam==='wind'){title='Διεύθυνση, ένταση & ριπές ανέμου';unit=isF?'mph / °':'km/h / °';note=dailyMode?'Ημερήσια μέγιστη ένταση, μέγιστες ριπές και επικρατούσα διεύθυνση ανέμου.':'Ωριαία μέση ένταση, ριπές και διεύθυνση ανέμου.';datasets=[{...ds(dailyMode?'Μέγιστη ένταση':'Μέση ένταση',a.windSpeed.map(v=>+(v*(isF?.621371:1)).toFixed(1)),'#43c7e8',true),yAxisID:'y'},{...ds('Ριπές (gust)',a.windGusts.map(v=>+(v*(isF?.621371:1)).toFixed(1)),'#e76f51'),yAxisID:'y'},{...ds(dailyMode?'Επικρατούσα διεύθυνση':'Διεύθυνση',a.windDirection,'#f4a261'),yAxisID:'y1'}];}
+ else if(forecastParam==='humidity'){title='Υγρασία & νεφοκάλυψη';unit='%';note=dailyMode?'Ημερήσια μέση σχετική υγρασία και μέση νεφοκάλυψη.':'Ωριαία σχετική υγρασία και συνολική νεφοκάλυψη.';datasets=[ds('Σχετική υγρασία',a.humidity,'#62d6a5',true),ds('Νεφοκάλυψη',a.cloudCover,'#9b8af5')];}
+ else{
+   title=dailyMode?'Ημερήσιο ύψος υετού & πιθανότητα':'Ύψος υετού & πιθανότητα βροχής';unit=dailyMode?'mm/ημέρα · %':'mm/h · %';
+   note=dailyMode?'Οι μπάρες δείχνουν το συνολικό ημερήσιο ύψος υετού (mm) και η γραμμή την ημερήσια μέγιστη πιθανότητα (%).':'Οι μπάρες δείχνουν το ωριαίο ύψος υετού (mm) και η γραμμή την πιθανότητα υετού (%).';
+   type='bar';
+   datasets=[{
+     type:'bar',label:'Ύψος υετού (mm)',
+     data:a.rain.slice(0,n).map(v=>Math.max(0,Number(v)||0)),
+     backgroundColor:'rgba(48,166,220,.88)',
+     hoverBackgroundColor:'rgba(91,205,245,1)',
+     borderColor:'#36b8e8',borderWidth:1,borderRadius:4,borderSkipped:false,
+     categoryPercentage:.88,barPercentage:.92,maxBarThickness:22,minBarLength:2,yAxisID:'y'
+   },{
+     type:'line',label:'Πιθανότητα υετού (%)',
+     data:a.rainChance.slice(0,n),borderColor:'#f4a261',backgroundColor:'transparent',
+     borderWidth:2,tension:.25,pointRadius:0,pointHoverRadius:4,yAxisID:'y1'
+   }];
+}
+ $('forecastChartTitle').textContent=title;$('forecastChartUnit').textContent=unit;$('forecastFootnote').textContent=note;
+ if(forecastChart)forecastChart.destroy();
+ const scales={x:{ticks:{color:'#8298b0',maxTicksLimit:forecastHours===24?12:forecastHours===48?12:14,maxRotation:0},grid:{color:'rgba(120,150,180,.08)'}},y:{beginAtZero:forecastParam==='humidity'||forecastParam==='rain',title:{display:forecastParam==='rain',text:'Ύψος υετού (mm)',color:'#aebed0'},ticks:{color:'#8298b0'},grid:{color:'rgba(120,150,180,.08)'}}};
+ if(forecastParam==='wind')scales.y1={position:'right',min:0,max:360,title:{display:true,text:'Διεύθυνση (°)',color:'#f4a261'},ticks:{color:'#f4a261',stepSize:90},grid:{drawOnChartArea:false}};
+ if(forecastParam==='rain')scales.y1={position:'right',min:0,max:100,title:{display:true,text:'Πιθανότητα (%)',color:'#f4a261'},ticks:{color:'#f4a261',callback:v=>v+'%'},grid:{drawOnChartArea:false}};
+ if(forecastParam==='humidity')scales.y.max=100;
+ forecastChart=new Chart($('forecastChart'),{type,data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{labels:{color:'#aebed0',usePointStyle:true}}},scales}});
+}
+document.addEventListener('click',e=>{
+ const t=e.target.closest('.forecast-tab');if(t){document.querySelectorAll('.forecast-tab').forEach(x=>x.classList.toggle('active',x===t));forecastParam=t.dataset.param;const summary=document.querySelector('.forecast-days-card');if(summary)summary.style.display='block';renderForecastDetail();}
+ const r=e.target.closest('.range-btn');if(r){document.querySelectorAll('.range-btn').forEach(x=>x.classList.toggle('active',x===r));forecastHours=Number(r.dataset.hours);renderForecastDetail();}
+});
+
+function status(t){$('layerStatus').textContent=t}
+function clearOverlay(){if(activeOverlay&&map.hasLayer(activeOverlay))map.removeLayer(activeOverlay);activeOverlay=null;gridLayer.clearLayers();windLayer.clearLayers();if(radarTimer){clearInterval(radarTimer);radarTimer=null}}
+function setActive(name){document.querySelectorAll('#layerBar button').forEach(b=>b.classList.toggle('active',b.dataset.layer===name))}
+function initMap(){
+ map=L.map('map',{zoomControl:true}).setView([lat,lon],6);
+ baseLayer=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap'}).addTo(map);
+ terrainLayer=L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',{attribution:'© OpenTopoMap'});
+ marker=L.marker([lat,lon]).addTo(map).bindPopup(city);
+ largeMap=L.map('mapLarge').setView([lat,lon],5);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap'}).addTo(largeMap);L.marker([lat,lon]).addTo(largeMap).bindPopup(city);
+ document.querySelectorAll('#layerBarLarge button').forEach(b=>b.onclick=()=>selectLargeLayer(b.dataset.layer));
+ const syncLead=(from,to)=>{if($(to))$(to).value=$(from).value};
+ $('gfsLead').addEventListener('change',()=>{syncLead('gfsLead','gfsLeadLarge');const active=document.querySelector('#layerBar button.active')?.dataset.layer;if(active&&active!=='none')selectLayer(active)});
+ $('gfsLeadLarge').addEventListener('change',()=>{syncLead('gfsLeadLarge','gfsLead');const active=document.querySelector('#layerBarLarge button.active')?.dataset.layer;if(active&&active!=='none')selectLargeLayer(active)});
+
+ $('mapTerrain').onclick=()=>{if(map.hasLayer(baseLayer))map.removeLayer(baseLayer);terrainLayer.addTo(map)};
+ $('mapStandard').onclick=()=>{if(map.hasLayer(terrainLayer))map.removeLayer(terrainLayer);baseLayer.addTo(map)};
+ document.querySelectorAll('#layerBar button').forEach(b=>b.onclick=()=>selectLayer(b.dataset.layer));
+ map.on('moveend',()=>{if(['cloudforecast','rainforecast','wind','gfs-temp','gfs-cape','gfs-pressure'].includes(mainGfsActive)){clearTimeout(gridTimer);gridTimer=setTimeout(()=>drawForecastGrid(mainGfsActive),350)}});
+ largeMap.on('moveend',()=>{if(['cloudforecast','rainforecast','wind','gfs-temp','gfs-cape','gfs-pressure'].includes(largeGfsActive)){clearTimeout(window.largeGfsTimer);window.largeGfsTimer=setTimeout(()=>selectLargeLayer(largeGfsActive),350)}});
+
+}
+async function selectLayer(name){
+ mainGfsActive=name;
+ clearOverlay();setActive(name);$('layerLegend').innerHTML='';
+ if(name==='none'){mainGfsActive='none';status('Βασικός χάρτης χωρίς πρόσθετα επίπεδα.');return}
+ if(name==='satellite'||name==='cloudtype'){
+   const layer=name==='satellite'?'mtg_fd:rgb_geocolour':'mtg_fd:rgb_cloudtype';
+   const title=name==='satellite'?'MTG GeoColour RGB':'MTG Cloud Type RGB';
+   activeOverlay=L.tileLayer.wms(WMS,{layers:layer,format:'image/png',transparent:true,version:'1.1.1',opacity:.82,tiled:true,attribution:'© EUMETSAT'+(name==='satellite'?' / NASA':'')});
+   activeOverlay.addTo(map);status(`Φόρτωση ${title} από EUMETSAT WMS. Η διαθεσιμότητα εξαρτάται από το χρονικό εύρος του προϊόντος.`);
+   $('layerLegend').textContent='Πηγή: EUMETSAT EUMETView · '+title+' · '+WMS;return;
+ }
+ if(name==='radar'){
+   try{
+    const data=await (await fetch('https://api.rainviewer.com/public/weather-maps.json')).json();
+    const frames=data.radar?.past||[];if(!frames.length)throw Error('No radar frames');
+    let idx=0;
+    const show=()=>{if(radarLayer)map.removeLayer(radarLayer);const f=frames[idx];radarLayer=L.tileLayer(`${data.host}${f.path}/256/{z}/{x}/{y}/2/1_0.png`,{tileSize:256,opacity:.72,maxNativeZoom:7,maxZoom:18,attribution:'Radar: <a href="https://www.rainviewer.com/">RainViewer</a>'});radarLayer.addTo(map);status(`Radar τελευταίας διαθέσιμης εικόνας: ${new Date(f.time*1000).toLocaleTimeString('el-GR',{hour:'2-digit',minute:'2-digit'})} UTC · ιστορικά δεδομένα, όχι πρόγνωση.`)};
+    show();let n=0;radarTimer=setInterval(()=>{idx=(idx+1)%frames.length;show();n++;if(n>=frames.length-1){clearInterval(radarTimer);radarTimer=null}},800);
+    $('layerLegend').textContent='RainViewer · διαθέσιμες ιστορικές εικόνες radar (περίπου 2 ώρες).';return;
+   }catch(e){status('Το radar δεν είναι προσωρινά διαθέσιμο από τον πάροχο.');return}
+ }
+ if(name==='cloudforecast'||name==='rainforecast'||name==='wind'||name==='gfs-temp'||name==='gfs-cape'||name==='gfs-pressure'){
+   status('Λήψη προγνωστικών πεδίων NOAA GFS για την ορατή περιοχή…');
+   await drawForecastGrid(name);return;
+ }
+}
+async function selectLargeLayer(name){
+ largeGfsActive=name;
+ const area=L.layerGroup(),vectors=L.layerGroup();
+ if(window.largeGfsArea){largeMap.removeLayer(window.largeGfsArea);largeMap.removeLayer(window.largeGfsVectors)}
+ window.largeGfsArea=area;window.largeGfsVectors=vectors;
+ document.querySelectorAll('#layerBarLarge button').forEach(b=>b.classList.toggle('active',b.dataset.layer===name));
+ $('layerLegendLarge').textContent='';
+ if(name==='none'){$('layerStatusLarge').textContent='Βασικός χάρτης χωρίς πρόσθετα επίπεδα.';return}
+ $('layerStatusLarge').textContent='Λήψη προγνωστικών πεδίων NOAA GFS…';
+ await drawGfsGrid(largeMap,name,area,vectors,'layerStatusLarge','layerLegendLarge','gfsLeadLarge');
+}
+async function drawForecastGrid(kind){
+ await drawGfsGrid(map,kind,gridLayer,windLayer,'layerStatus','layerLegend','gfsLead');
+}
+async function drawGfsGrid(targetMap,kind,areaLayer,vectorLayer,statusId,legendId,leadId){
+ try{
+  areaLayer.clearLayers();vectorLayer.clearLayers();
+  const b=targetMap.getBounds(),south=b.getSouth(),north=b.getNorth(),west=b.getWest(),east=b.getEast();
+  const rows=7,cols=7,lats=[],lons=[],points=[];
+  for(let y=0;y<rows;y++)for(let x=0;x<cols;x++){
+   const la=south+(north-south)*y/(rows-1),lo=west+(east-west)*x/(cols-1);
+   lats.push(la.toFixed(3));lons.push(lo.toFixed(3));points.push([la,lo]);
+  }
+  const fields='temperature_2m,precipitation,cloud_cover,wind_speed_10m,wind_direction_10m,cape,pressure_msl';
+  const url=`https://api.open-meteo.com/v1/gfs?latitude=${lats.join(',')}&longitude=${lons.join(',')}&hourly=${fields}&forecast_hours=73&timezone=UTC`;
+  const resp=await fetch(url);if(!resp.ok)throw Error('GFS HTTP '+resp.status);
+  const payload=await resp.json(),items=Array.isArray(payload)?payload:[payload];
+  const lead=Math.max(0,Math.min(72,Number($(leadId)?.value||24)));
+  let validTime='';
+  items.forEach((d,i)=>{
+   if(!d.hourly)return;
+   const times=d.hourly.time||[];
+   let idx=times.findIndex(t=>new Date(t).getTime()>=Date.now()+lead*3600000);
+   if(idx<0)idx=Math.min(times.length-1,lead);
+   if(!validTime)validTime=times[idx]||'';
+   const h=d.hourly,[la,lo]=points[i];
+   const tempV=h.temperature_2m?.[idx],rainV=h.precipitation?.[idx],cloudV=h.cloud_cover?.[idx],
+         windV=h.wind_speed_10m?.[idx],dirV=h.wind_direction_10m?.[idx],
+         capeV=h.cape?.[idx],pressureV=h.pressure_msl?.[idx];
+   if(kind==='wind'){
+    if(windV==null||dirV==null)return;
+    const html=`<div class="wind-arrow" style="transform:rotate(${(dirV+180)%360}deg)">↑</div>`;
+    L.marker([la,lo],{icon:L.divIcon({className:'',html,iconSize:[22,22],iconAnchor:[11,11]})})
+     .bindTooltip(`GFS άνεμος ${Math.round(windV)} km/h · διεύθυνση ${Math.round(dirV)}°`)
+     .addTo(vectorLayer);
+    return;
+   }
+   let v,color,opacity,unit,label;
+   if(kind==='cloudforecast'){v=cloudV;unit='%';label='Νεφοκάλυψη';color=v>85?'#e8f3ff':v>65?'#a9c7e4':v>40?'#668fb7':v>20?'#3d668e':'#203d5e';opacity=.22+(v||0)/230}
+   else if(kind==='rainforecast'){v=rainV;unit='mm/h';label='Υετός';color=v>=10?'#8b36b5':v>=5?'#d13d9a':v>=2?'#ed843c':v>=.5?'#f0c34d':v>.1?'#58cce0':'#52677c';opacity=v>.1?Math.min(.78,.28+v/18):.035}
+   else if(kind==='gfs-temp'){v=tempV;unit='°C';label='Θερμοκρασία 2 m';color=v<=0?'#6844bd':v<=5?'#367bd0':v<=10?'#36b8d0':v<=15?'#48b879':v<=20?'#d1c64c':v<=25?'#e99a3d':'#d84b43';opacity=.52}
+   else if(kind==='gfs-cape'){v=capeV;unit='J/kg';label='CAPE';color=v>=2000?'#a52b35':v>=1000?'#e45c35':v>=500?'#e7a13a':v>=100?'#d8d34b':'#426b91';opacity=.18+Math.min(0.58,(v||0)/3500)}
+   else if(kind==='gfs-pressure'){v=pressureV;unit='hPa';label='Πίεση MSL';color=v<990?'#7752bd':v<1000?'#4c86c6':v<1010?'#48a99b':v<1020?'#d0b24c':'#d47c45';opacity=.42}
+   else return;
+   if(v==null)return;
+   const dy=(north-south)/(rows-1)*.49,dx=(east-west)/(cols-1)*.49;
+   L.rectangle([[la-dy,lo-dx],[la+dy,lo+dx]],{color,weight:0,fillColor:color,fillOpacity:opacity,interactive:true})
+    .bindTooltip(`${label}: ${kind==='gfs-temp'?v.toFixed(1):kind==='gfs-pressure'?Math.round(v):Math.round(v*10)/10} ${unit}`)
+    .addTo(areaLayer);
+  });
+  if(kind==='wind')vectorLayer.addTo(targetMap);else areaLayer.addTo(targetMap);
+  const parsedTime=validTime?(/[zZ]|[+-]\\d{2}:\\d{2}$/.test(validTime)?new Date(validTime):new Date(validTime+'Z')):null;
+  const stamp=parsedTime&&!isNaN(parsedTime)?parsedTime.toLocaleString('el-GR',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',timeZone:'UTC'})+' UTC':'';
+  const desc={cloudforecast:'Νεφοκάλυψη',rainforecast:'Υετός',wind:'Άνεμος 10 m','gfs-temp':'Θερμοκρασία στα 2 m','gfs-cape':'Convective Available Potential Energy (CAPE)','gfs-pressure':'Πίεση μέσης στάθμης θάλασσας'};
+  const msg=`NOAA GFS · ${desc[kind]} · +${lead}h · έγκυρο: ${stamp}`;
+  $(statusId).textContent=msg;
+  $(legendId).textContent=`${msg}. Η απεικόνιση είναι χωρική δειγματοληψία 7×7 σημείων από το GFS.`;
+  const runEl=$('gfsRunLarge');if(runEl)runEl.textContent=`NOAA GFS · πρόγνωση +${lead}h · ${stamp}`;
+ }catch(e){
+  $(statusId).textContent='Δεν ήταν δυνατή η λήψη των δεδομένων GFS. Δοκιμάστε ξανά ή κάντε zoom σε μικρότερη περιοχή.';
+  console.error('GFS map error',e);
+ }
+}
+
+async function loadWeather(){
+ $('condition').textContent='Φόρτωση…';
+ try{
+ const url=`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,wind_speed_10m,wind_direction_10m,surface_pressure&hourly=temperature_2m,apparent_temperature,relative_humidity_2m,dew_point_2m,cloud_cover,precipitation,precipitation_probability,wind_speed_10m,wind_direction_10m,wind_gusts_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant,uv_index_max&forecast_days=7&timezone=auto`;
+ const response=await fetch(url);
+ if(!response.ok)throw new Error('Open-Meteo HTTP '+response.status);
+ const d=await response.json();
+ if(d.error)throw new Error(d.reason||'Open-Meteo returned an error');
+ const c=d.current,h=d.hourly,day=d.daily;
+ if(!c||!h||!day)throw new Error('Λείπουν current/hourly/daily δεδομένα από την υπηρεσία');
+ $('tempStat').innerHTML=`${temp(c.temperature_2m)}°<span class="unit">${isF?'F':'C'}</span>`;$('windStat').innerHTML=`${Math.round(c.wind_speed_10m*(isF?0.621371:1))} <span class="unit">${isF?'mph':'km/h'}</span>`;
+ $('humidityStat').innerHTML=`${c.relative_humidity_2m}<span class="unit">%</span>`;$('rainStat').innerHTML=`${h.precipitation_probability[0]}<span class="unit">%</span>`;
+ $('feels').textContent=`Αίσθηση: ${temp(c.apparent_temperature)}°`; $('windDir').textContent=`Διεύθυνση: ${dir(c.wind_direction_10m)} (${c.wind_direction_10m}°)`;
+ $('cityName').textContent=city;updateCityLandmark(city);$('condition').textContent=codeText(c.weather_code);$('currentTemp').textContent=temp(c.temperature_2m)+'°';$('weatherIcon').textContent=icon(c.weather_code);
+ $('updated').textContent='Ενημέρωση: '+new Date(c.time).toLocaleString('el-GR',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'short'});
+ $('feels2').textContent=temp(c.apparent_temperature)+'°'+(isF?'F':'C');$('dew').textContent=temp(h.dew_point_2m?.[0] ?? c.temperature_2m)+'°'+(isF?'F':'C');$('pressure').textContent=Math.round(c.surface_pressure)+' hPa';$('visibility').textContent='—';
+ const minT=Math.min(...day.temperature_2m_min),maxT=Math.max(...day.temperature_2m_max),span=Math.max(1,maxT-minT);
+ const rows=day.time.map((date,i)=>{
+   const dt=new Date(date+'T12:00:00'),today=i===0;
+   const dayName=today?'Σήμερα':dt.toLocaleDateString('el-GR',{weekday:'short'});
+   const dateLabel=dt.toLocaleDateString('el-GR',{day:'numeric',month:'short'});
+   const left=((day.temperature_2m_min[i]-minT)/span)*100;
+   const width=Math.max(5,((day.temperature_2m_max[i]-day.temperature_2m_min[i])/span)*100);
+   const rainProb=Math.round(day.precipitation_probability_max?.[i]??0);
+   const rainMm=(day.precipitation_sum?.[i]??0).toFixed(1);
+   const wind=Math.round(day.wind_speed_10m_max?.[i]??0),gust=Math.round(day.wind_gusts_10m_max?.[i]??0);
+   const uv=Math.round(day.uv_index_max?.[i]??0);
+   return `<div class="outlook-row">
+    <div class="outlook-date"><strong>${dayName}</strong><span>${dateLabel}</span></div>
+    <div class="outlook-icon">${icon(day.weather_code[i])}</div>
+    <div class="outlook-condition">${codeText(day.weather_code[i])}</div>
+    <strong class="outlook-low">${temp(day.temperature_2m_min[i])}°</strong>
+    <div class="outlook-tempbar"><span class="outlook-track"></span><span class="outlook-range" style="left:${left}%;width:${width}%"></span></div>
+    <strong class="outlook-high">${temp(day.temperature_2m_max[i])}°</strong>
+    <div class="outlook-metric" title="Πιθανότητα υετού και συνολικό ύψος"><span>💧 ${rainProb}% · ${rainMm} mm</span></div>
+    <div class="outlook-metric" title="Μέγιστη ταχύτητα ανέμου / ριπές"><span>≋ ${wind} / ${gust}</span></div>
+    <div class="outlook-metric" title="Μέγιστος δείκτης UV"><span>☼ UV ${uv}</span></div>
+   </div>`;
+ }).join('');
+ const outlook=`<div class="outlook-shell"><div class="outlook-title">7ήμερη πρόγνωση</div><div class="outlook-subtitle">Ελάχιστη / μέγιστη θερμοκρασία · υετός · άνεμος · UV</div><div class="outlook-list">${rows}</div></div>`;
+ $('forecastList').innerHTML=outlook;$('forecastList2').innerHTML=outlook;
+ const labels=h.time.slice(0,24).map(t=>new Date(t).toLocaleTimeString('el-GR',{hour:'2-digit',minute:'2-digit'})),vals=h.temperature_2m.slice(0,24).map(temp);
+ forecastSeries=h&&h.time?{
+   time:h.time,
+   temperature:h.temperature_2m,
+   apparent:h.apparent_temperature,
+   humidity:h.relative_humidity_2m,
+   cloudCover:h.cloud_cover,
+   rain:h.precipitation,
+   rainChance:h.precipitation_probability,
+   windSpeed:h.wind_speed_10m,
+   windGusts:h.wind_gusts_10m,
+   windDirection:h.wind_direction_10m
+ }:null;
+ const dailyMean=(values,dates,targetDates)=>{
+   const sums={},counts={};
+   (dates||[]).forEach((stamp,i)=>{const key=String(stamp).slice(0,10),v=values?.[i];if(Number.isFinite(v)){sums[key]=(sums[key]||0)+v;counts[key]=(counts[key]||0)+1;}});
+   return (targetDates||[]).map(date=>counts[date]?+(sums[date]/counts[date]).toFixed(1):null);
+ };
+ forecastDaily=day?{
+   time:day.time,temperatureMin:day.temperature_2m_min,temperatureMax:day.temperature_2m_max,
+   humidity:dailyMean(h.relative_humidity_2m,h.time,day.time),
+   cloudCover:dailyMean(h.cloud_cover,h.time,day.time),
+   rain:day.precipitation_sum,rainChance:day.precipitation_probability_max,
+   windSpeed:day.wind_speed_10m_max,windGusts:day.wind_gusts_10m_max,
+   windDirection:day.wind_direction_10m_dominant,uv:day.uv_index_max
+ }:null;
+ const cfg={type:'line',data:{labels,datasets:[{label:'Θερμοκρασία',data:vals,borderColor:'#48c8e8',backgroundColor:'#48c8e822',fill:true,tension:.35,pointRadius:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#8499b4',maxTicksLimit:8},grid:{color:'#22334a'}},y:{ticks:{color:'#8499b4'},grid:{color:'#22334a'}}}}};
+ if(chart)chart.destroy();chart=new Chart($('tempChart'),cfg);renderForecastDetail();
+ if(marker){marker.setLatLng([lat,lon]).bindPopup(city);map.setView([lat,lon],6);largeMap.setView([lat,lon],5)}
+ const active=document.querySelector('#layerBar button.active')?.dataset.layer;
+ if(active&&['cloudforecast','rainforecast','wind'].includes(active))drawForecastGrid(active);
+ }catch(e){$('condition').textContent='Αδυναμία φόρτωσης δεδομένων';$('updated').textContent='Σφάλμα: '+(e?.message||'Άγνωστο πρόβλημα');console.error('WeatherWise loadWeather:',e)}
+}
+$('units').onclick=()=>{isF=!isF;$('units').textContent=isF?'°F':'°C';loadWeather()};
+$('refresh').onclick=loadWeather;
+const themeSelect=$('themeSelect'), appearanceTheme=$('appearanceTheme');
+function applyTheme(theme){const allowed=['midnight','arctic','ocean','aurora','graphite','contrast','glass','intelligence'];const chosen=allowed.includes(theme)?theme:'ocean';document.body.dataset.theme=chosen;if(themeSelect)themeSelect.value=chosen;if(appearanceTheme)appearanceTheme.value=chosen;try{localStorage.setItem('weatherwise-theme',chosen)}catch(e){}document.querySelectorAll('.theme-preset').forEach(b=>{b.style.outline=b.dataset.theme===chosen?'2px solid var(--cyan)':'none'});}
+let savedTheme='ocean';try{savedTheme=localStorage.getItem('weatherwise-theme')||'ocean'}catch(e){}
+applyTheme(savedTheme);
+if(themeSelect)themeSelect.addEventListener('change',e=>applyTheme(e.target.value));
+if(appearanceTheme)appearanceTheme.addEventListener('change',e=>applyTheme(e.target.value));
+document.querySelectorAll('.theme-preset').forEach(b=>b.addEventListener('click',()=>applyTheme(b.dataset.theme)));
+const bgUpload=$('backgroundUpload'),bgStatus=$('backgroundStatus'),dim=$('backgroundDimmer'),dimValue=$('dimValue');
+function setDim(v){const n=Math.max(0,Math.min(80,Number(v)||0));document.documentElement.style.setProperty('--bg-dim',(n/100).toFixed(2));if(dim)dim.value=n;if(dimValue)dimValue.textContent=n+'%';try{localStorage.setItem('weatherwise-bg-dim',String(n))}catch(e){}}
+let savedDim=35;try{savedDim=Number(localStorage.getItem('weatherwise-bg-dim')??35)}catch(e){}setDim(savedDim);
+if(dim)dim.addEventListener('input',e=>setDim(e.target.value));
+function applyCustomBackground(data){if(data){document.body.style.backgroundImage=`linear-gradient(rgba(4,12,24,var(--bg-dim,.35)),rgba(4,12,24,var(--bg-dim,.35))),url("${data}")`;document.body.classList.add('has-custom-background');if(bgStatus)bgStatus.textContent='Προσαρμοσμένη εικόνα ενεργή'}else{document.body.style.backgroundImage='';document.body.classList.remove('has-custom-background');if(bgStatus)bgStatus.textContent='Χωρίς προσαρμοσμένη εικόνα'}}
+let savedBg=null;try{savedBg=localStorage.getItem('weatherwise-custom-background')}catch(e){}if(savedBg)applyCustomBackground(savedBg);
+if(bgUpload)bgUpload.addEventListener('change',e=>{const f=e.target.files?.[0];if(!f)return;if(!f.type.startsWith('image/')){if(bgStatus)bgStatus.textContent='Επιλέξτε αρχείο εικόνας';return}const reader=new FileReader();reader.onload=()=>{const data=String(reader.result);applyCustomBackground(data);try{localStorage.setItem('weatherwise-custom-background',data)}catch(err){if(bgStatus)bgStatus.textContent='Η εικόνα εφαρμόστηκε, αλλά δεν ήταν δυνατή η αποθήκευσή της λόγω μεγέθους'}};reader.readAsDataURL(f)});
+const removeBg=$('removeBackground');if(removeBg)removeBg.addEventListener('click',()=>{try{localStorage.removeItem('weatherwise-custom-background')}catch(e){}if(bgUpload)bgUpload.value='';applyCustomBackground(null)});
+$('menuBtn').onclick=()=>$('sidebar').classList.toggle('open');
+document.querySelectorAll('.europe-sort-btn').forEach(b=>b.onclick=()=>{document.querySelectorAll('.europe-sort-btn').forEach(x=>x.classList.toggle('active',x===b));europeSort=b.dataset.sort;renderEuropeChart()});
+document.querySelectorAll('.nav').forEach(n=>n.onclick=()=>{document.querySelectorAll('.nav').forEach(x=>x.classList.remove('active'));n.classList.add('active');document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));$(n.dataset.section).classList.add('active');$('pageTitle').textContent=n.textContent.trim();$('sidebar').classList.remove('open');if(n.dataset.section==='europe')loadEuropeWeather();setTimeout(()=>{if(map)map.invalidateSize();if(largeMap)largeMap.invalidateSize();if(europeChart)europeChart.resize()},100)});
+let searchTimer;
+$('citySearch').addEventListener('input',()=>{clearTimeout(searchTimer);let q=$('citySearch').value.trim();if(q.length<2){$('searchResults').style.display='none';return}searchTimer=setTimeout(async()=>{try{let r=await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}&count=6&language=el&format=json`),j=await r.json();$('searchResults').innerHTML=(j.results||[]).map((p,i)=>`<button data-i="${i}">${p.name}${p.admin1?', '+p.admin1:''}${p.country?', '+p.country:''}</button>`).join('')||'<span class="small">Δεν βρέθηκαν αποτελέσματα</span>';$('searchResults').style.display='block';$('searchResults').querySelectorAll('button').forEach((b,i)=>b.onclick=()=>{let p=j.results[i];lat=p.latitude;lon=p.longitude;city=[p.name,p.country].filter(Boolean).join(', ');$('citySearch').value='';$('searchResults').style.display='none';loadWeather()})}catch(e){}},350)});
+document.addEventListener('click',e=>{if(!e.target.closest('.topbar'))$('searchResults').style.display='none'});
+
+// Community weather reports (local prototype; connect to a shared API for cross-user publishing)
+const reportForm=$('weatherReportForm'), reportFiles=$('reportPhotos'), reportPreview=$('reportPhotoPreviews');
+let reportPhotoData=[];
+function resizeReportImage(file){
+ return new Promise((resolve,reject)=>{
+  const reader=new FileReader();
+  reader.onerror=()=>reject(new Error('Δεν ήταν δυνατή η ανάγνωση της εικόνας.'));
+  reader.onload=()=>{
+   const img=new Image();
+   img.onerror=()=>reject(new Error('Μη έγκυρη εικόνα.'));
+   img.onload=()=>{
+    const scale=Math.min(1,1280/Math.max(img.width,img.height));
+    const canvas=document.createElement('canvas');canvas.width=Math.round(img.width*scale);canvas.height=Math.round(img.height*scale);
+    canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);
+    resolve(canvas.toDataURL('image/jpeg',.76));
+   };
+   img.src=reader.result;
+  };
+  reader.readAsDataURL(file);
+ });
+}
+if(reportFiles)reportFiles.addEventListener('change',async()=>{
+ reportPhotoData=[];reportPreview.innerHTML='';
+ const files=Array.from(reportFiles.files||[]).slice(0,4);
+ if((reportFiles.files||[]).length>4) $('reportStatus').textContent='Μπορείτε να ανεβάσετε έως 4 φωτογραφίες.';
+ for(const file of files){
+  if(!file.type.startsWith('image/'))continue;
+  try{const data=await resizeReportImage(file);reportPhotoData.push(data);const img=document.createElement('img');img.src=data;img.alt='Προεπισκόπηση φωτογραφίας';reportPreview.appendChild(img)}
+  catch(e){$('reportStatus').textContent=e.message}
+ }
+});
+function getCommunityReports(){try{return JSON.parse(localStorage.getItem('weatherwise-community-reports')||'[]')}catch(e){return []}}
+function renderCommunityReports(){
+ const reports=getCommunityReports(), host=$('communityReports');
+ $('reportCount').textContent=reports.length+' αναφορές';
+ if(!reports.length){host.innerHTML='<div class="notice">Δεν υπάρχουν ακόμη αναφορές. Γίνετε οι πρώτοι που θα μοιραστούν τις καιρικές συνθήκες της περιοχής τους.</div>';return}
+ host.innerHTML=reports.slice().reverse().map(r=>`<article class="report-item"><div class="report-item-head"><b>${escapeReportText(r.location)}</b><span class="report-meta">${escapeReportText(r.dateLabel)}</span></div><div><b>${escapeReportText(r.type)}</b> · ${escapeReportText(r.intensity)}</div><p style="font-size:12px;line-height:1.5">${escapeReportText(r.description)}</p><div class="report-meta">${r.temperature!==''?'Θερμοκρασία: '+escapeReportText(r.temperature)+'°C · ':''}${r.observedAt?'Παρατήρηση: '+escapeReportText(r.observedAt):''}</div><div>${(r.photos||[]).map(p=>`<img src="${p}" alt="Φωτογραφία αναφοράς">`).join('')}</div></article>`).join('');
+}
+function escapeReportText(value){return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+if(reportForm){
+ const now=new Date();now.setMinutes(now.getMinutes()-now.getTimezoneOffset());$('reportObservedAt').value=now.toISOString().slice(0,16);
+ renderCommunityReports();
+ reportForm.addEventListener('submit',e=>{
+  e.preventDefault();
+  const reports=getCommunityReports();
+  const report={id:Date.now(),location:$('reportLocation').value.trim(),type:$('reportType').value,intensity:$('reportIntensity').value,observedAt:$('reportObservedAt').value,temperature:$('reportTemperature').value,description:$('reportDescription').value.trim(),photos:reportPhotoData,dateLabel:new Date().toLocaleString('el-GR',{dateStyle:'short',timeStyle:'short'})};
+  reports.push(report);
+  try{
+   localStorage.setItem('weatherwise-community-reports',JSON.stringify(reports));
+   $('reportStatus').textContent='Η αναφορά αποθηκεύτηκε σε αυτή τη συσκευή.';
+   reportForm.reset();reportPhotoData=[];reportPreview.innerHTML='';
+   const d=new Date();d.setMinutes(d.getMinutes()-d.getTimezoneOffset());$('reportObservedAt').value=d.toISOString().slice(0,16);
+   renderCommunityReports();
+  }catch(err){$('reportStatus').textContent='Δεν ήταν δυνατή η αποθήκευση. Δοκιμάστε λιγότερες ή μικρότερες φωτογραφίες.'}
+ });
+}
+
+
+// Official severe-weather alerts: HNMS/EMY CAP feed distributed via MeteoAlarm.
+// Same-origin endpoint served by the companion proxy (Cloudflare Worker).
+// Deploy the worker with the route /api/meteoalarm on the same domain.
+const METEOALARM_PROXY_ENDPOINT='/api/meteoalarm';
+function xmlLocalValues(node,name){
+ return Array.from(node.getElementsByTagName('*')).filter(el=>el.localName===name);
+}
+function xmlText(node,name){
+ const el=xmlLocalValues(node,name)[0];
+ return el?(el.textContent||'').trim():'';
+}
+function meteoAlarmSeverity(value){
+ const v=(value||'').toLowerCase();
+ if(v.includes('extreme')||v.includes('red'))return 'red';
+ if(v.includes('severe')||v.includes('orange'))return 'orange';
+ if(v.includes('moderate')||v.includes('yellow'))return 'yellow';
+ return 'unknown';
+}
+function meteoAlarmGreekSeverity(value){
+ return ({red:'ΚΟΚΚΙΝΟ',orange:'ΠΟΡΤΟΚΑΛΙ',yellow:'ΚΙΤΡΙΝΟ',unknown:'ΕΝΗΜΕΡΩΣΗ'})[value]||'ΕΝΗΜΕΡΩΣΗ';
+}
+function meteoAlarmDate(value){
+ if(!value)return '—';
+ const d=new Date(value);return isNaN(d)?value:d.toLocaleString('el-GR',{dateStyle:'short',timeStyle:'short'});
+}
+function meteoAlarmSafe(value){
+ return String(value||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function renderMeteoAlarmAlerts(entries){
+ const host=$('meteoAlarmAlertsList');
+ if(!entries.length){
+  host.innerHTML='<div class="notice">Η ροή MeteoAlarm ενημερώθηκε επιτυχώς: δεν βρέθηκαν ενεργές προειδοποιήσεις για την Ελλάδα. Για επιβεβαίωση, ανοίξτε την επίσημη σελίδα προειδοποιήσεων της ΕΜΥ.</div>';return;
+ }
+ host.innerHTML=entries.map(a=>`<article class="meteoalarm-alert-card ${a.level}"><div class="meteoalarm-alert-head"><div class="meteoalarm-alert-title">${meteoAlarmSafe(a.headline||a.event||'Προειδοποίηση καιρού')}</div><span class="meteoalarm-alert-badge ${a.level}">${meteoAlarmGreekSeverity(a.level)}</span></div><div class="meteoalarm-alert-meta">Έκδοση: ${meteoAlarmSafe(meteoAlarmDate(a.sent||a.updated))} · Έναρξη: ${meteoAlarmSafe(meteoAlarmDate(a.effective||a.onset))} · Λήξη: ${meteoAlarmSafe(meteoAlarmDate(a.expires))}</div>${a.description?`<div class="meteoalarm-alert-description">${meteoAlarmSafe(a.description)}</div>`:''}${a.area?`<div class="meteoalarm-alert-area">Περιοχές: ${meteoAlarmSafe(a.area)}</div>`:''}<div class="meteoalarm-alert-meta">Φαινόμενο: ${meteoAlarmSafe(a.event||'—')} · Βεβαιότητα: ${meteoAlarmSafe(a.certainty||'—')}</div>${a.url?`<a href="${meteoAlarmSafe(a.url)}" target="_blank" rel="noopener">Περισσότερες πληροφορίες ↗</a>`:''}</article>`).join('');
+}
+async function loadMeteoAlarmAlerts(){
+ const statusEl=$('meteoAlarmFeedStatus'),updatedEl=$('meteoAlarmUpdated'),host=$('meteoAlarmAlertsList');
+ if(!statusEl||!host)return;
+ statusEl.textContent='ΛΗΨΗ ΔΕΔΟΜΕΝΩΝ…';
+ try{
+  const response=await fetch(METEOALARM_PROXY_ENDPOINT,{cache:'no-store'});
+  if(!response.ok)throw new Error('HTTP '+response.status);
+  const xmlTextValue=await response.text();
+  const doc=new DOMParser().parseFromString(xmlTextValue,'application/xml');
+  if(doc.querySelector('parsererror'))throw new Error('Μη έγκυρη XML ροή');
+  const entries=Array.from(doc.getElementsByTagName('*')).filter(el=>el.localName==='entry');
+  const now=Date.now();
+  const alerts=entries.map(entry=>{
+   const info=xmlLocalValues(entry,'info')[0]||entry;
+   const title=xmlText(entry,'headline')||xmlText(entry,'title');
+   const event=xmlText(entry,'event')||'Καιρικό φαινόμενο';
+   const severity=xmlText(entry,'severity');
+   const expires=xmlText(entry,'expires');
+   const sent=xmlText(entry,'sent')||xmlText(entry,'updated');
+   const effective=xmlText(entry,'effective')||xmlText(entry,'onset');
+   const status=xmlText(entry,'status');
+   const msgType=xmlText(entry,'msgType');
+   const area=xmlLocalValues(info,'areaDesc').map(x=>x.textContent.trim()).filter(Boolean).join(', ')||xmlText(entry,'areaDesc');
+   const description=xmlText(info,'description')||xmlText(entry,'summary')||xmlText(entry,'content');
+   const certainty=xmlText(info,'certainty')||xmlText(entry,'certainty');
+   const link=Array.from(entry.getElementsByTagName('*')).find(el=>el.localName==='link'&&el.getAttribute('href'));
+   return {headline:title,event,severity,level:meteoAlarmSeverity(severity),expires,sent,effective,area,description,certainty,status,msgType,url:link?.getAttribute('href')||''};
+  }).filter(a=>{
+   const expiry=a.expires?new Date(a.expires).getTime():Infinity;
+   const active=(!Number.isFinite(expiry)||expiry>=now)&&(!a.status||a.status.toLowerCase()==='actual')&&(!a.msgType||!['cancel','ack'].includes(a.msgType.toLowerCase()));
+   return active&&(a.level!=='unknown'||a.event!=='');
+  }).sort((a,b)=>({red:0,orange:1,yellow:2,unknown:3}[a.level]-({red:0,orange:1,yellow:2,unknown:3}[b.level])));
+  renderMeteoAlarmAlerts(alerts);
+  statusEl.textContent='METEOALARM · ΕΠΙΣΗΜΗ ΡΟΗ';
+  updatedEl.textContent='Τελευταίος έλεγχος: '+new Date().toLocaleString('el-GR');
+ }catch(error){
+  statusEl.textContent='ΜΗ ΔΙΑΘΕΣΙΜΗ ΑΥΤΗ ΤΗ ΣΤΙΓΜΗ';
+  host.innerHTML=`<div class="notice">Δεν ήταν δυνατή η ανάκτηση της ροής CAP/Atom μέσω του proxy (${meteoAlarmSafe(error.message)}). Οι επίσημες προειδοποιήσεις παραμένουν διαθέσιμες από την ιστοσελίδα της ΕΜΥ. <a href="https://www.emy.gr/warnings" target="_blank" rel="noopener">Άνοιγμα ΕΜΥ ↗</a></div>`;
+  updatedEl.textContent='Τελευταία προσπάθεια: '+new Date().toLocaleString('el-GR');
+ }
+}
+if($('meteoAlarmRefresh'))$('meteoAlarmRefresh').addEventListener('click',loadMeteoAlarmAlerts);
+loadMeteoAlarmAlerts();
+setInterval(loadMeteoAlarmAlerts,5*60*1000);
+
+initMap();
+let moveDebounce;map.on('moveend',()=>{const active=document.querySelector('#layerBar button.active')?.dataset.layer;if(active&&['cloudforecast','rainforecast','wind'].includes(active)){clearTimeout(moveDebounce);moveDebounce=setTimeout(()=>drawForecastGrid(active),450)}});
+loadWeather();
+</script>
+</body></html>
