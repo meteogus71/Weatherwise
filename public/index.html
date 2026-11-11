@@ -896,6 +896,79 @@ const cityLandmarks=[
  {keys:['hobart','χόμπαρτ','χομπαρτ'],title:'Hobart waterfront'},
  {keys:['dunedin','ντούνεντιν','ντουνεντιν'],title:'Dunedin railway station'}
 ];
+const cityLandmarkSearchAliases={
+ 'athens':'Acropolis Parthenon',
+ 'paris':'Eiffel Tower',
+ 'london':'Big Ben Westminster',
+ 'rome':'Colosseum',
+ 'lisbon':'Belem Tower',
+ 'amsterdam':'Amsterdam canals',
+ 'madrid':'Royal Palace of Madrid',
+ 'berlin':'Brandenburg Gate',
+ 'prague':'Charles Bridge',
+ 'vienna':'Schonbrunn Palace',
+ 'helsinki':'Helsinki Cathedral',
+ 'dublin':'Ha penny Bridge',
+ 'reykjavik':'Hallgrimskirkja',
+ 'valletta':'Grand Harbour Valletta',
+ 'kyiv':'Motherland Monument Kyiv',
+ 'oslo':'Oslo Opera House',
+ 'copenhagen':'Nyhavn Copenhagen',
+ 'warsaw':'Warsaw Old Town',
+ 'budapest':'Hungarian Parliament Budapest',
+ 'bucharest':'Palace of the Parliament',
+ 'sofia':'Alexander Nevsky Cathedral',
+ 'belgrade':'Belgrade Fortress',
+ 'nafplio':'Palamidi Fortress Nafplio old town',
+ 'chania':'Chania Venetian Harbour lighthouse',
+ 'rethymno':'Rethymno Fortezza Venetian harbour',
+ 'ioannina':'Ioannina castle lake Pamvotida',
+ 'kastoria':'Kastoria lakefront mansions',
+ 'florina':'Florina river old town',
+ 'santorini':'Oia blue domes caldera',
+ 'thessaloniki':'White Tower Thessaloniki',
+ 'bruges':'Bruges medieval canals Markt',
+ 'ghent':'Graslei Ghent medieval waterfront',
+ 'colmar':'Colmar Petite Venise',
+ 'annecy':'Annecy old town lake Palais de l Isle',
+ 'avignon':'Palais des Papes Avignon',
+ 'siena':'Piazza del Campo Siena',
+ 'matera':'Sassi di Matera',
+ 'lucca':'Lucca historic walls',
+ 'sintra':'Pena Palace Sintra',
+ 'porto':'Dom Luis I Bridge Ribeira Porto',
+ 'cesky krumlov':'Cesky Krumlov castle old town',
+ 'hallstatt':'Hallstatt lakeside village',
+ 'kotor':'Kotor old town bay',
+ 'mostar':'Stari Most Mostar',
+ 'lake bled':'Bled island church castle',
+ 'gjirokaster':'Gjirokaster castle old town',
+ 'berat':'Berat Mangalem quarter castle',
+ 'chefchaouen':'Chefchaouen blue medina',
+ 'marrakech':'Jemaa el Fnaa Koutoubia',
+ 'fes':'Fes old medina Bab Bou Jeloud',
+ 'oaxaca':'Oaxaca Santo Domingo church',
+ 'cartagena':'Cartagena Colombia old town clock tower',
+ 'cusco':'Cusco Plaza de Armas cathedral',
+ 'arequipa':'Arequipa Plaza de Armas cathedral',
+ 'medellin':'Medellin Comuna 13 city view',
+ 'kyoto':'Kiyomizu dera Kyoto',
+ 'tokyo':'Tokyo Tower skyline',
+ 'osaka':'Osaka Castle',
+ 'seoul':'Gyeongbokgung Palace Seoul',
+ 'bangkok':'Wat Arun Bangkok',
+ 'hoi an':'Hoi An Japanese Covered Bridge',
+ 'singapore':'Marina Bay Sands Singapore',
+ 'jaipur':'Hawa Mahal Jaipur',
+ 'varanasi':'Varanasi Dashashwamedh Ghat',
+ 'dubai':'Burj Khalifa Dubai',
+ 'abu dhabi':'Sheikh Zayed Grand Mosque',
+ 'cape town':'Table Mountain Cape Town',
+ 'cairo':'Giza pyramids Cairo',
+ 'luxor':'Karnak Temple Luxor',
+ 'sydney':'Sydney Opera House Harbour Bridge',
+ 'queenstown':'Queenstown lake Wakatipu Remarkables'
+};
 const cityLandmarkCache=new Map();
 let cityLandmarkRequest=0;
 function citySearchName(cityText){return String(cityText||'').split(',')[0].trim();}
@@ -919,13 +992,23 @@ async function findCommonsCityImage(cityText,landmarkHint=''){
 
  const englishName=await resolveEnglishCityName(cityName);
  const names=[...new Set([englishName,cityName].filter(Boolean))];
+ const matchedCity=cityLandmarks.find(item=>item.keys.some(k=>cityText.toLocaleLowerCase('el').includes(k)));
+ const cityKey=matchedCity?.keys?.[0]?.toLowerCase()||englishName.toLowerCase();
+ const landmarkAlias=cityLandmarkSearchAliases[cityKey]||'';
+ const landmarkTerms=[...new Set([landmarkAlias,landmarkHint].filter(Boolean))];
  const queries=[];
+ // First search for the actual landmark, not a generic city skyline.
+ landmarkTerms.forEach(term=>{
+  queries.push(`${englishName} ${term}`);
+  queries.push(term);
+  queries.push(`${term} landmark`);
+ });
+ // Only use general city-view searches if the landmark-specific searches fail.
+ const generalQueries=[];
  names.forEach(name=>{
-  queries.push(`${name} city`);
-  queries.push(`${name} skyline`);
-  queries.push(`${name} panorama`);
-  queries.push(`${name} old town`);
-  if(landmarkHint)queries.push(`${name} ${landmarkHint}`);
+  generalQueries.push(`${name} famous landmark`);
+  generalQueries.push(`${name} monument`);
+  generalQueries.push(`${name} historic centre`);
  });
  const seen=new Set();
  for(const query of queries){
@@ -950,10 +1033,14 @@ async function findCommonsCityImage(cityText,landmarkHint=''){
     const lower=title.toLowerCase();
     if(/\.(svg|pdf|djvu)$/i.test(title)||/map|logo|flag|coat.of.arms|icon|diagram|location.map|weather.chart|locator/.test(lower))return null;
     let score=0;
-    for(const name of names){if(lower.includes(name.toLowerCase()))score+=8;}
-    if(/panorama|skyline|cityscape|old.town|historic|aerial|view|harbour|harbor|waterfront|medina|village|town/.test(lower))score+=5;
-    if(/landmark|cathedral|castle|bridge|tower|square|monument|palace/.test(lower))score+=2;
-    if(/street|building/.test(lower))score+=1;
+    for(const name of names){if(lower.includes(name.toLowerCase()))score+=6;}
+    for(const term of landmarkTerms){
+     const words=term.toLowerCase().split(/\\s+/).filter(w=>w.length>2);
+     for(const word of words){if(lower.includes(word))score+=5;}
+    }
+    if(/landmark|cathedral|castle|bridge|tower|square|monument|palace|temple|fortress|parthenon|acropolis|statue/.test(lower))score+=4;
+    if(/panorama|skyline|cityscape|old.town|historic|aerial|view|harbour|harbor|waterfront|medina|village|town/.test(lower))score+=1;
+    if(/street|building/.test(lower))score+=0.5;
     return {
      url:imageUrl,
      fallbackUrl:info?.url&&info.url!==imageUrl?info.url:'',
@@ -970,6 +1057,28 @@ async function findCommonsCityImage(cityText,landmarkHint=''){
     return result;
    }
   }catch(error){/* Continue to the next query/provider if Commons is temporarily unavailable. */}
+ }
+ // Fallback to a city landmark category search, still avoiding unrelated skyline photos.
+ for(const query of generalQueries){
+  const params=new URLSearchParams({
+   action:'query',format:'json',formatversion:'2',generator:'search',
+   gsrsearch:query,gsrnamespace:'6',gsrlimit:'20',
+   prop:'imageinfo',iiprop:'url|extmetadata',iiurlwidth:'1600',
+   iiextmetadatafilter:'Artist|Credit|LicenseShortName',origin:'*'
+  });
+  try{
+   const response=await fetch('https://commons.wikimedia.org/w/api.php?'+params.toString(),{mode:'cors'});
+   if(!response.ok)continue;
+   const data=await response.json(),pages=data?.query?.pages||[];
+   const ranked=pages.map(page=>{
+    const info=page.imageinfo?.[0],imageUrl=info?.thumburl||info?.url;
+    if(!imageUrl)return null;
+    const title=String(page.title||'').replace(/^File:/,'');
+    if(/\\.(svg|pdf|djvu)$/i.test(title)||/map|logo|flag|icon|diagram|locator/.test(title.toLowerCase()))return null;
+    return {url:imageUrl,title,descriptionUrl:info?.descriptionurl||'',credit:info?.extmetadata?.Artist?.value||info?.extmetadata?.Credit?.value||'',license:info?.extmetadata?.LicenseShortName?.value||'',score:1};
+   }).filter(Boolean);
+   if(ranked.length){cityLandmarkCache.set(cacheKey,ranked.slice(0,8));return ranked.slice(0,8);}
+  }catch(error){}
  }
 
  // Secondary source: Wikipedia article thumbnail for the city.
