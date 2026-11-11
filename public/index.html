@@ -361,30 +361,35 @@ select.btn{color:var(--text);background:var(--panel2);border:1px solid var(--lin
         <button data-layer="satellite">🛰 MTG GeoColour</button>
         <button data-layer="cloudtype">☁ Τύπος νεφών</button>
         <button data-layer="radar">🌧 Radar</button>
-        <button data-layer="cloudforecast">☁ Νεφοκάλυψη GFS</button>
-        <button data-layer="rainforecast">💧 Υετός GFS</button>
-        <button data-layer="gfs-temp">🌡 Θερμοκρασία GFS</button>
-        <button data-layer="gfs-cape">⛈ CAPE GFS</button>
-        <button data-layer="gfs-pressure">〰 Πίεση MSL GFS</button>
-        <button data-layer="wind">➤ Άνεμος GFS</button>
+        <button data-layer="cloudforecast">☁ Νεφοκάλυψη</button>
+        <button data-layer="rainforecast">💧 Υετός</button>
+        <button data-layer="gfs-temp">🌡 Θερμοκρασία 2m</button>
+        <button data-layer="gfs-cape">⛈ CAPE</button>
+        <button data-layer="gfs-pressure">〰 Πίεση MSL</button>
+        <button data-layer="ecmwf-850">🌡 Θερμοκρασία 850 hPa</button><button data-layer="ecmwf-500">🌡 Θερμοκρασία 500 hPa</button>
+        <button data-layer="wind">➤ Άνεμος 10m</button>
         <button data-layer="none" class="active">Καθαρός χάρτης</button>
       </div>
-      <div class="map-tools" style="margin:8px 0"><label class="small" for="gfsLead">Πρόγνωση:</label><select id="gfsLead" class="btn"><option value="0">+0h</option><option value="3">+3h</option><option value="6">+6h</option><option value="9">+9h</option><option value="12">+12h</option><option value="15">+15h</option><option value="18">+18h</option><option value="21">+21h</option><option value="24" selected>+24h</option><option value="27">+27h</option><option value="30">+30h</option><option value="33">+33h</option><option value="36">+36h</option><option value="39">+39h</option><option value="42">+42h</option><option value="45">+45h</option><option value="48">+48h</option><option value="51">+51h</option><option value="54">+54h</option><option value="57">+57h</option><option value="60">+60h</option><option value="63">+63h</option><option value="66">+66h</option><option value="69">+69h</option><option value="72">+72h</option></select></div>
-      <div class="layer-status" id="layerStatus">Επίλεξε ένα επίπεδο GFS για απεικόνιση στον χάρτη.</div>
+      <div class="map-tools" style="margin:8px 0;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+<label class="small" for="forecastModel">Μοντέλο:</label><select id="forecastModel" class="btn"><option value="gfs" selected>NOAA GFS</option><option value="ecmwf">ECMWF IFS</option></select>
+<label class="small" for="gfsLead">Πρόγνωση:</label><select id="gfsLead" class="btn"><option value="0">+0h</option><option value="3">+3h</option><option value="6">+6h</option><option value="9">+9h</option><option value="12">+12h</option><option value="15">+15h</option><option value="18">+18h</option><option value="21">+21h</option><option value="24" selected>+24h</option><option value="27">+27h</option><option value="30">+30h</option><option value="33">+33h</option><option value="36">+36h</option><option value="39">+39h</option><option value="42">+42h</option><option value="45">+45h</option><option value="48">+48h</option><option value="51">+51h</option><option value="54">+54h</option><option value="57">+57h</option><option value="60">+60h</option><option value="63">+63h</option><option value="66">+66h</option><option value="69">+69h</option><option value="72">+72h</option><option value="75">+75h</option><option value="78">+78h</option><option value="81">+81h</option><option value="84">+84h</option><option value="87">+87h</option><option value="90">+90h</option><option value="93">+93h</option><option value="96">+96h</option><option value="99">+99h</option><option value="102">+102h</option><option value="105">+105h</option><option value="108">+108h</option><option value="111">+111h</option><option value="114">+114h</option><option value="117">+117h</option><option value="120">+120h</option><option value="123">+123h</option><option value="126">+126h</option><option value="129">+129h</option><option value="132">+132h</option><option value="135">+135h</option><option value="138">+138h</option><option value="141">+141h</option><option value="144">+144h</option><option value="147">+147h</option><option value="150">+150h</option><option value="153">+153h</option><option value="156">+156h</option><option value="159">+159h</option><option value="162">+162h</option><option value="165">+165h</option><option value="168">+168h</option><option value="171">+171h</option><option value="174">+174h</option><option value="177">+177h</option><option value="180">+180h</option><option value="183">+183h</option><option value="186">+186h</option><option value="189">+189h</option><option value="192">+192h</option><option value="195">+195h</option><option value="198">+198h</option><option value="201">+201h</option><option value="204">+204h</option><option value="207">+207h</option><option value="210">+210h</option><option value="213">+213h</option><option value="216">+216h</option><option value="219">+219h</option><option value="222">+222h</option><option value="225">+225h</option><option value="228">+228h</option><option value="231">+231h</option><option value="234">+234h</option><option value="237">+237h</option><option value="240">+240h</option></select></div>
+      <div class="layer-status" id="layerStatus">Επίλεξε προγνωστικό επίπεδο GFS ή ECMWF για απεικόνιση στον χάρτη.</div>
       <div id="map" class="map"></div>
       <div class="layer-legend" id="layerLegend"></div></div>
       <div class="card"><div class="card-head"><h3>ΠΡΟΓΝΩΣΗ 5 ΗΜΕΡΩΝ</h3><span>ΗΜΕΡΗΣΙΑ</span></div><div class="forecast-list" id="forecastList"></div></div>
     </div>
     <div class="card chart-card"><div class="card-head"><h3>ΕΞΕΛΙΞΗ ΘΕΡΜΟΚΡΑΣΙΑΣ</h3><span>ΕΠΟΜΕΝΕΣ 24 ΩΡΕΣ</span></div><div class="chart-wrap"><canvas id="tempChart"></canvas></div></div>
-    <div class="notice">Οι τρέχουσες συνθήκες και οι λοιπές προγνώσεις παρέχονται από Open-Meteo. Τα προγνωστικά πεδία χαρτών χρησιμοποιούν NOAA GFS μέσω Open-Meteo. Η σελίδα δεν αποτελεί επίσημη υπηρεσία προειδοποιήσεων.</div>
+    <div class="notice">Οι τρέχουσες συνθήκες και οι λοιπές προγνώσεις παρέχονται από Open-Meteo. Τα προγνωστικά πεδία χαρτών χρησιμοποιούν NOAA GFS ή ECMWF IFS μέσω Open-Meteo. Η σελίδα δεν αποτελεί επίσημη υπηρεσία προειδοποιήσεων.</div>
   </section>
 
   <section class="section" id="maps">
  <div class="card">
-  <div class="map-title"><div><h3>ΔΙΑΔΡΑΣΤΙΚΟΙ ΠΡΟΓΝΩΣΤΙΚΟΙ ΧΑΡΤΕΣ GFS</h3><p class="small">Παγκόσμιο μοντέλο NOAA GFS · επιλέξτε μετεωρολογικό πεδίο και χρονικό ορίζοντα.</p></div></div>
+  <div class="map-title"><div><h3>ΔΙΑΔΡΑΣΤΙΚΟΙ ΠΡΟΓΝΩΣΤΙΚΟΙ ΧΑΡΤΕΣ GFS / ECMWF</h3><p class="small">Επιλογή παγκόσμιου μοντέλου NOAA GFS ή ECMWF IFS · μετεωρολογικό πεδίο και χρονικός ορίζοντας έως 10 ημέρες.</p></div></div>
   <div class="forecast-toolbar" style="margin:12px 0">
+   <label class="small" for="forecastModelLarge">Μοντέλο</label>
+   <select id="forecastModelLarge" class="btn"><option value="gfs" selected>NOAA GFS</option><option value="ecmwf">ECMWF IFS</option></select>
    <label class="small" for="gfsLeadLarge">Χρόνος πρόγνωσης</label>
-   <select id="gfsLeadLarge" class="btn"><option value="0">Τώρα / +0h</option><option value="3">+3h</option><option value="6">+6h</option><option value="9">+9h</option><option value="12">+12h</option><option value="15">+15h</option><option value="18">+18h</option><option value="21">+21h</option><option value="24" selected>+24h</option><option value="27">+27h</option><option value="30">+30h</option><option value="33">+33h</option><option value="36">+36h</option><option value="39">+39h</option><option value="42">+42h</option><option value="45">+45h</option><option value="48">+48h</option><option value="51">+51h</option><option value="54">+54h</option><option value="57">+57h</option><option value="60">+60h</option><option value="63">+63h</option><option value="66">+66h</option><option value="69">+69h</option><option value="72">+72h</option></select>
+   <select id="gfsLeadLarge" class="btn"><option value="0">Τώρα / +0h</option><option value="3">+3h</option><option value="6">+6h</option><option value="9">+9h</option><option value="12">+12h</option><option value="15">+15h</option><option value="18">+18h</option><option value="21">+21h</option><option value="24" selected>+24h</option><option value="27">+27h</option><option value="30">+30h</option><option value="33">+33h</option><option value="36">+36h</option><option value="39">+39h</option><option value="42">+42h</option><option value="45">+45h</option><option value="48">+48h</option><option value="51">+51h</option><option value="54">+54h</option><option value="57">+57h</option><option value="60">+60h</option><option value="63">+63h</option><option value="66">+66h</option><option value="69">+69h</option><option value="72">+72h</option><option value="75">+75h</option><option value="78">+78h</option><option value="81">+81h</option><option value="84">+84h</option><option value="87">+87h</option><option value="90">+90h</option><option value="93">+93h</option><option value="96">+96h</option><option value="99">+99h</option><option value="102">+102h</option><option value="105">+105h</option><option value="108">+108h</option><option value="111">+111h</option><option value="114">+114h</option><option value="117">+117h</option><option value="120">+120h</option><option value="123">+123h</option><option value="126">+126h</option><option value="129">+129h</option><option value="132">+132h</option><option value="135">+135h</option><option value="138">+138h</option><option value="141">+141h</option><option value="144">+144h</option><option value="147">+147h</option><option value="150">+150h</option><option value="153">+153h</option><option value="156">+156h</option><option value="159">+159h</option><option value="162">+162h</option><option value="165">+165h</option><option value="168">+168h</option><option value="171">+171h</option><option value="174">+174h</option><option value="177">+177h</option><option value="180">+180h</option><option value="183">+183h</option><option value="186">+186h</option><option value="189">+189h</option><option value="192">+192h</option><option value="195">+195h</option><option value="198">+198h</option><option value="201">+201h</option><option value="204">+204h</option><option value="207">+207h</option><option value="210">+210h</option><option value="213">+213h</option><option value="216">+216h</option><option value="219">+219h</option><option value="222">+222h</option><option value="225">+225h</option><option value="228">+228h</option><option value="231">+231h</option><option value="234">+234h</option><option value="237">+237h</option><option value="240">+240h</option></select>
    <span id="gfsRunLarge" class="small">Πηγή: NOAA GFS μέσω Open-Meteo</span>
   </div>
   <div class="gfs-player" id="gfsPlayer">
@@ -394,8 +399,8 @@ select.btn{color:var(--text);background:var(--panel2);border:1px solid var(--lin
      <select id="gfsPlayerSpeed" class="btn"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option></select>
     </label>
    </div>
-   <input id="gfsPlayerSlider" class="gfs-player-slider" type="range" min="0" max="72" step="3" value="24" aria-label="Χρόνος πρόγνωσης GFS">
-   <div class="gfs-player-scale"><span>+0h</span><span>+24h</span><span>+48h</span><span>+72h</span></div>
+   <input id="gfsPlayerSlider" class="gfs-player-slider" type="range" min="0" max="240" step="3" value="24" aria-label="Χρόνος πρόγνωσης GFS">
+   <div class="gfs-player-scale"><span>+0h</span><span>+3d</span><span>+6d</span><span>+10d</span></div>
    <div class="gfs-player-controls">
     <button type="button" id="gfsPlayerStart" title="Αρχή">|◀</button>
     <button type="button" id="gfsPlayerBack" title="Προηγούμενο βήμα">◀</button>
@@ -404,15 +409,15 @@ select.btn{color:var(--text);background:var(--panel2);border:1px solid var(--lin
     <button type="button" id="gfsPlayerEnd" title="Τέλος">▶▶</button>
     <label class="gfs-loop"><input type="checkbox" id="gfsPlayerLoop" checked> Loop</label>
    </div>
-   <div class="small gfs-player-note">Κοινός χρόνος για όλους τους προγνωστικούς χάρτες GFS. Βήμα 3 ωρών · χρόνος UTC.</div>
+   <div class="small gfs-player-note">Κοινός χρόνος για όλους τους προγνωστικούς χάρτες GFS / ECMWF. Βήμα επιλογής 3 ωρών · χρόνος UTC. Το ECMWF χρησιμοποιεί την εγγενή χρονική ανάλυση του μοντέλου.</div>
   </div>
   <div class="layerbar" id="layerBarLarge">
-   <button data-layer="gfs-temp">🌡 Θερμοκρασία 2m</button><button data-layer="rainforecast">💧 Υετός</button><button data-layer="cloudforecast">☁ Νεφοκάλυψη</button><button data-layer="wind">➤ Άνεμος 10m</button><button data-layer="gfs-cape">⛈ CAPE</button><button data-layer="gfs-pressure">〰 Πίεση MSL</button><button data-layer="none" class="active">Καθαρός χάρτης</button>
+   <button data-layer="gfs-temp">🌡 Θερμοκρασία 2m</button><button data-layer="rainforecast">💧 Υετός</button><button data-layer="cloudforecast">☁ Νεφοκάλυψη</button><button data-layer="wind">➤ Άνεμος 10m</button><button data-layer="gfs-cape">⛈ CAPE</button><button data-layer="gfs-pressure">〰 Πίεση MSL</button><button data-layer="ecmwf-850">🌡 Θερμοκρασία 850 hPa</button><button data-layer="ecmwf-500">🌡 Θερμοκρασία 500 hPa</button><button data-layer="none" class="active">Καθαρός χάρτης</button>
   </div>
-  <div class="layer-status" id="layerStatusLarge">Επιλέξτε πεδίο GFS για να εμφανιστεί στον χάρτη.</div>
+  <div class="layer-status" id="layerStatusLarge">Επιλέξτε πεδίο GFS ή ECMWF για να εμφανιστεί στον χάρτη.</div>
   <div id="mapLarge" class="map" style="height:650px;margin-top:12px;border-radius:10px"></div>
   <div class="layer-legend" id="layerLegendLarge"></div>
-  <div class="notice" style="margin-top:12px">Τα πεδία είναι αριθμητικά προγνωστικά δεδομένα GFS και όχι παρατηρήσεις ή επίσημες προειδοποιήσεις. Η ανάλυση του παγκόσμιου GFS είναι περίπου 13–25 km και η συχνότητα νέου κύκλου περίπου 6 ώρες.</div>
+  <div class="notice" style="margin-top:12px">Τα πεδία είναι αριθμητικά προγνωστικά δεδομένα μοντέλων και όχι παρατηρήσεις ή επίσημες προειδοποιήσεις. Το ECMWF IFS εμφανίζεται στην εγγενή χρονική ανάλυση που επιστρέφει το Open-Meteo.</div>
  </div>
 </section>
   <section class="section" id="forecast">
@@ -641,10 +646,10 @@ function clearOverlay(){if(activeOverlay&&map.hasLayer(activeOverlay))map.remove
 function setActive(name){document.querySelectorAll('#layerBar button').forEach(b=>b.classList.toggle('active',b.dataset.layer===name))}
 function initMap(){
  map=L.map('map',{zoomControl:true}).setView([lat,lon],6);
- baseLayer=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap'}).addTo(map);
+ baseLayer=L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=cb1_51yw_1_497f6b7d9f678b3bd71abfc2',{attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a> © <a href="https://carto.com/attributions">CARTO</a>'}).addTo(map);
  terrainLayer=L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',{attribution:'© OpenTopoMap'});
  marker=L.marker([lat,lon]).addTo(map).bindPopup(city);
- largeMap=L.map('mapLarge').setView([lat,lon],5);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap'}).addTo(largeMap);L.marker([lat,lon]).addTo(largeMap).bindPopup(city);
+ largeMap=L.map('mapLarge').setView([lat,lon],5);L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=cb1_51yw_1_497f6b7d9f678b3bd71abfc2',{attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a> © <a href="https://carto.com/attributions">CARTO</a>'}).addTo(largeMap);L.marker([lat,lon]).addTo(largeMap).bindPopup(city);
  document.querySelectorAll('#layerBarLarge button').forEach(b=>b.onclick=()=>selectLargeLayer(b.dataset.layer));
  const syncLead=(from,to)=>{if($(to))$(to).value=$(from).value};
  // Shared player handlers below replace the previous independent lead handlers.
@@ -652,10 +657,10 @@ function initMap(){
  // One shared GFS timeline drives both forecast-map views.
  const playerSlider=$('gfsPlayerSlider'),playerTime=$('gfsPlayerTime'),playerToggle=$('gfsPlayerToggle');
  let gfsPlayerTimer=null,playerBusy=false;
- const activeGfsLayers=['cloudforecast','rainforecast','wind','gfs-temp','gfs-cape','gfs-pressure'];
- function showPlayerTime(v){if(playerSlider)playerSlider.value=String(v);if(playerTime)playerTime.textContent=`NOAA GFS · +${v}h · UTC`}
+ const activeGfsLayers=['cloudforecast','rainforecast','wind','gfs-temp','gfs-cape','gfs-pressure','ecmwf-850','ecmwf-500'];
+ function showPlayerTime(v){if(playerSlider)playerSlider.value=String(v);if(playerTime)playerTime.textContent=`${window.weatherwiseForecastModel==='ecmwf'?'ECMWF IFS':'NOAA GFS'} · +${v}h · UTC`}
  async function setSharedLead(v,redraw=true){
-  const lead=Math.max(0,Math.min(72,Math.round(Number(v)/3)*3));
+  const lead=Math.max(0,Math.min(240,Math.round(Number(v)/3)*3));
   $('gfsLead').value=String(lead);$('gfsLeadLarge').value=String(lead);showPlayerTime(lead);
   if(!redraw||playerBusy)return;
   playerBusy=true;
@@ -671,18 +676,18 @@ function initMap(){
  function stopGfsPlayer(){if(gfsPlayerTimer){clearInterval(gfsPlayerTimer);gfsPlayerTimer=null}if(playerToggle){playerToggle.textContent='▶';playerToggle.title='Αναπαραγωγή'}}
  function playerStep(delta){
   let n=Number(playerSlider?.value||$('gfsLeadLarge').value||24)+delta;
-  if(n>72)n=$('gfsPlayerLoop').checked?0:72;
-  if(n<0)n=$('gfsPlayerLoop').checked?72:0;
+  if(n>240)n=$('gfsPlayerLoop').checked?0:240;
+  if(n<0)n=$('gfsPlayerLoop').checked?240:0;
   setSharedLead(n,true);
  }
  function startGfsPlayer(){
   if(gfsPlayerTimer){stopGfsPlayer();return}
-  if(Number(playerSlider.value)>=72)playerSlider.value='0';
+  if(Number(playerSlider.value)>=240)playerSlider.value='0';
   playerToggle.textContent='Ⅱ';playerToggle.title='Παύση';
   const tickMs=1800/Number($('gfsPlayerSpeed').value||1);
   gfsPlayerTimer=setInterval(()=>{
    const current=Number(playerSlider.value);
-   if(current>=72){if($('gfsPlayerLoop').checked){setSharedLead(0,true)}else{stopGfsPlayer()}return}
+   if(current>=240){if($('gfsPlayerLoop').checked){setSharedLead(0,true)}else{stopGfsPlayer()}return}
    playerStep(3);
   },tickMs);
  }
@@ -690,6 +695,17 @@ function initMap(){
  playerSlider.addEventListener('change',()=>setSharedLead(playerSlider.value,true));
  $('gfsLead').addEventListener('change',()=>setSharedLead($('gfsLead').value,true));
  $('gfsLeadLarge').addEventListener('change',()=>setSharedLead($('gfsLeadLarge').value,true));
+  const changeForecastModel=(value)=>{
+   window.weatherwiseForecastModel=value;
+   $('forecastModel').value=value;$('forecastModelLarge').value=value;
+   const small=document.querySelector('#layerBar button.active')?.dataset.layer;
+   const large=document.querySelector('#layerBarLarge button.active')?.dataset.layer;
+   if(small&&small!=='none')selectLayer(small);
+   if(large&&large!=='none')selectLargeLayer(large);
+   $('gfsRunLarge').textContent='Πηγή: '+(value==='ecmwf'?'ECMWF IFS μέσω Open-Meteo':'NOAA GFS μέσω Open-Meteo');
+  };
+  $('forecastModel').addEventListener('change',e=>changeForecastModel(e.target.value));
+  $('forecastModelLarge').addEventListener('change',e=>changeForecastModel(e.target.value));
  playerToggle.addEventListener('click',startGfsPlayer);
  $('gfsPlayerStart').addEventListener('click',()=>{stopGfsPlayer();setSharedLead(0,true)});
  $('gfsPlayerBack').addEventListener('click',()=>{stopGfsPlayer();playerStep(-3)});
@@ -702,7 +718,7 @@ function initMap(){
  $('mapStandard').onclick=()=>{if(map.hasLayer(terrainLayer))map.removeLayer(terrainLayer);baseLayer.addTo(map)};
  document.querySelectorAll('#layerBar button').forEach(b=>b.onclick=()=>selectLayer(b.dataset.layer));
  map.on('moveend',()=>{if(['cloudforecast','rainforecast','wind','gfs-temp','gfs-cape','gfs-pressure'].includes(mainGfsActive)){clearTimeout(gridTimer);gridTimer=setTimeout(()=>drawForecastGrid(mainGfsActive),350)}});
- largeMap.on('moveend',()=>{if(['cloudforecast','rainforecast','wind','gfs-temp','gfs-cape','gfs-pressure'].includes(largeGfsActive)){clearTimeout(window.largeGfsTimer);window.largeGfsTimer=setTimeout(()=>selectLargeLayer(largeGfsActive),350)}});
+ largeMap.on('moveend',()=>{if(['cloudforecast','rainforecast','wind','gfs-temp','gfs-cape','gfs-pressure','ecmwf-850','ecmwf-500'].includes(largeGfsActive)){clearTimeout(window.largeGfsTimer);window.largeGfsTimer=setTimeout(()=>selectLargeLayer(largeGfsActive),350)}});
 
 }
 async function selectLayer(name){
@@ -726,8 +742,8 @@ async function selectLayer(name){
     $('layerLegend').textContent='RainViewer · διαθέσιμες ιστορικές εικόνες radar (περίπου 2 ώρες).';return;
    }catch(e){status('Το radar δεν είναι προσωρινά διαθέσιμο από τον πάροχο.');return}
  }
- if(name==='cloudforecast'||name==='rainforecast'||name==='wind'||name==='gfs-temp'||name==='gfs-cape'||name==='gfs-pressure'){
-   status('Λήψη προγνωστικών πεδίων NOAA GFS για την ορατή περιοχή…');
+ if(name==='cloudforecast'||name==='rainforecast'||name==='wind'||name==='gfs-temp'||name==='gfs-cape'||name==='gfs-pressure'||name==='ecmwf-850'||name==='ecmwf-500'){
+   status('Λήψη προγνωστικών πεδίων '+(window.weatherwiseForecastModel==='ecmwf'?'ECMWF IFS':'NOAA GFS')+' για την ορατή περιοχή…');
    await drawForecastGrid(name);return;
  }
 }
@@ -739,12 +755,13 @@ async function selectLargeLayer(name){
  document.querySelectorAll('#layerBarLarge button').forEach(b=>b.classList.toggle('active',b.dataset.layer===name));
  $('layerLegendLarge').textContent='';
  if(name==='none'){$('layerStatusLarge').textContent='Βασικός χάρτης χωρίς πρόσθετα επίπεδα.';return}
- $('layerStatusLarge').textContent='Λήψη προγνωστικών πεδίων NOAA GFS…';
+ $('layerStatusLarge').textContent='Λήψη προγνωστικών πεδίων '+(window.weatherwiseForecastModel==='ecmwf'?'ECMWF IFS':'NOAA GFS')+'…';
  await drawGfsGrid(largeMap,name,area,vectors,'layerStatusLarge','layerLegendLarge','gfsLeadLarge');
 }
 async function drawForecastGrid(kind){
  await drawGfsGrid(map,kind,gridLayer,windLayer,'layerStatus','layerLegend','gfsLead');
 }
+window.weatherwiseForecastModel='gfs';
 async function drawGfsGrid(targetMap,kind,areaLayer,vectorLayer,statusId,legendId,leadId){
  try{
   areaLayer.clearLayers();vectorLayer.clearLayers();
@@ -754,14 +771,14 @@ async function drawGfsGrid(targetMap,kind,areaLayer,vectorLayer,statusId,legendI
   // Keep the request bounded and split locations into API-safe batches.
   let step=.45;
   let cols=Math.max(2,Math.ceil(lonSpan/step)+1),rows=Math.max(2,Math.ceil(latSpan/step)+1);
-  if(cols*rows>900){
-   const factor=Math.sqrt((cols*rows)/900);
+  if(cols*rows>400){
+   const factor=Math.sqrt((cols*rows)/400);
    step*=factor;
    cols=Math.max(2,Math.ceil(lonSpan/step)+1);
    rows=Math.max(2,Math.ceil(latSpan/step)+1);
   }
-  cols=Math.min(cols,50);rows=Math.min(rows,50);
-  while(cols*rows>900){
+  cols=Math.min(cols,40);rows=Math.min(rows,40);
+  while(cols*rows>400){
    if(cols>=rows)cols--;else rows--;
   }
   const points=[];
@@ -776,32 +793,40 @@ async function drawGfsGrid(targetMap,kind,areaLayer,vectorLayer,statusId,legendI
    'wind':'wind_speed_10m,wind_direction_10m',
    'gfs-temp':'temperature_2m',
    'gfs-cape':'cape',
-   'gfs-pressure':'pressure_msl'
+   'gfs-pressure':'pressure_msl',
+   'ecmwf-850':'temperature_850hPa',
+   'ecmwf-500':'temperature_500hPa'
   };
   const fields=fieldByKind[kind]||'pressure_msl';
-  const lead=Math.max(0,Math.min(72,Number($(leadId)?.value||24)));
+  const lead=Math.max(0,Math.min(240,Number($(leadId)?.value||24)));
   const values=new Array(rows*cols).fill(null),windMarkers=[];
   let validTime='';
-  const batchSize=80,batches=[];
+  const batchSize=100,batches=[];
   for(let i=0;i<points.length;i+=batchSize)batches.push({offset:i,coords:points.slice(i,i+batchSize)});
   // Limit concurrent calls to avoid flooding Open-Meteo on map pan/zoom.
-  for(let bi=0;bi<batches.length;bi+=4){
-   const group=batches.slice(bi,bi+4);
+  for(let bi=0;bi<batches.length;bi+=2){
+   const group=batches.slice(bi,bi+2);
    const results=await Promise.all(group.map(async batch=>{
     const lat=batch.coords.map(p=>p[0].toFixed(3)).join(',');
     const lon=batch.coords.map(p=>p[1].toFixed(3)).join(',');
-    const url=`https://api.open-meteo.com/v1/gfs?latitude=${encodeURIComponent(lat)}&longitude=${encodeURIComponent(lon)}&hourly=${fields}&forecast_hours=73&timezone=UTC`;
-    const response=await fetch(url);
-    if(!response.ok)throw new Error('GFS HTTP '+response.status);
+    const url=window.weatherwiseForecastModel==='ecmwf'
+      ? `/api/ecmwf?latitude=${encodeURIComponent(lat)}&longitude=${encodeURIComponent(lon)}&hourly=${encodeURIComponent(fields)}`
+      : `https://api.open-meteo.com/v1/gfs?latitude=${encodeURIComponent(lat)}&longitude=${encodeURIComponent(lon)}&hourly=${encodeURIComponent(fields)}&forecast_hours=241&past_hours=24&timezone=UTC`;
+    const response=await fetch(url,{cache:'no-store'});
+    if(!response.ok){
+     const detail=(await response.text()).slice(0,220);
+     throw new Error(`${window.weatherwiseForecastModel==='ecmwf'?'ECMWF':'GFS'} HTTP ${response.status}: ${detail}`);
+    }
     const payload=await response.json();
+    if(payload&&payload.error)throw new Error(payload.reason||'GFS API returned an error');
     return {batch,items:Array.isArray(payload)?payload:[payload]};
    }));
    for(const result of results){
     result.items.forEach((d,j)=>{
      if(!d.hourly)return;
      const times=d.hourly.time||[];
-     let idx=times.findIndex(t=>new Date(t).getTime()>=Date.now()+lead*3600000);
-     if(idx<0)idx=Math.min(times.length-1,lead);
+     let idx=times.findIndex(t=>new Date(t.endsWith('Z')?t:t+'Z').getTime()>=Date.now()+lead*3600000);
+     if(idx<0)idx=times.length-1;
      if(!validTime)validTime=times[idx]||'';
      const pointIndex=result.batch.offset+j,[la,lo]=points[pointIndex],h=d.hourly;
      if(kind==='wind'){
@@ -809,7 +834,7 @@ async function drawGfsGrid(targetMap,kind,areaLayer,vectorLayer,statusId,legendI
       if(speed==null||direction==null)return;
       const arrow=`<div class="wind-arrow" style="transform:rotate(${(direction+180)%360}deg)">↑</div>`;
       windMarkers.push(L.marker([la,lo],{icon:L.divIcon({className:'',html:arrow,iconSize:[22,22],iconAnchor:[11,11]})})
-       .bindTooltip(`GFS άνεμος ${Math.round(speed)} km/h · διεύθυνση ${Math.round(direction)}°`));
+       .bindTooltip(`${window.weatherwiseForecastModel==='ecmwf'?'ECMWF':'GFS'} άνεμος ${Math.round(speed)} ${window.weatherwiseForecastModel==='ecmwf'?'kt':'km/h'} · διεύθυνση ${Math.round(direction)}°`));
       return;
      }
      const field=fields.split(',')[0],v=h[field]?.[idx];
@@ -888,7 +913,9 @@ async function drawGfsGrid(targetMap,kind,areaLayer,vectorLayer,statusId,legendI
   $(legendId).textContent=kind==='gfs-pressure'?`${msg}. Πυκνότερη δειγματοληψία ${cols}×${rows} σημείων, χωρική παρεμβολή και ισοβαρείς ανά 4 hPa. Η πραγματική ανάλυση περιορίζεται από το μοντέλο GFS.`:`${msg}. Πυκνότερη δειγματοληψία ${cols}×${rows} σημείων και χωρική παρεμβολή. Η πραγματική ανάλυση περιορίζεται από το μοντέλο GFS.`;
   const runEl=$('gfsRunLarge');if(runEl)runEl.textContent=`NOAA GFS · πρόγνωση +${lead}h · ${stamp}`;
  }catch(e){
-  $(statusId).textContent='Δεν ήταν δυνατή η λήψη των δεδομένων GFS. Δοκιμάστε ξανά ή κάντε zoom σε μικρότερη περιοχή.';
+  const reason=String(e?.message||e||'Άγνωστο σφάλμα').slice(0,180);
+  $(statusId).textContent=`Αποτυχία λήψης GFS: ${reason}`;
+  $(legendId).textContent='Ελέγξτε τη σύνδεση με το Open-Meteo GFS API και δοκιμάστε ξανά.';
   console.error('GFS map error',e);
  }
 }
