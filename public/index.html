@@ -387,6 +387,28 @@ select.btn{color:var(--text);background:var(--panel2);border:1px solid var(--lin
  #overview > .card.chart-card #forecastList .outlook-metric{font-size:10px!important}
 }
 
+
+/* Animated outline weather glyphs for the seven-day outlook */
+.outlook-icon{display:flex!important;align-items:center;justify-content:center}
+.wx-icon{width:42px;height:42px;overflow:visible;fill:none;stroke:#94c99d;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 1px 3px rgba(110,190,130,.12))}
+.wx-icon .wx-cloud{transform-origin:24px 24px;animation:wx-cloud-float 3.8s ease-in-out infinite}
+.wx-icon .wx-sun{stroke:#a1d5a3;animation:wx-sun-pulse 4s ease-in-out infinite;transform-origin:17px 16px}
+.wx-icon .wx-rain path{animation:wx-rain-fall .9s ease-in infinite}
+.wx-icon .wx-rain path:nth-child(2){animation-delay:.22s}
+.wx-icon .wx-rain path:nth-child(3){animation-delay:.44s}
+.wx-icon .wx-fog path{animation:wx-fog-drift 2.6s ease-in-out infinite alternate}
+.wx-icon .wx-fog path:nth-child(2){animation-delay:.5s}
+.wx-icon .wx-snow path{animation:wx-snow-twinkle 1.8s ease-in-out infinite alternate}
+.wx-icon .wx-bolt{stroke:#d8d98b;fill:rgba(216,217,139,.18);animation:wx-lightning 2.8s steps(1,end) infinite}
+.wx-fog .wx-cloud{opacity:.7}
+@keyframes wx-cloud-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-1.7px)}}
+@keyframes wx-sun-pulse{0%,100%{opacity:.82;transform:scale(.96)}50%{opacity:1;transform:scale(1.05)}}
+@keyframes wx-rain-fall{0%{transform:translateY(-2px);opacity:.35}55%{opacity:1}100%{transform:translateY(3px);opacity:.45}}
+@keyframes wx-fog-drift{from{transform:translateX(-2px);opacity:.55}to{transform:translateX(2px);opacity:1}}
+@keyframes wx-snow-twinkle{from{opacity:.45;transform:translateY(-1px)}to{opacity:1;transform:translateY(2px)}}
+@keyframes wx-lightning{0%,44%,48%,100%{opacity:.25}45%,47%{opacity:1}}
+@media(prefers-reduced-motion:reduce){.wx-icon *{animation:none!important}}
+
 </style>
 </head>
 <body>
@@ -652,7 +674,23 @@ let lat=37.9838,lon=23.7275,city="Αθήνα, Ελλάδα",isF=false,map,marker
 let forecastSeries=null,forecastDaily=null,forecastParam='temperature',forecastHours=24;
 let europeChart=null,europeRows=[],europeSort='windy';
 const codeText=c=>({0:"Αίθριος",1:"Κυρίως αίθριος",2:"Μερική νέφωση",3:"Νεφελώδης",45:"Ομίχλη",48:"Παγωμένη ομίχλη",51:"Ασθενής ψιχάλα",53:"Ψιχάλα",55:"Ισχυρή ψιχάλα",61:"Ασθενής βροχή",63:"Βροχή",65:"Ισχυρή βροχή",71:"Ασθενής χιονόπτωση",73:"Χιονόπτωση",75:"Ισχυρή χιονόπτωση",80:"Μπόρες",81:"Ισχυρές μπόρες",82:"Έντονες μπόρες",95:"Καταιγίδα",96:"Καταιγίδα με χαλάζι",99:"Ισχυρή καταιγίδα"})[c]||"Μεταβλητός καιρός";
-const icon=c=>c===0?"☀️":c<=2?"🌤️":c===3?"☁️":c<=48?"🌫️":c<=67?"🌧️":c<=77?"🌨️":c<=82?"🌦️":"⛈️";
+const icon=c=>{
+ const kind=c===0?'sun':c<=2?'partly':c===3?'cloud':c<=48?'fog':c<=67?'rain':c<=77?'snow':c<=82?'showers':'storm';
+ const cloud='<path class="wx-cloud" d="M12 29.5h22.2a7.3 7.3 0 0 0 .1-14.6 11.1 11.1 0 0 0-21.1-1.8 8.5 8.5 0 0 0-1.2 16.4Z"/>';
+ const sun='<g class="wx-sun"><circle cx="17" cy="16" r="6.2"/><path d="M17 3.5v3.1M17 25.4v3M4.5 16h3M26.5 16h3M8.2 7.2l2.2 2.2M23.6 22.6l2.2 2.2M25.8 7.2l-2.2 2.2"/></g>';
+ const drops='<g class="wx-rain"><path d="M18 34v8M27 34v10M36 34v7"/></g>';
+ const fog='<g class="wx-fog"><path d="M10 36h27M14 42h20"/></g>';
+ const snow='<g class="wx-snow"><path d="M18 35v8m-3-5 6 2m0-2-6 2M31 35v8m-3-5 6 2m0-2-6 2"/></g>';
+ const bolt='<path class="wx-bolt" d="m28 31-7 10h6l-3 7 11-13h-7l3-4Z"/>';
+ let art='';
+ if(kind==='sun') art=sun;
+ else if(kind==='partly') art=sun+cloud;
+ else if(kind==='cloud'||kind==='fog') art=cloud+(kind==='fog'?fog:'');
+ else if(kind==='rain'||kind==='showers') art=cloud+drops;
+ else if(kind==='snow') art=cloud+snow;
+ else art=cloud+bolt+drops;
+ return `<svg class="wx-icon wx-${kind}" viewBox="0 0 48 48" role="img" aria-label="${kind}" xmlns="http://www.w3.org/2000/svg">${art}</svg>`;
+};
 const dir=d=>["Β","ΒΒΑ","ΒΑ","ΑΒΑ","Α","ΑΝΑ","ΝΑ","ΝΝΑ","Ν","ΝΝΔ","ΝΔ","ΔΝΔ","Δ","ΔΒΔ","ΒΔ","ΒΒΔ"][Math.round(d/22.5)%16];
 const temp=v=>Math.round(isF?v*9/5+32:v);
 let baseLayer,terrainLayer,activeOverlay=null,radarLayer=null,gridLayer=L.layerGroup(),windLayer=L.layerGroup(),radarTimer=null,gridTimer=null,mainGfsActive='none',largeGfsActive='none',largeGfsArea=null,largeGfsVectors=null;
@@ -722,38 +760,141 @@ function renderEuropeChart(){
  }});
 }
 const cityLandmarks=[
- {keys:['athens','αθήνα','αθηνα'],title:'Ακρόπολη · Παρθενώνας',file:'Parthenon.jpg'},
- {keys:['paris','παρίσι','παρισ'],title:'Πύργος του Άιφελ',file:'Eiffel_Tower_in_Paris,_France.jpg'},
- {keys:['london','λονδίνο','λονδινο'],title:'Big Ben · Westminster',file:'Big_Ben,_London.jpg'},
- {keys:['rome','ρώμη','ρωμη'],title:'Κολοσσαίο',file:'Colosseum_in_Rome,_Italy_-_April_2007.jpg'},
- {keys:['lisbon','λισαβόνα','λισαβωνα'],title:'Πύργος Μπελέμ',file:'Torre_de_Belém_-_Lisboa.jpg'},
- {keys:['brussels','βρυξέλλες','βρυξελλες'],title:'Atomium',file:'Atomium_Brussels_Belgium.jpg'},
- {keys:['amsterdam','άμστερνταμ','αμστερνταμ'],title:'Κανάλια Άμστερνταμ',file:'Amsterdam_Canals.jpg'},
- {keys:['madrid','μαδρίτη','μαδριτη'],title:'Βασιλικό Παλάτι',file:'Royal_Palace_of_Madrid.jpg'},
- {keys:['berlin','βερολίνο','βερολινο'],title:'Πύλη του Βρανδεμβούργου',file:'Brandenburger_Tor_abends.jpg'},
- {keys:['prague','πράγα','πραγα'],title:'Γέφυρα του Καρόλου',file:'Charles_Bridge_Prague.jpg'},
- {keys:['vienna','βιέννη','βιεννη'],title:'Ανάκτορα Schönbrunn',file:'Schönbrunn_Palace_Vienna.jpg'},
- {keys:['stockholm','στοκχόλμη','στοκχολμη'],title:'Δημαρχείο Στοκχόλμης',file:'Stockholm_City_Hall.jpg'},
- {keys:['helsinki','ελσίνκι','ελσινκι'],title:'Καθεδρικός Ελσίνκι',file:'Helsinki_Cathedral.jpg'},
- {keys:['dublin','δουβλίνο','δουβλινο'],title:'Ha’penny Bridge',file:'Ha_penny_Bridge_Dublin.jpg'},
- {keys:['reykjavik','ρέικιαβικ','ρεικιαβικ'],title:'Hallgrímskirkja',file:'Hallgrímskirkja_in_Reykjavík.jpg'},
- {keys:['valletta','βαλέτα','βαλετα'],title:'Grand Harbour',file:'Valletta_Grand_Harbour.jpg'},
- {keys:['kyiv','κίεβο','κιεβο'],title:'Μνημείο Motherland',file:'Motherland_Monument_Kyiv.jpg'},
- {keys:['oslo','όσλο','οσλο'],title:'Όπερα του Όσλο',file:'Oslo_Opera_House.jpg'},
- {keys:['copenhagen','κοπεγχάγη','κοπεγχαγη'],title:'Nyhavn',file:'Nyhavn_Copenhagen.jpg'},
- {keys:['warsaw','βαρσοβία','βαρσοβια'],title:'Παλαιά Πόλη Βαρσοβίας',file:'Warsaw_Old_Town.jpg'},
- {keys:['budapest','βουδαπέστη','βουδαπεστη'],title:'Κοινοβούλιο Βουδαπέστης',file:'Hungarian_Parliament_Building_Budapest.jpg'},
- {keys:['bucharest','βουκουρέστι','βουκουρεστι'],title:'Παλάτι του Κοινοβουλίου',file:'Palace_of_the_Parliament_Bucharest.jpg'},
- {keys:['sofia','σόφια','σοφια'],title:'Καθεδρικός Alexander Nevsky',file:'Alexander_Nevsky_Cathedral_Sofia.jpg'},
- {keys:['belgrade','βελιγράδι','βελιγραδι'],title:'Φρούριο Βελιγραδίου',file:'Belgrade_Fortress.jpg'}
+ {keys:['athens','αθήνα','αθηνα'],title:'Ακρόπολη · Παρθενώνας'},
+ {keys:['paris','παρίσι','παρισ'],title:'Πύργος του Άιφελ'},
+ {keys:['london','λονδίνο','λονδινο'],title:'Big Ben · Westminster'},
+ {keys:['rome','ρώμη','ρωμη'],title:'Κολοσσαίο'},
+ {keys:['lisbon','λισαβόνα','λισαβωνα'],title:'Πύργος Μπελέμ'},
+ {keys:['brussels','βρυξέλλες','βρυξελλες'],title:'Atomium'},
+ {keys:['amsterdam','άμστερνταμ','αμστερνταμ'],title:'Κανάλια Άμστερνταμ'},
+ {keys:['madrid','μαδρίτη','μαδριτη'],title:'Βασιλικό Παλάτι'},
+ {keys:['berlin','βερολίνο','βερολινο'],title:'Πύλη του Βρανδεμβούργου'},
+ {keys:['prague','πράγα','πραγα'],title:'Γέφυρα του Καρόλου'},
+ {keys:['vienna','βιέννη','βιεννη'],title:'Ανάκτορα Schönbrunn'},
+ {keys:['stockholm','στοκχόλμη','στοκχολμη'],title:'Gamla Stan'},
+ {keys:['helsinki','ελσίνκι','ελσινκι'],title:'Καθεδρικός Ελσίνκι'},
+ {keys:['dublin','δουβλίνο','δουβλινο'],title:'Ha’penny Bridge'},
+ {keys:['reykjavik','ρέικιαβικ','ρεικιαβικ'],title:'Hallgrímskirkja'},
+ {keys:['valletta','βαλέτα','βαλετα'],title:'Grand Harbour'},
+ {keys:['kyiv','κίεβο','κιεβο'],title:'Μνημείο Motherland'},
+ {keys:['oslo','όσλο','οσλο'],title:'Όπερα του Όσλο'},
+ {keys:['copenhagen','κοπεγχάγη','κοπεγχαγη'],title:'Nyhavn'},
+ {keys:['warsaw','βαρσοβία','βαρσοβια'],title:'Παλαιά Πόλη'},
+ {keys:['budapest','βουδαπέστη','βουδαπεστη'],title:'Κοινοβούλιο Βουδαπέστης'},
+ {keys:['bucharest','βουκουρέστι','βουκουρεστι'],title:'Παλάτι του Κοινοβουλίου'},
+ {keys:['sofia','σόφια','σοφια'],title:'Καθεδρικός Alexander Nevsky'},
+ {keys:['belgrade','βελιγράδι','βελιγραδι'],title:'Φρούριο Βελιγραδίου'},
+ {keys:['new york','νέα υόρκη','νεα υορκη'],title:'Manhattan skyline'},
+ {keys:['chicago','σικάγο','σικαγο'],title:'Chicago Riverwalk skyline'},
+ {keys:['san francisco','σαν φρανσίσκο','σαν φρανσισκο'],title:'Golden Gate Bridge'},
+ {keys:['los angeles','λος άντζελες','λος αντζελες'],title:'Hollywood Sign skyline'},
+ {keys:['seattle','σίάτλ','σιατλ'],title:'Space Needle'},
+ {keys:['vancouver','βανκούβερ','βανκουβερ'],title:'Vancouver harbour skyline'},
+ {keys:['quebec city','κεμπέκ','κεμπεκ'],title:'Château Frontenac old town'},
+ {keys:['montreal','μόντρεαλ','μοντρεαλ'],title:'Old Montreal'},
+ {keys:['mexico city','πόλη του μεξικού','πολη του μεξικου'],title:'Palacio de Bellas Artes'},
+ {keys:['oaxaca','οαχάκα','οαχακα'],title:'Oaxaca historic centre'},
+ {keys:['cartagena','καρταχένα','καρταχενα'],title:'Cartagena old town'},
+ {keys:['havana','αβάνα','αβανα'],title:'Havana Malecón'},
+ {keys:['kingston','κίνγκστον','κινγκστον'],title:'Kingston waterfront'},
+ {keys:['rio de janeiro','ρίο ντε τζανέιρο','ριο ντε τζανειρο'],title:'Sugarloaf Mountain'},
+ {keys:['buenos aires','μπουένος άιρες','μπουενος αιρες'],title:'Obelisco Buenos Aires'},
+ {keys:['santiago','σαντιάγο','σαντιαγο'],title:'Santiago skyline Andes'},
+ {keys:['cusco','κούσκο','κουσκο'],title:'Cusco Plaza de Armas'},
+ {keys:['arequipa','αρεκίπα','αρεκιπα'],title:'Arequipa historic centre'},
+ {keys:['medellin','μεδεγίν','μεδεγιν'],title:'Medellín skyline'},
+ {keys:['salvador','σαλβαδόρ','σαλβαδορ'],title:'Pelourinho Salvador'},
+ {keys:['tokyo','τόκιο','τοκιο'],title:'Tokyo skyline'},
+ {keys:['kyoto','κιότο','κιοτο'],title:'Kiyomizu-dera Kyoto'},
+ {keys:['osaka','οσάκα','οσακα'],title:'Osaka Castle'},
+ {keys:['seoul','σεούλ','σεουλ'],title:'Gyeongbokgung Palace'},
+ {keys:['busan','μπουσάν','μπουσαν'],title:'Busan coastal skyline'},
+ {keys:['beijing','πεκίνο','πεκινο'],title:'Forbidden City'},
+ {keys:['shanghai','σαγκάη','σαγκαη'],title:'Shanghai Bund skyline'},
+ {keys:['hong kong','χονγκ κονγκ'],title:'Victoria Harbour'},
+ {keys:['taipei','ταϊπέι','ταιπει'],title:'Taipei 101'},
+ {keys:['bangkok','μπανγκόκ','μπανγκοκ'],title:'Wat Arun'},
+ {keys:['chiang mai','τσιάνγκ μάι','τσιανγκ μαι'],title:'Wat Phra Singh'},
+ {keys:['hanoi','ανόι','ανοι'],title:'Hoan Kiem Lake'},
+ {keys:['hoi an','χοϊ αν','χοι αν'],title:'Hoi An old town'},
+ {keys:['singapore','σιγκαπούρη','σιγκαπουρη'],title:'Marina Bay Sands'},
+ {keys:['kuala lumpur','κουάλα λουμπούρ','κουαλα λουμπουρ'],title:'Petronas Towers'},
+ {keys:['jakarta','τζακάρτα','τζακαρτα'],title:'Jakarta skyline'},
+ {keys:['bali','μπαλί','μπαλι'],title:'Ubud rice terraces'},
+ {keys:['mumbai','μουμπάι','μουμπαι'],title:'Gateway of India'},
+ {keys:['jaipur','τζαϊπούρ','τζαιπουρ'],title:'Hawa Mahal'},
+ {keys:['varanasi','βαρανάσι','βαρανασι'],title:'Varanasi ghats'},
+ {keys:['colombo','κολόμπο','κολομπο'],title:'Colombo waterfront'},
+ {keys:['dubai','ντουμπάι','ντουμπαι'],title:'Burj Khalifa'},
+ {keys:['abu dhabi','αμπού ντάμπι','αμπου νταμπι'],title:'Sheikh Zayed Grand Mosque'},
+ {keys:['muscat','μασκάτ','μασκατ'],title:'Mutrah Corniche'},
+ {keys:['istanbul','κωνσταντινούπολη','κωνσταντινουπολη','istanbul'],title:'Hagia Sophia Bosphorus'},
+ {keys:['tbilisi','τιφλίδα','τιφλιδα'],title:'Tbilisi old town'},
+ {keys:['yerevan','γερεβάν','γερεβαν'],title:'Cascade Yerevan'},
+ {keys:['samarkand','σαμαρκάνδη','σαμαρκανδη'],title:'Registan Square'},
+ {keys:['cape town','κέιπ τάουν','κειπ ταουν'],title:'Table Mountain waterfront'},
+ {keys:['marrakech','μαρακές','μαρακες'],title:'Jemaa el-Fnaa'},
+ {keys:['fes','φεζ','φες'],title:'Fes medina'},
+ {keys:['chefchaouen','σεφσαουέν','σεφσαουεν'],title:'Chefchaouen blue medina'},
+ {keys:['cairo','κάιρο','καιρο'],title:'Cairo Nile skyline'},
+ {keys:['luxor','λουξόρ','λουξορ'],title:'Luxor Temple'},
+ {keys:['alexandria','αλεξάνδρεια','αλεξανδρεια'],title:'Alexandria Corniche'},
+ {keys:['nairobi','ναϊρόμπι','ναιρομπι'],title:'Nairobi skyline'},
+ {keys:['zanzibar','ζανζιβάρη','ζανζιβαρη'],title:'Stone Town'},
+ {keys:['addis ababa','αντίς αμπέμπα','αντις αμπεμπα'],title:'Addis Ababa skyline'},
+ {keys:['lagos','λάγος','λαγος'],title:'Lagos waterfront'},
+ {keys:['sydney','σίντνεϊ','σιδνεϊ'],title:'Sydney Opera House harbour'},
+ {keys:['melbourne','μελβούρνη','μελβουρνη'],title:'Melbourne skyline'},
+ {keys:['brisbane','μπρισμπέιν','μπρισμπειν'],title:'Brisbane river skyline'},
+ {keys:['perth','περθ','περθ'],title:'Perth waterfront'},
+ {keys:['auckland','οκλαντ','αουκλαντ'],title:'Auckland Sky Tower'},
+ {keys:['wellington','γουέλινγκτον','γουελινγκτον'],title:'Wellington harbour'},
+ {keys:['queenstown','κουίνσταουν','κουινσταουν'],title:'Queenstown lake mountains'},
+ {keys:['nafplio','ναύπλιο','ναυπλιο'],title:'Nafplio old town Palamidi'},
+ {keys:['chania','χάνια','χανια'],title:'Chania Venetian harbour'},
+ {keys:['rethymno','ρέθυμνο','ρεθυμνο'],title:'Rethymno old town lighthouse'},
+ {keys:['ioannina','ιωάννινα','ιωαννινα'],title:'Ioannina lake castle'},
+ {keys:['kastoria','καστοριά','καστορια'],title:'Kastoria lakefront'},
+ {keys:['florina','φλώρινα','φλωρινα'],title:'Florina river old town'},
+ {keys:['santorini','σαντορίνη','σαντορινη'],title:'Oia caldera'},
+ {keys:['bruges','μπριζ','μπριζ'],title:'Bruges canals medieval centre'},
+ {keys:['ghent','γκεντ','γκεντ'],title:'Ghent Graslei waterfront'},
+ {keys:['colmar','κολμάρ','κολμαρ'],title:'Colmar Petite Venise'},
+ {keys:['annecy','ανσί','αννεσύ','annecy'],title:'Annecy lake old town'},
+ {keys:['avignon','αβινιόν','αβινιον'],title:'Avignon Palais des Papes'},
+ {keys:['siena','σιένα','σιενα'],title:'Piazza del Campo'},
+ {keys:['matera','ματέρα','ματαρα'],title:'Matera Sassi'},
+ {keys:['lucca','λούκα','λουκα'],title:'Lucca historic walls'},
+ {keys:['sintra','σίντρα','σιντρα'],title:'Pena Palace Sintra'},
+ {keys:['porto','πόρτο','πορτο'],title:'Porto Ribeira'},
+ {keys:['cesky krumlov','τσέσκι κρούμλοβ','τσεσκι κρουμλοβ'],title:'Cesky Krumlov old town'},
+ {keys:['hallstatt','χάλστατ','χαλστατ'],title:'Hallstatt lakeside village'},
+ {keys:['plitvice','λίμνες πλίτβιτσε','πλιτβιτσε'],title:'Plitvice Lakes'},
+ {keys:['kotor','κότορ','κοτορ'],title:'Kotor bay old town'},
+ {keys:['mostar','μόσταρ','μοσταρ'],title:'Mostar Stari Most'},
+ {keys:['lake bled','λίμνη μπλεντ','μπλεντ'],title:'Lake Bled island church'},
+ {keys:['gjirokaster','αργυρόκαστρο','αργυροκαστρο'],title:'Gjirokaster old town'},
+ {keys:['berat','μπεράτι','μπερατι'],title:'Berat Ottoman old town'},
+ {keys:['luang prabang','λουάνγκ πραμπάνγκ','λουανγκ πραμπανγκ'],title:'Luang Prabang temples'},
+ {keys:['georgetown','τζορτζτάουν','τζορτζταουν'],title:'George Town Penang shophouses'},
+ {keys:['takayama','τακαγιάμα','τακαγιαμα'],title:'Takayama old town'},
+ {keys:['kanazawa','καναζάουα','καναζαουα'],title:'Kenrokuen Kanazawa'},
+ {keys:['galle','γκάλε','γκαλε'],title:'Galle Fort'},
+ {keys:['jodhpur','τζοντπούρ','τζοντπουρ'],title:'Mehrangarh Fort blue city'},
+ {keys:['pushkar','πουσκάρ','πουσκαρ'],title:'Pushkar lake ghats'},
+ {keys:['Essaouira','εσαουίρα','εσαουιρα'],title:'Essaouira medina harbour'},
+ {keys:['stone town','στόουν τάουν','στουν ταουν'],title:'Stone Town Zanzibar'},
+ {keys:['windhoek','ουίντχουκ','ουιντχουκ'],title:'Windhoek city view'},
+ {keys:['hobart','χόμπαρτ','χομπαρτ'],title:'Hobart waterfront'},
+ {keys:['dunedin','ντούνεντιν','ντουνεντιν'],title:'Dunedin railway station'}
 ];
 const cityLandmarkCache=new Map();
 let cityLandmarkRequest=0;
 function citySearchName(cityText){return String(cityText||'').split(',')[0].trim();}
-async function findCommonsCityImage(cityText){
+async function findCommonsCityImage(cityText,landmarkHint=''){
  const cityName=citySearchName(cityText);if(!cityName)return null;
  const cacheKey=cityName.toLocaleLowerCase();if(cityLandmarkCache.has(cacheKey))return cityLandmarkCache.get(cacheKey);
- for(const query of [`${cityName} city landmark`,`${cityName} skyline panorama`]){
+ for(const query of (landmarkHint?[`${cityName} ${landmarkHint}`,`${cityName} ${landmarkHint} city view`,`${cityName} skyline panorama`]:[`${cityName} city panorama`,`${cityName} skyline panorama`,`${cityName} historic centre`])){
   const params=new URLSearchParams({action:'query',format:'json',formatversion:'2',generator:'search',gsrsearch:query,gsrnamespace:'6',gsrlimit:'12',prop:'imageinfo',iiprop:'url|extmetadata',iiurlwidth:'1800',iiextmetadatafilter:'Artist|Credit|LicenseShortName',origin:'*'});
   try{
    const response=await fetch('https://commons.wikimedia.org/w/api.php?'+params.toString());if(!response.ok)continue;
@@ -761,9 +902,10 @@ async function findCommonsCityImage(cityText){
    const ranked=pages.map(page=>{
     const info=page.imageinfo?.[0];if(!info?.thumburl)return null;
     const title=String(page.title||'').replace(/^File:/,'');const lower=title.toLowerCase();
-    if(/map|logo|flag|coat.of.arms|icon|diagram|location.map|weather.chart/.test(lower))return null;
+    if(/map|logo|flag|coat.of.arms|icon|diagram|location.map|weather.chart| svg$|locator map/.test(lower))return null;
     let score=0;if(lower.includes(cityName.toLowerCase()))score+=5;
-    if(/panorama|skyline|cityscape|old.town|historic|aerial|view/.test(lower))score+=4;
+    if(/panorama|skyline|cityscape|old.town|historic|aerial|view|harbour|harbor|waterfront|medina|village|town/.test(lower))score+=4;
+    if(landmarkHint&&lower.includes(landmarkHint.toLowerCase().split(' ')[0]))score+=3;
     if(/landmark|cathedral|castle|bridge|tower|harbour|harbor|square|monument/.test(lower))score+=2;
     if(/street|building/.test(lower))score+=1;
     return {url:info.thumburl,title,descriptionUrl:info.descriptionurl,credit:info.extmetadata?.Artist?.value||info.extmetadata?.Credit?.value||'',license:info.extmetadata?.LicenseShortName?.value||'',score};
@@ -784,9 +926,8 @@ function updateCityLandmark(cityText){
   img.alt=title||citySearchName(cityText);img.src=url;
   if(caption){caption.textContent=title||citySearchName(cityText);caption.title=credit||'';}
  };
- if(match){showImage('https://commons.wikimedia.org/wiki/Special:FilePath/'+encodeURIComponent(match.file)+'?width=1600',match.title);return;}
- img.style.opacity='0';if(caption)caption.textContent='Αναζήτηση φωτογραφίας πόλης…';
- findCommonsCityImage(cityText).then(result=>{
+ img.style.opacity='0';if(caption)caption.textContent=match?'Αναζήτηση φωτογραφίας · '+match.title:'Αναζήτηση φωτογραφίας πόλης…';
+ findCommonsCityImage(cityText,match?.title||'').then(result=>{
   if(requestId!==cityLandmarkRequest)return;
   if(result)showImage(result.url,result.title.replace(/\.[^.]+$/,'').replace(/[_-]+/g,' '),[result.credit,result.license,result.descriptionUrl].filter(Boolean).join(' · '));
   else if(caption)caption.textContent='Δεν βρέθηκε διαθέσιμη φωτογραφία';
