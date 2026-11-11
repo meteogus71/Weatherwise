@@ -793,7 +793,9 @@ async function drawGfsGrid(targetMap,kind,areaLayer,vectorLayer,statusId,legendI
   const latSpan=Math.max(.1,north-south),lonSpan=Math.max(.1,east-west);
   // Sample the visible area much more densely than the former 7x7/9x9 grid.
   // Keep the request bounded and split locations into API-safe batches.
-  const zoom=targetMap.getZoom();\n  const pointBudget=zoom<=4?1600:zoom<=6?2200:zoom<=8?2800:3200;\n  let step=zoom<=4?.24:zoom<=6?.16:zoom<=8?.10:.065;
+  const zoom=targetMap.getZoom();
+  const pointBudget=zoom<=4?1600:zoom<=6?2200:zoom<=8?2800:3200;
+  let step=zoom<=4?.24:zoom<=6?.16:zoom<=8?.10:.065;
   let cols=Math.max(2,Math.ceil(lonSpan/step)+1),rows=Math.max(2,Math.ceil(latSpan/step)+1);
   if(cols*rows>400){
    const factor=Math.sqrt((cols*rows)/400);
@@ -1236,4 +1238,8 @@ loadMeteoAlarmAlerts();
 setInterval(loadMeteoAlarmAlerts,5*60*1000);
 
 initMap();
-let moveDebo
+let moveDebounce;
+loadWeather();
+</script>
+</body>
+</html>
