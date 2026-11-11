@@ -102,10 +102,12 @@ async function getEcmwfGrid(url) {
     throw new Error('Invalid latitude/longitude coordinates');
   }
   if (latitudes.length > 100) throw new Error('Maximum 100 coordinates per request');
+  if (!hourlyFields.length) throw new Error('At least one hourly variable is required');
   const allowed = new Set([
     'temperature_2m','precipitation','rain','pressure_msl','cloud_cover',
     'wind_speed_10m','wind_direction_10m','wind_gusts_10m','cape',
-    'temperature_850hPa','temperature_500hPa'
+    'temperature_850hPa','temperature_500hPa','precipitation_type',
+    'snowfall_water_equivalent'
   ]);
   if (!hourlyFields.length || hourlyFields.some(f => !allowed.has(f))) {
     throw new Error('Unsupported hourly variable requested');
@@ -226,9 +228,11 @@ const server = http.createServer(async (req, res) => {
         'Access-Control-Allow-Origin': '*'
       });
     } catch (err) {
+      console.error('[ECMWF API]', err && err.stack ? err.stack : err);
       return send(res, 502, JSON.stringify({
         error: 'ECMWF data temporarily unavailable',
-        detail: err.message
+        detail: String(err && err.message || err),
+        hint: 'Check Render logs for [ECMWF API]'
       }), { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' });
     }
   }
