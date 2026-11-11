@@ -423,6 +423,12 @@ select.btn{color:var(--text);background:var(--panel2);border:1px solid var(--lin
    </div>
    <div class="small gfs-player-note">Κοινός χρόνος για όλους τους προγνωστικούς χάρτες GFS / ECMWF. Βήμα επιλογής 3 ωρών · χρόνος UTC. Το ECMWF χρησιμοποιεί την εγγενή χρονική ανάλυση του μοντέλου.</div>
   </div>
+  
+  <div class="dashboard-model-switch" role="group" aria-label="Επιλογή προγνωστικού μοντέλου">
+    <span>ΜΟΝΤΕΛΟ ΠΡΟΓΝΩΣΗΣ</span>
+    <button type="button" data-dashboard-model="gfs" class="active">NOAA GFS</button>
+    <button type="button" data-dashboard-model="ecmwf">ECMWF IFS</button>
+  </div>
   <div class="layerbar" id="layerBarLarge">
    <button data-layer="gfs-temp">🌡 Θερμοκρασία 2m</button><button data-layer="rainforecast">💧 Υετός</button><button data-layer="cloudforecast">☁ Νεφοκάλυψη</button><button data-layer="wind">➤ Άνεμος 10m</button><button data-layer="gfs-cape">⛈ CAPE</button><button data-layer="gfs-pressure">〰 Πίεση MSL</button><button data-layer="ecmwf-850">🌡 Θερμοκρασία 850 hPa</button><button data-layer="ecmwf-500">🌡 Θερμοκρασία 500 hPa</button><button data-layer="none" class="active">Καθαρός χάρτης</button>
   </div>
