@@ -387,6 +387,41 @@ select.btn{color:var(--text);background:var(--panel2);border:1px solid var(--lin
  #overview > .card.chart-card #forecastList .outlook-metric{font-size:10px!important}
 }
 
+
+/* Click-to-inspect weather map */
+.point-weather-shell{display:grid;grid-template-columns:minmax(0,2.15fr) minmax(320px,1fr);gap:18px;padding:18px;background:#1b2437;border:1px solid #3a465b;border-radius:18px;margin-bottom:18px}
+.point-map-column{min-width:0}
+.point-map-heading{font:400 30px Georgia,serif;color:#eef2fa;margin:0 0 4px}
+.point-map-sub{font-size:13px;color:#9aaac2;margin:0 0 16px}
+#pointWeatherMap{height:590px;min-height:420px;border-radius:14px;overflow:hidden;background:#273348;border:1px solid #4b5669}
+.point-weather-panel{min-width:0;display:flex;flex-direction:column;gap:14px}
+.point-current-card{border-radius:16px;padding:20px;background:linear-gradient(115deg,#9bd39d,#b9c87f);color:#17243a;min-height:178px;position:relative}
+.point-current-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.point-current-title{font:400 29px Georgia,serif;margin:0 0 4px}
+.point-coords,.point-localtime{font-size:12px;color:#34465a}
+.point-current-main{display:flex;align-items:flex-end;justify-content:space-between;gap:8px;margin-top:10px}
+.point-temp{font:400 68px Georgia,serif;line-height:1}
+.point-condition{text-align:right;font-size:14px;font-weight:700}
+.point-wind{font-size:13px;font-weight:500;color:#34465a;margin-top:4px}
+.point-weather-icon{font-size:38px;line-height:1}
+.point-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 12px}
+.point-metric{display:flex;align-items:center;gap:10px;min-width:0;padding:9px 4px}
+.point-metric-icon{width:22px;flex:0 0 22px;text-align:center;color:#9bd39d;font-size:18px}
+.point-metric-label{font-size:10px;color:#7f91aa;text-transform:uppercase;letter-spacing:.35px}
+.point-metric-value{font-size:15px;color:#e8eef7;font-weight:650;margin-top:2px}
+.point-chart-title{font-size:10px;color:#7f91aa;letter-spacing:.7px;margin:3px 0 0}
+.point-chart-wrap{height:94px;position:relative}
+.point-days{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.point-day{padding:9px 7px;border-radius:10px;background:#202d42;text-align:center;min-width:0}
+.point-day-name{font-size:11px;color:#8fa3bc}
+.point-day-icon{font-size:20px;margin:6px 0}
+.point-day-temps{font-size:13px;color:#e8eef7;white-space:nowrap}
+.point-day-rain{font-size:10px;color:#8fa3bc;margin-top:5px}
+.point-open-forecast{display:block;text-align:center;text-decoration:none;border:0;border-radius:9px;padding:12px;background:#9bd39d;color:#17243a;font-weight:650}
+.point-weather-status{font-size:11px;color:#9aaac2;min-height:15px}
+@media(max-width:950px){.point-weather-shell{grid-template-columns:1fr}.point-weather-panel{display:grid;grid-template-columns:1fr 1fr;align-items:start}.point-current-card{grid-column:1/-1}.point-metrics{grid-column:1/-1}.point-chart-title,.point-chart-wrap,.point-days,.point-open-forecast,.point-weather-status{grid-column:1/-1}#pointWeatherMap{height:470px}}
+@media(max-width:600px){.point-weather-shell{padding:12px;gap:12px}.point-weather-panel{display:flex}.point-map-heading{font-size:26px}#pointWeatherMap{height:390px;min-height:350px}.point-current-card{padding:16px}.point-temp{font-size:58px}}
+
 </style>
 </head>
 <body>
@@ -544,6 +579,39 @@ select.btn{color:var(--text);background:var(--panel2);border:1px solid var(--lin
   </section>
 
   <section class="section" id="maps">
+
+<div class="point-weather-shell">
+ <div class="point-map-column">
+  <h2 class="point-map-heading">Weather map</h2>
+  <p class="point-map-sub">Κάντε κλικ σε οποιοδήποτε σημείο του χάρτη για να δείτε τις τρέχουσες καιρικές συνθήκες ακριβώς σε εκείνη τη θέση.</p>
+  <div id="pointWeatherMap" role="application" aria-label="Διαδραστικός χάρτης επιλογής σημείου"></div>
+ </div>
+ <aside class="point-weather-panel" aria-live="polite">
+  <div class="point-current-card">
+   <div class="point-current-top"><div><h3 class="point-current-title">Selected point</h3><div class="point-coords" id="pointCoords">37.98°N, 23.73°E</div><div class="point-localtime" id="pointLocalTime">Τοπική ώρα —</div></div><div class="point-weather-icon" id="pointIcon">☁</div></div>
+   <div class="point-current-main"><div class="point-temp" id="pointTemp">—°</div><div><div class="point-condition" id="pointCondition">Επιλέξτε σημείο στον χάρτη</div><div class="point-wind" id="pointWind">—</div></div></div>
+  </div>
+  <div class="point-metrics">
+   <div class="point-metric"><div class="point-metric-icon">♨</div><div><div class="point-metric-label">Feels like</div><div class="point-metric-value" id="pointFeels">—</div></div></div>
+   <div class="point-metric"><div class="point-metric-icon">◌</div><div><div class="point-metric-label">Humidity</div><div class="point-metric-value" id="pointHumidity">—</div></div></div>
+   <div class="point-metric"><div class="point-metric-icon">≋</div><div><div class="point-metric-label">Gusts</div><div class="point-metric-value" id="pointGusts">—</div></div></div>
+   <div class="point-metric"><div class="point-metric-icon">◉</div><div><div class="point-metric-label">Pressure</div><div class="point-metric-value" id="pointPressure">—</div></div></div>
+   <div class="point-metric"><div class="point-metric-icon">☁</div><div><div class="point-metric-label">Clouds</div><div class="point-metric-value" id="pointClouds">—</div></div></div>
+   <div class="point-metric"><div class="point-metric-icon">☂</div><div><div class="point-metric-label">Rain now</div><div class="point-metric-value" id="pointRain">—</div></div></div>
+   <div class="point-metric"><div class="point-metric-icon">☼</div><div><div class="point-metric-label">UV max</div><div class="point-metric-value" id="pointUV">—</div></div></div>
+   <div class="point-metric"><div class="point-metric-icon">◷</div><div><div class="point-metric-label">Daylight</div><div class="point-metric-value" id="pointDaylight">—</div></div></div>
+  </div>
+  <div class="point-chart-title">NEXT 24 HOURS · TEMPERATURE</div>
+  <div class="point-chart-wrap"><canvas id="pointHourlyChart"></canvas></div>
+  <div class="point-days" id="pointDays">
+   <div class="point-day"><div class="point-day-name">Today</div><div class="point-day-icon">—</div><div class="point-day-temps">— / —</div><div class="point-day-rain">— rain</div></div>
+   <div class="point-day"><div class="point-day-name">Tomorrow</div><div class="point-day-icon">—</div><div class="point-day-temps">— / —</div><div class="point-day-rain">— rain</div></div>
+   <div class="point-day"><div class="point-day-name">+2 days</div><div class="point-day-icon">—</div><div class="point-day-temps">— / —</div><div class="point-day-rain">— rain</div></div>
+  </div>
+  <a href="#forecast" class="point-open-forecast" id="pointForecastLink">Open full forecast →</a>
+  <div class="point-weather-status" id="pointStatus">Επιλέξτε οποιοδήποτε σημείο στον χάρτη.</div>
+ </aside>
+</div>
  <div class="card">
   <div class="map-title"><div><h3>ΔΙΑΔΡΑΣΤΙΚΟΙ ΠΡΟΓΝΩΣΤΙΚΟΙ ΧΑΡΤΕΣ GFS / ECMWF</h3><p class="small">Επιλογή παγκόσμιου μοντέλου NOAA GFS ή ECMWF IFS · μετεωρολογικό πεδίο και χρονικός ορίζοντας έως 10 ημέρες.</p></div></div>
   <div class="forecast-toolbar" style="margin:12px 0">
@@ -1435,8 +1503,63 @@ loadMeteoAlarmAlerts();
 setInterval(loadMeteoAlarmAlerts,5*60*1000);
 
 initMap();
+initPointWeatherMap();
+document.querySelectorAll('.nav[data-section]').forEach(n=>n.addEventListener('click',()=>{if(n.dataset.section==='maps')setTimeout(()=>pointWeatherMap?.invalidateSize(),180)}));
 let moveDebounce;
 loadWeather();
+
+// Interactive point weather map: click any coordinate and load local Open-Meteo data.
+let pointWeatherMap=null, pointWeatherMarker=null, pointHourlyChart=null, pointRequestToken=0;
+function pointWeatherIcon(code){
+ if(code===0)return '☀'; if(code===1||code===2)return '🌤'; if(code===3)return '☁';
+ if(code===45||code===48)return '🌫'; if([51,53,55,56,57].includes(code))return '🌦';
+ if([61,63,65,66,67,80,81,82].includes(code))return '🌧';
+ if([71,73,75,77,85,86].includes(code))return '❄';
+ if([95,96,99].includes(code))return '⛈'; return '☁';
+}
+function pointWindDirection(deg){const dirs=['N','NE','E','SE','S','SW','W','NW'];return dirs[Math.round((Number(deg)||0)/45)%8]}
+function pointSet(id,value){const el=$(id);if(el)el.textContent=value}
+function initPointWeatherMap(){
+ const host=$('pointWeatherMap'); if(!host||pointWeatherMap)return;
+ pointWeatherMap=L.map(host,{zoomControl:true,scrollWheelZoom:true}).setView([48.5,15],4);
+ L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'© OpenStreetMap contributors © CARTO',maxZoom:19}).addTo(pointWeatherMap);
+ pointWeatherMap.on('click',e=>loadPointWeather(e.latlng.lat,e.latlng.lng));
+ loadPointWeather(37.9838,23.7275);
+ setTimeout(()=>pointWeatherMap.invalidateSize(),250);
+}
+async function loadPointWeather(latitude,longitude){
+ const token=++pointRequestToken,latText=Math.abs(latitude).toFixed(2)+'°'+(latitude>=0?'N':'S'),lonText=Math.abs(longitude).toFixed(2)+'°'+(longitude>=0?'E':'W');
+ pointSet('pointCoords',latText+', '+lonText);pointSet('pointStatus','Φόρτωση μετεωρολογικών δεδομένων για το επιλεγμένο σημείο…');
+ if(pointWeatherMarker)pointWeatherMarker.setLatLng([latitude,longitude]);
+ else if(pointWeatherMap)pointWeatherMarker=L.circleMarker([latitude,longitude],{radius:8,color:'#fff',weight:3,fillColor:'#d5a43e',fillOpacity:1}).addTo(pointWeatherMap);
+ try{
+  const params=new URLSearchParams({latitude,longitude,current:'temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,wind_speed_10m,wind_direction_10m,surface_pressure',hourly:'temperature_2m,precipitation,cloud_cover,wind_gusts_10m',daily:'weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,uv_index_max,sunrise,sunset',forecast_days:'3',timezone:'auto'});
+  const response=await fetch('https://api.open-meteo.com/v1/forecast?'+params.toString());
+  if(!response.ok)throw new Error('HTTP '+response.status);
+  const d=await response.json();if(token!==pointRequestToken)return;
+  const c=d.current,h=d.hourly,day=d.daily;if(!c||!h||!day)throw new Error('Δεν επιστράφηκαν πλήρη δεδομένα');
+  pointSet('pointTemp',Math.round(c.temperature_2m)+'°');pointSet('pointCondition',codeText(c.weather_code));
+  pointSet('pointIcon',pointWeatherIcon(c.weather_code));pointSet('pointWind',`${pointWindDirection(c.wind_direction_10m)} ${Math.round(c.wind_speed_10m)} km/h`);
+  pointSet('pointFeels',Math.round(c.apparent_temperature)+'°C');pointSet('pointHumidity',Math.round(c.relative_humidity_2m)+'%');
+  const nearIndex=Math.max(0,h.time.findIndex(t=>t>=c.time));
+  pointSet('pointGusts',Math.round(h.wind_gusts_10m?.[nearIndex]??c.wind_speed_10m)+' km/h');
+  pointSet('pointPressure',Math.round(c.surface_pressure)+' hPa');
+  pointSet('pointClouds',Math.round(h.cloud_cover?.[nearIndex]??0)+'%');
+  pointSet('pointRain',Number(c.precipitation||0).toFixed(1)+' mm');
+  pointSet('pointUV',String(Math.round(day.uv_index_max?.[0]??0)));
+  const sunrise=day.sunrise?.[0]?.slice(11,16)||'—',sunset=day.sunset?.[0]?.slice(11,16)||'—';
+  pointSet('pointDaylight',sunrise+'–'+sunset);
+  const local=new Intl.DateTimeFormat('en-GB',{weekday:'short',hour:'2-digit',minute:'2-digit',timeZone:d.timezone||'UTC'}).format(new Date(c.time));
+  pointSet('pointLocalTime','Local time '+local);
+  const times=h.time.slice(0,24),temps=h.temperature_2m.slice(0,24);
+  if(pointHourlyChart)pointHourlyChart.destroy();
+  pointHourlyChart=new Chart($('pointHourlyChart'),{type:'line',data:{labels:times.map(t=>t.slice(11,16)),datasets:[{data:temps,borderColor:'#9bd39d',backgroundColor:'rgba(155,211,157,.16)',fill:true,tension:.35,pointRadius:0,borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${Math.round(ctx.raw)}°C`}}},scales:{x:{display:false,grid:{display:false}},y:{display:false,grid:{display:false}}}}});
+  const days=day.time.map((date,i)=>{const dt=new Date(date+'T12:00:00');const name=i===0?'Today':dt.toLocaleDateString('en-GB',{weekday:'short',timeZone:'UTC'});return `<div class="point-day"><div class="point-day-name">${name}</div><div class="point-day-icon">${pointWeatherIcon(day.weather_code[i])}</div><div class="point-day-temps">${Math.round(day.temperature_2m_max[i])}° / ${Math.round(day.temperature_2m_min[i])}°</div><div class="point-day-rain">${Math.round(day.precipitation_probability_max?.[i]??0)}% rain</div></div>`}).join('');
+  $('pointDays').innerHTML=days;
+  pointSet('pointStatus',`Open-Meteo · ${d.timezone||'local timezone'} · ${new Date(c.time).toLocaleString()}`);
+ }catch(error){if(token!==pointRequestToken)return;pointSet('pointStatus','Δεν ήταν δυνατή η φόρτωση δεδομένων: '+error.message)}
+}
+
 </script>
 </body>
 </html>
