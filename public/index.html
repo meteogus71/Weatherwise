@@ -899,49 +899,146 @@ const cityLandmarks=[
 const cityLandmarkCache=new Map();
 let cityLandmarkRequest=0;
 function citySearchName(cityText){return String(cityText||'').split(',')[0].trim();}
+async function resolveEnglishCityName(cityName){
+ try{
+  const url=`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(cityName)}&count=1&language=en&format=json`;
+  const response=await fetch(url);
+  if(response.ok){
+   const data=await response.json();
+   const result=data.results?.[0];
+   if(result?.name)return result.name;
+  }
+ }catch(error){}
+ return cityName;
+}
 async function findCommonsCityImage(cityText,landmarkHint=''){
- const cityName=citySearchName(cityText);if(!cityName)return null;
- const cacheKey=cityName.toLocaleLowerCase();if(cityLandmarkCache.has(cacheKey))return cityLandmarkCache.get(cacheKey);
- for(const query of (landmarkHint?[`${cityName} ${landmarkHint}`,`${cityName} ${landmarkHint} city view`,`${cityName} skyline panorama`]:[`${cityName} city panorama`,`${cityName} skyline panorama`,`${cityName} historic centre`])){
-  const params=new URLSearchParams({action:'query',format:'json',formatversion:'2',generator:'search',gsrsearch:query,gsrnamespace:'6',gsrlimit:'12',prop:'imageinfo',iiprop:'url|extmetadata',iiurlwidth:'1800',iiextmetadatafilter:'Artist|Credit|LicenseShortName',origin:'*'});
+ const cityName=citySearchName(cityText);
+ if(!cityName)return null;
+ const cacheKey=cityName.toLocaleLowerCase();
+ if(cityLandmarkCache.has(cacheKey))return cityLandmarkCache.get(cacheKey);
+
+ const englishName=await resolveEnglishCityName(cityName);
+ const names=[...new Set([englishName,cityName].filter(Boolean))];
+ const queries=[];
+ names.forEach(name=>{
+  queries.push(`${name} city`);
+  queries.push(`${name} skyline`);
+  queries.push(`${name} panorama`);
+  queries.push(`${name} old town`);
+  if(landmarkHint)queries.push(`${name} ${landmarkHint}`);
+ });
+ const seen=new Set();
+ for(const query of queries){
+  if(seen.has(query.toLowerCase()))continue;
+  seen.add(query.toLowerCase());
+  const params=new URLSearchParams({
+   action:'query',format:'json',formatversion:'2',generator:'search',
+   gsrsearch:query,gsrnamespace:'6',gsrlimit:'20',
+   prop:'imageinfo',iiprop:'url|extmetadata',iiurlwidth:'1600',
+   iiextmetadatafilter:'Artist|Credit|LicenseShortName',origin:'*'
+  });
   try{
-   const response=await fetch('https://commons.wikimedia.org/w/api.php?'+params.toString());if(!response.ok)continue;
-   const data=await response.json(),pages=data?.query?.pages||[];
+   const response=await fetch('https://commons.wikimedia.org/w/api.php?'+params.toString(),{mode:'cors'});
+   if(!response.ok)continue;
+   const data=await response.json();
+   const pages=data?.query?.pages||[];
    const ranked=pages.map(page=>{
-    const info=page.imageinfo?.[0];if(!info?.thumburl)return null;
-    const title=String(page.title||'').replace(/^File:/,'');const lower=title.toLowerCase();
-    if(/map|logo|flag|coat.of.arms|icon|diagram|location.map|weather.chart| svg$|locator map/.test(lower))return null;
-    let score=0;if(lower.includes(cityName.toLowerCase()))score+=5;
-    if(/panorama|skyline|cityscape|old.town|historic|aerial|view|harbour|harbor|waterfront|medina|village|town/.test(lower))score+=4;
-    if(landmarkHint&&lower.includes(landmarkHint.toLowerCase().split(' ')[0]))score+=3;
-    if(/landmark|cathedral|castle|bridge|tower|harbour|harbor|square|monument/.test(lower))score+=2;
+    const info=page.imageinfo?.[0];
+    const imageUrl=info?.thumburl||info?.url;
+    if(!imageUrl)return null;
+    const title=String(page.title||'').replace(/^File:/,'');
+    const lower=title.toLowerCase();
+    if(/\.(svg|pdf|djvu)$/i.test(title)||/map|logo|flag|coat.of.arms|icon|diagram|location.map|weather.chart|locator/.test(lower))return null;
+    let score=0;
+    for(const name of names){if(lower.includes(name.toLowerCase()))score+=8;}
+    if(/panorama|skyline|cityscape|old.town|historic|aerial|view|harbour|harbor|waterfront|medina|village|town/.test(lower))score+=5;
+    if(/landmark|cathedral|castle|bridge|tower|square|monument|palace/.test(lower))score+=2;
     if(/street|building/.test(lower))score+=1;
-    return {url:info.thumburl,title,descriptionUrl:info.descriptionurl,credit:info.extmetadata?.Artist?.value||info.extmetadata?.Credit?.value||'',license:info.extmetadata?.LicenseShortName?.value||'',score};
+    return {
+     url:imageUrl,
+     fallbackUrl:info?.url&&info.url!==imageUrl?info.url:'',
+     title,
+     descriptionUrl:info?.descriptionurl||'',
+     credit:info?.extmetadata?.Artist?.value||info?.extmetadata?.Credit?.value||'',
+     license:info?.extmetadata?.LicenseShortName?.value||'',
+     score
+    };
    }).filter(Boolean).sort((a,b)=>b.score-a.score);
-   if(ranked.length){cityLandmarkCache.set(cacheKey,ranked[0]);return ranked[0];}
-  }catch(error){/* Try the next Commons query; keep the dashboard usable if the image service is unavailable. */}
+   if(ranked.length){
+    const result=ranked.slice(0,8);
+    cityLandmarkCache.set(cacheKey,result);
+    return result;
+   }
+  }catch(error){/* Continue to the next query/provider if Commons is temporarily unavailable. */}
  }
- cityLandmarkCache.set(cacheKey,null);return null;
+
+ // Secondary source: Wikipedia article thumbnail for the city.
+ for(const name of names){
+  try{
+   const params=new URLSearchParams({
+    action:'query',format:'json',formatversion:'2',prop:'pageimages',
+    piprop:'thumbnail',pithumbsize:'1600',titles:name,origin:'*'
+   });
+   const response=await fetch('https://en.wikipedia.org/w/api.php?'+params.toString(),{mode:'cors'});
+   if(!response.ok)continue;
+   const data=await response.json();
+   const page=(data?.query?.pages||[]).find(p=>p.thumbnail?.source);
+   if(page){
+    const result=[{url:page.thumbnail.source,title:page.title||name,descriptionUrl:`https://en.wikipedia.org/wiki/${encodeURIComponent(page.title||name)}`,credit:'Wikipedia',license:'See image page'}];
+    cityLandmarkCache.set(cacheKey,result);
+    return result;
+   }
+  }catch(error){}
+ }
+ // Do not cache failures: a temporary network/API problem should be retried next time.
+ return null;
 }
 function updateCityLandmark(cityText){
- const img=$('cityLandmark'),caption=$('cityLandmarkCaption');if(!img)return;
- const requestId=++cityLandmarkRequest,value=String(cityText||'').toLocaleLowerCase('el');
+ const img=$('cityLandmark'),caption=$('cityLandmarkCaption');
+ if(!img)return;
+ const requestId=++cityLandmarkRequest;
+ const value=String(cityText||'').toLocaleLowerCase('el');
  const match=cityLandmarks.find(item=>item.keys.some(k=>value.includes(k)));
- const showImage=(url,title,credit='')=>{
+ img.style.opacity='0';
+ if(caption)caption.textContent='Αναζήτηση φωτογραφίας πόλης…';
+
+ findCommonsCityImage(cityText,match?.title||'').then(results=>{
   if(requestId!==cityLandmarkRequest)return;
-  img.onload=()=>{if(requestId===cityLandmarkRequest)img.style.opacity='.82';};
-  img.onerror=()=>{if(requestId===cityLandmarkRequest){img.style.opacity='0';if(caption)caption.textContent='';}};
-  img.alt=title||citySearchName(cityText);img.src=url;
-  if(caption){caption.textContent=title||citySearchName(cityText);caption.title=credit||'';}
- };
- img.style.opacity='0';if(caption)caption.textContent=match?'Αναζήτηση φωτογραφίας · '+match.title:'Αναζήτηση φωτογραφίας πόλης…';
- findCommonsCityImage(cityText,match?.title||'').then(result=>{
-  if(requestId!==cityLandmarkRequest)return;
-  if(result)showImage(result.url,result.title.replace(/\.[^.]+$/,'').replace(/[_-]+/g,' '),[result.credit,result.license,result.descriptionUrl].filter(Boolean).join(' · '));
-  else if(caption)caption.textContent='Δεν βρέθηκε διαθέσιμη φωτογραφία';
+  if(!results?.length){
+   if(caption)caption.textContent='Δεν βρέθηκε φωτογραφία — δοκίμασε ξανά';
+   return;
+  }
+  let candidateIndex=0;
+  const tryCandidate=()=>{
+   if(requestId!==cityLandmarkRequest)return;
+   const result=results[candidateIndex];
+   if(!result){
+    img.style.opacity='0';
+    if(caption)caption.textContent='Δεν ήταν δυνατή η φόρτωση φωτογραφίας';
+    return;
+   }
+   img.onload=()=>{if(requestId===cityLandmarkRequest)img.style.opacity='.82';};
+   img.onerror=()=>{
+    if(requestId!==cityLandmarkRequest)return;
+    if(result.fallbackUrl&&img.src!==result.fallbackUrl){
+     img.src=result.fallbackUrl;
+     return;
+    }
+    candidateIndex++;
+    tryCandidate();
+   };
+   img.alt=result.title||citySearchName(cityText);
+   img.src=result.url;
+   if(caption){
+    caption.textContent=(result.title||citySearchName(cityText)).replace(/\.[^.]+$/,'').replace(/[_-]+/g,' ');
+    caption.title=[result.credit,result.license,result.descriptionUrl].filter(Boolean).join(' · ');
+   }
+  };
+  tryCandidate();
+ }).catch(()=>{
+  if(requestId===cityLandmarkRequest&&caption)caption.textContent='Προσωρινό πρόβλημα αναζήτησης φωτογραφίας';
  });
 }
-
 
 function renderForecastDetail(){
  const chartPanel=$('forecastChartPanel'),outlookPanel=$('forecastOutlookPanel');
