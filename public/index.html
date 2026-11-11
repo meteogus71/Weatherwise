@@ -749,34 +749,81 @@ async function drawGfsGrid(targetMap,kind,areaLayer,vectorLayer,statusId,legendI
  try{
   areaLayer.clearLayers();vectorLayer.clearLayers();
   const b=targetMap.getBounds(),south=b.getSouth(),north=b.getNorth(),west=b.getWest(),east=b.getEast();
-  const rows=9,cols=9,lats=[],lons=[],points=[];
-  for(let y=0;y<rows;y++)for(let x=0;x<cols;x++){
-   const la=south+(north-south)*y/(rows-1),lo=west+(east-west)*x/(cols-1);
-   lats.push(la.toFixed(3));lons.push(lo.toFixed(3));points.push([la,lo]);
+  const latSpan=Math.max(.1,north-south),lonSpan=Math.max(.1,east-west);
+  // Sample the visible area much more densely than the former 7x7/9x9 grid.
+  // Keep the request bounded and split locations into API-safe batches.
+  let step=.45;
+  let cols=Math.max(2,Math.ceil(lonSpan/step)+1),rows=Math.max(2,Math.ceil(latSpan/step)+1);
+  if(cols*rows>900){
+   const factor=Math.sqrt((cols*rows)/900);
+   step*=factor;
+   cols=Math.max(2,Math.ceil(lonSpan/step)+1);
+   rows=Math.max(2,Math.ceil(latSpan/step)+1);
   }
-  const fields='temperature_2m,precipitation,cloud_cover,wind_speed_10m,wind_direction_10m,cape,pressure_msl';
-  const url=`https://api.open-meteo.com/v1/gfs?latitude=${lats.join(',')}&longitude=${lons.join(',')}&hourly=${fields}&forecast_hours=73&timezone=UTC`;
-  const resp=await fetch(url);if(!resp.ok)throw Error('GFS HTTP '+resp.status);
-  const payload=await resp.json(),items=Array.isArray(payload)?payload:[payload];
-  const lead=Math.max(0,Math.min(72,Number($(leadId)?.value||24))),values=new Array(rows*cols).fill(null);
-  let validTime='',windMarkers=[];
-  items.forEach((d,i)=>{
-   if(!d.hourly)return;const times=d.hourly.time||[];
-   let idx=times.findIndex(t=>new Date(t).getTime()>=Date.now()+lead*3600000);if(idx<0)idx=Math.min(times.length-1,lead);
-   if(!validTime)validTime=times[idx]||'';
-   const h=d.hourly,[la,lo]=points[i];
-   const tv=h.temperature_2m?.[idx],rv=h.precipitation?.[idx],cv=h.cloud_cover?.[idx],wv=h.wind_speed_10m?.[idx],dv=h.wind_direction_10m?.[idx],cape=h.cape?.[idx],pv=h.pressure_msl?.[idx];
-   if(kind==='wind'){
-    if(wv==null||dv==null)return;
-    const html=`<div class="wind-arrow" style="transform:rotate(${(dv+180)%360}deg)">↑</div>`;
-    windMarkers.push(L.marker([la,lo],{icon:L.divIcon({className:'',html,iconSize:[22,22],iconAnchor:[11,11]})}).bindTooltip(`GFS άνεμος ${Math.round(wv)} km/h · διεύθυνση ${Math.round(dv)}°`));return;
+  cols=Math.min(cols,50);rows=Math.min(rows,50);
+  while(cols*rows>900){
+   if(cols>=rows)cols--;else rows--;
+  }
+  const points=[];
+  for(let y=0;y<rows;y++)for(let x=0;x<cols;x++){
+   const la=south+latSpan*y/(rows-1),lo=west+lonSpan*x/(cols-1);
+   points.push([la,lo]);
+  }
+
+  const fieldByKind={
+   'cloudforecast':'cloud_cover',
+   'rainforecast':'precipitation',
+   'wind':'wind_speed_10m,wind_direction_10m',
+   'gfs-temp':'temperature_2m',
+   'gfs-cape':'cape',
+   'gfs-pressure':'pressure_msl'
+  };
+  const fields=fieldByKind[kind]||'pressure_msl';
+  const lead=Math.max(0,Math.min(72,Number($(leadId)?.value||24)));
+  const values=new Array(rows*cols).fill(null),windMarkers=[];
+  let validTime='';
+  const batchSize=80,batches=[];
+  for(let i=0;i<points.length;i+=batchSize)batches.push({offset:i,coords:points.slice(i,i+batchSize)});
+  // Limit concurrent calls to avoid flooding Open-Meteo on map pan/zoom.
+  for(let bi=0;bi<batches.length;bi+=4){
+   const group=batches.slice(bi,bi+4);
+   const results=await Promise.all(group.map(async batch=>{
+    const lat=batch.coords.map(p=>p[0].toFixed(3)).join(',');
+    const lon=batch.coords.map(p=>p[1].toFixed(3)).join(',');
+    const url=`https://api.open-meteo.com/v1/gfs?latitude=${encodeURIComponent(lat)}&longitude=${encodeURIComponent(lon)}&hourly=${fields}&forecast_hours=73&timezone=UTC`;
+    const response=await fetch(url);
+    if(!response.ok)throw new Error('GFS HTTP '+response.status);
+    const payload=await response.json();
+    return {batch,items:Array.isArray(payload)?payload:[payload]};
+   }));
+   for(const result of results){
+    result.items.forEach((d,j)=>{
+     if(!d.hourly)return;
+     const times=d.hourly.time||[];
+     let idx=times.findIndex(t=>new Date(t).getTime()>=Date.now()+lead*3600000);
+     if(idx<0)idx=Math.min(times.length-1,lead);
+     if(!validTime)validTime=times[idx]||'';
+     const pointIndex=result.batch.offset+j,[la,lo]=points[pointIndex],h=d.hourly;
+     if(kind==='wind'){
+      const speed=h.wind_speed_10m?.[idx],direction=h.wind_direction_10m?.[idx];
+      if(speed==null||direction==null)return;
+      const arrow=`<div class="wind-arrow" style="transform:rotate(${(direction+180)%360}deg)">↑</div>`;
+      windMarkers.push(L.marker([la,lo],{icon:L.divIcon({className:'',html:arrow,iconSize:[22,22],iconAnchor:[11,11]})})
+       .bindTooltip(`GFS άνεμος ${Math.round(speed)} km/h · διεύθυνση ${Math.round(direction)}°`));
+      return;
+     }
+     const field=fields.split(',')[0],v=h[field]?.[idx];
+     if(v!=null&&Number.isFinite(Number(v)))values[pointIndex]=Number(v);
+    });
    }
-   const v=kind==='cloudforecast'?cv:kind==='rainforecast'?rv:kind==='gfs-temp'?tv:kind==='gfs-cape'?cape:kind==='gfs-pressure'?pv:null;
-   if(v!=null&&Number.isFinite(Number(v)))values[i]=Number(v);
-  });
-  if(kind==='wind'){windMarkers.forEach(m=>m.addTo(vectorLayer));vectorLayer.addTo(targetMap);}
-  else{
-   const valid=values.filter(v=>v!=null);if(!valid.length)throw Error('No valid GFS values');
+  }
+
+  if(kind==='wind'){
+   windMarkers.forEach(m=>m.addTo(vectorLayer));
+   vectorLayer.addTo(targetMap);
+  }else{
+   const valid=values.filter(v=>v!=null);
+   if(!valid.length)throw new Error('No valid GFS values returned');
    const min=Math.min(...valid),max=Math.max(...valid);
    const ramps={
     'gfs-pressure':[[0,[75,55,150]],[.18,[65,115,185]],[.38,[65,165,160]],[.58,[205,190,85]],[.78,[225,125,65]],[1,[170,55,55]]],
@@ -786,20 +833,64 @@ async function drawGfsGrid(targetMap,kind,areaLayer,vectorLayer,statusId,legendI
     'gfs-cape':[[0,[35,75,120]],[.15,[75,160,175]],[.35,[205,205,65]],[.58,[240,150,45]],[.78,[220,65,65]],[1,[150,45,145]]]
    };
    const ramp=ramps[kind]||ramps['gfs-pressure'];
-   const colorAt=t=>{t=Math.max(0,Math.min(1,t));let a=ramp[0],z=ramp[ramp.length-1];for(let k=1;k<ramp.length;k++)if(t<=ramp[k][0]){a=ramp[k-1];z=ramp[k];break}const q=(t-a[0])/(z[0]-a[0]||1);return a[1].map((c,j)=>Math.round(c+(z[1][j]-c)*q))};
-   const W=640,H=640,canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;const ctx=canvas.getContext('2d'),img=ctx.createImageData(W,H),data=img.data;
-   const sample=(gx,gy)=>{const x0=Math.max(0,Math.min(cols-1,Math.floor(gx))),y0=Math.max(0,Math.min(rows-1,Math.floor(gy))),x1=Math.min(cols-1,x0+1),y1=Math.min(rows-1,y0+1),fx=gx-x0,fy=gy-y0,at=(x,y)=>values[y*cols+x],q00=at(x0,y0),q10=at(x1,y0),q01=at(x0,y1),q11=at(x1,y1);if([q00,q10,q01,q11].some(v=>v==null))return null;return q00*(1-fx)*(1-fy)+q10*fx*(1-fy)+q01*(1-fx)*fy+q11*fx*fy};
-   for(let py=0;py<H;py++)for(let px=0;px<W;px++){const v=sample(px/(W-1)*(cols-1),(1-py/(H-1))*(rows-1)),o=(py*W+px)*4;if(v==null)continue;const t=(v-min)/(max-min||1),c=colorAt(t);let alpha=kind==='rainforecast'?(v<.05?0:Math.min(.78,.20+Math.sqrt(Math.max(0,t))*.55)):kind==='cloudforecast'?.25+t*.48:kind==='gfs-cape'?.22+t*.60:.48;if(kind==='gfs-pressure')alpha=.52;data[o]=c[0];data[o+1]=c[1];data[o+2]=c[2];data[o+3]=Math.round(alpha*255)}
+   const colorAt=t=>{
+    t=Math.max(0,Math.min(1,t));let a=ramp[0],z=ramp[ramp.length-1];
+    for(let k=1;k<ramp.length;k++)if(t<=ramp[k][0]){a=ramp[k-1];z=ramp[k];break}
+    const q=(t-a[0])/(z[0]-a[0]||1);return a[1].map((c,j)=>Math.round(c+(z[1][j]-c)*q));
+   };
+   const W=1024,H=1024,canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;
+   const ctx=canvas.getContext('2d'),img=ctx.createImageData(W,H),data=img.data;
+   const sample=(gx,gy)=>{
+    const x0=Math.max(0,Math.min(cols-1,Math.floor(gx))),y0=Math.max(0,Math.min(rows-1,Math.floor(gy)));
+    const x1=Math.min(cols-1,x0+1),y1=Math.min(rows-1,y0+1),fx=gx-x0,fy=gy-y0;
+    const at=(x,y)=>values[y*cols+x],q00=at(x0,y0),q10=at(x1,y0),q01=at(x0,y1),q11=at(x1,y1);
+    if([q00,q10,q01,q11].some(v=>v==null))return null;
+    return q00*(1-fx)*(1-fy)+q10*fx*(1-fy)+q01*(1-fx)*fy+q11*fx*fy;
+   };
+   for(let py=0;py<H;py++)for(let px=0;px<W;px++){
+    const v=sample(px/(W-1)*(cols-1),(1-py/(H-1))*(rows-1)),o=(py*W+px)*4;
+    if(v==null)continue;
+    const t=(v-min)/(max-min||1),c=colorAt(t);
+    let alpha=kind==='rainforecast'?(v<.05?0:Math.min(.78,.20+Math.sqrt(Math.max(0,t))*.55)):
+      kind==='cloudforecast'?.25+t*.48:kind==='gfs-cape'?.22+t*.60:.48;
+    if(kind==='gfs-pressure')alpha=.52;
+    data[o]=c[0];data[o+1]=c[1];data[o+2]=c[2];data[o+3]=Math.round(alpha*255);
+   }
    ctx.putImageData(img,0,0);
-   if(kind==='gfs-pressure'&&max-min>0){ctx.lineWidth=1.25;ctx.strokeStyle='rgba(20,30,48,.72)';for(let level=Math.ceil(min/4)*4;level<=max;level+=4){ctx.beginPath();for(let y=0;y<rows-1;y++)for(let x=0;x<cols-1;x++){const c=[[x,y,values[y*cols+x]],[x+1,y,values[y*cols+x+1]],[x+1,y+1,values[(y+1)*cols+x+1]],[x,y+1,values[(y+1)*cols+x]]],cross=[];for(let e=0;e<4;e++){const q=c[e],z=c[(e+1)%4];if(q[2]==null||z[2]==null||(level-q[2])*(level-z[2])>0||q[2]===z[2])continue;const t=(level-q[2])/(z[2]-q[2]);cross.push([(q[0]+(z[0]-q[0])*t)/(cols-1)*W,(1-(q[1]+(z[1]-q[1])*t)/(rows-1))*H])}if(cross.length>=2){ctx.moveTo(...cross[0]);ctx.lineTo(...cross[1])}}ctx.stroke()}}
-   L.imageOverlay(canvas.toDataURL('image/png'),[[south,west],[north,east]],{opacity:1,interactive:false}).addTo(areaLayer);areaLayer.addTo(targetMap);
+   // Pressure contours are calculated from the denser sampled field.
+   if(kind==='gfs-pressure'&&max-min>0){
+    ctx.lineWidth=1.1;ctx.strokeStyle='rgba(20,30,48,.72)';
+    for(let level=Math.ceil(min/4)*4;level<=max;level+=4){
+     ctx.beginPath();
+     for(let y=0;y<rows-1;y++)for(let x=0;x<cols-1;x++){
+      const corners=[[x,y,values[y*cols+x]],[x+1,y,values[y*cols+x+1]],
+       [x+1,y+1,values[(y+1)*cols+x+1]],[x,y+1,values[(y+1)*cols+x]]],cross=[];
+      for(let e=0;e<4;e++){
+       const a=corners[e],z=corners[(e+1)%4];
+       if(a[2]==null||z[2]==null||(level-a[2])*(level-z[2])>0||a[2]===z[2])continue;
+       const f=(level-a[2])/(z[2]-a[2]);
+       cross.push([(a[0]+(z[0]-a[0])*f)/(cols-1)*W,(1-(a[1]+(z[1]-a[1])*f)/(rows-1))*H]);
+      }
+      if(cross.length>=2){ctx.moveTo(cross[0][0],cross[0][1]);ctx.lineTo(cross[1][0],cross[1][1]);}
+     }
+     ctx.stroke();
+    }
+   }
+   L.imageOverlay(canvas.toDataURL('image/png'),[[south,west],[north,east]],{opacity:1,interactive:false}).addTo(areaLayer);
+   areaLayer.addTo(targetMap);
   }
-  const parsedTime=validTime?(/[zZ]|[+-]\d{2}:\d{2}$/.test(validTime)?new Date(validTime):new Date(validTime+'Z')):null;
+
+  const parsedTime=validTime?new Date(validTime):null;
   const stamp=parsedTime&&!isNaN(parsedTime)?parsedTime.toLocaleString('el-GR',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',timeZone:'UTC'})+' UTC':'';
-  const desc={cloudforecast:'Νεφοκάλυψη',rainforecast:'Υετός',wind:'Άνεμος 10 m','gfs-temp':'Θερμοκρασία στα 2 m','gfs-cape':'Convective Available Potential Energy (CAPE)','gfs-pressure':'Πίεση μέσης στάθμης θάλασσας'},msg=`NOAA GFS · ${desc[kind]} · +${lead}h · έγκυρο: ${stamp}`;
-  $(statusId).textContent=msg;$(legendId).textContent=kind==='gfs-pressure'?`${msg}. Συνεχές raster με παρεμβολή και ισοβαρείς ανά 4 hPa. Η παρεμβολή εξομαλύνει την εμφάνιση, δεν αυξάνει την πραγματική ανάλυση του GFS.`:`${msg}. Συνεχές raster με χωρική παρεμβολή από τα αριθμητικά σημεία GFS.`;
+  const desc={cloudforecast:'Νεφοκάλυψη',rainforecast:'Υετός',wind:'Άνεμος 10 m','gfs-temp':'Θερμοκρασία στα 2 m','gfs-cape':'Convective Available Potential Energy (CAPE)','gfs-pressure':'Πίεση μέσης στάθμης θάλασσας'};
+  const msg=`NOAA GFS · ${desc[kind]} · +${lead}h · έγκυρο: ${stamp}`;
+  $(statusId).textContent=msg;
+  $(legendId).textContent=kind==='gfs-pressure'?`${msg}. Πυκνότερη δειγματοληψία ${cols}×${rows} σημείων, χωρική παρεμβολή και ισοβαρείς ανά 4 hPa. Η πραγματική ανάλυση περιορίζεται από το μοντέλο GFS.`:`${msg}. Πυκνότερη δειγματοληψία ${cols}×${rows} σημείων και χωρική παρεμβολή. Η πραγματική ανάλυση περιορίζεται από το μοντέλο GFS.`;
   const runEl=$('gfsRunLarge');if(runEl)runEl.textContent=`NOAA GFS · πρόγνωση +${lead}h · ${stamp}`;
- }catch(e){$(statusId).textContent='Δεν ήταν δυνατή η λήψη των δεδομένων GFS. Δοκιμάστε ξανά ή κάντε zoom σε μικρότερη περιοχή.';console.error('GFS map error',e)}
+ }catch(e){
+  $(statusId).textContent='Δεν ήταν δυνατή η λήψη των δεδομένων GFS. Δοκιμάστε ξανά ή κάντε zoom σε μικρότερη περιοχή.';
+  console.error('GFS map error',e);
+ }
 }
 async function loadWeather(){
  $('condition').textContent='Φόρτωση…';
