@@ -767,18 +767,20 @@ async function drawGfsGrid(targetMap,kind,areaLayer,vectorLayer,statusId,legendI
   areaLayer.clearLayers();vectorLayer.clearLayers();
   const b=targetMap.getBounds(),south=b.getSouth(),north=b.getNorth(),west=b.getWest(),east=b.getEast();
   const latSpan=Math.max(.1,north-south),lonSpan=Math.max(.1,east-west);
-  // Sample the visible area much more densely than the former 7x7/9x9 grid.
-  // Keep the request bounded and split locations into API-safe batches.
-  let step=.32;
+  // Zoom-adaptive sampling: denser grids at country/city scale, bounded
+  // at continental scale to avoid overwhelming the public Open-Meteo API.
+  const zoom=targetMap.getZoom();
+  const pointBudget=zoom<=4?1800:zoom<=6?2400:zoom<=8?3000:3600;
+  let step=zoom<=4?.24:zoom<=6?.16:zoom<=8?.10:.065;
   let cols=Math.max(2,Math.ceil(lonSpan/step)+1),rows=Math.max(2,Math.ceil(latSpan/step)+1);
-  if(cols*rows>900){
-   const factor=Math.sqrt((cols*rows)/900);
+  if(cols*rows>pointBudget){
+   const factor=Math.sqrt((cols*rows)/pointBudget);
    step*=factor;
    cols=Math.max(2,Math.ceil(lonSpan/step)+1);
    rows=Math.max(2,Math.ceil(latSpan/step)+1);
   }
-  cols=Math.min(cols,48);rows=Math.min(rows,48);
-  while(cols*rows>900){
+  cols=Math.min(cols,90);rows=Math.min(rows,90);
+  while(cols*rows>pointBudget){
    if(cols>=rows)cols--;else rows--;
   }
   const points=[];
@@ -925,7 +927,7 @@ async function drawGfsGrid(targetMap,kind,areaLayer,vectorLayer,statusId,legendI
   const layerLabel=kind==='ecmwf-850'?'Θερμοκρασία 850 hPa':kind==='ecmwf-500'?'Θερμοκρασία 500 hPa':(desc[kind]||kind);
   const msg=`${modelLabel} · ${layerLabel} · +${lead}h · έγκυρο: ${stamp}`;
   $(statusId).textContent=msg;
-  $(legendId).textContent=kind==='gfs-pressure'?`${msg}. Πλέγμα ${cols}×${rows}, εξομαλυμένη απεικόνιση και ισοβαρείς ανά 4 hPa. Η εξομάλυνση δεν αυξάνει την εγγενή ανάλυση του μοντέλου.`:`${msg}. Πλέγμα ${cols}×${rows}, χωρική παρεμβολή και ήπια εξομάλυνση για συνεχή απεικόνιση. Η εξομάλυνση δεν αυξάνει την εγγενή ανάλυση του μοντέλου.`;
+  $(legendId).textContent=kind==='gfs-pressure'?`${msg}. Πλέγμα ${cols}×${rows} (${cols*rows} σημεία, zoom ${zoom}), εξομαλυμένη απεικόνιση και ισοβαρείς ανά 4 hPa. Η εξομάλυνση δεν αυξάνει την εγγενή ανάλυση του μοντέλου.`:`${msg}. Πλέγμα ${cols}×${rows} (${cols*rows} σημεία, zoom ${zoom}), χωρική παρεμβολή και ήπια εξομάλυνση. Η εξομάλυνση δεν αυξάνει την εγγενή ανάλυση του μοντέλου.`;
   const runEl=$('gfsRunLarge');if(runEl)runEl.textContent=`${modelLabel} · πρόγνωση +${lead}h · ${stamp}`;
  }catch(e){
   const reason=String(e?.message||e||'Άγνωστο σφάλμα').slice(0,180);
