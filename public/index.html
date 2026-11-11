@@ -198,6 +198,44 @@ select.btn{color:var(--text);background:var(--panel2);border:1px solid var(--lin
 .alert-source-links{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px;font-size:11px}
 .alert-source-links a{color:var(--cyan);text-decoration:none}
 
+ 
+.gfs-player{margin:12px 0 16px;padding:14px;border:1px solid #29465c;border-radius:12px;background:linear-gradient(145deg,#102b40,#0b1d2c);color:#e8f3fa}
+.gfs-player-top{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.gfs-player-top strong{font-size:12px;letter-spacing:.08em}
+.gfs-speed-label{display:flex;align-items:center;gap:7px;font-size:11px;color:#a9c3d5}
+.gfs-player-slider{width:100%;margin:17px 0 3px;accent-color:#36a8e0}
+.gfs-player-scale{display:flex;justify-content:space-between;color:#8fa9bc;font-size:10px}
+.gfs-player-controls{display:flex;align-items:center;justify-content:center;gap:9px;margin:13px 0 8px}
+.gfs-player-controls button{min-width:38px;height:36px;border:1px solid #36566d;border-radius:8px;background:#18364c;color:#eaf6ff;font-size:14px}
+.gfs-player-controls .gfs-player-play{min-width:48px;height:42px;border:0;border-radius:50%;background:#1686bd;color:white;font-size:17px}
+.gfs-loop{display:flex;align-items:center;gap:5px;margin-left:5px;color:#a9c3d5;font-size:11px}
+.gfs-player-note{color:#89a7bc;font-size:10px;text-align:center}
+@media(max-width:520px){.gfs-player{padding:11px}.gfs-player-controls{gap:5px}.gfs-player-controls button{min-width:33px}.gfs-player-controls .gfs-player-play{min-width:43px}}
+
+/* MeteoAlarm warning cards – severity-coloured, visual-first layout */
+.meteoalarm-alert-card{--alert-accent:#94a3b8;--alert-tint:rgba(148,163,184,.13);position:relative;overflow:hidden;border:1px solid color-mix(in srgb,var(--alert-accent) 48%,transparent);border-left:0;border-radius:15px;padding:0;background:var(--panel2);box-shadow:0 8px 22px rgba(0,0,0,.16);margin:12px 0}
+.meteoalarm-alert-card.yellow{--alert-accent:#f2d229;--alert-tint:rgba(242,210,41,.16)}
+.meteoalarm-alert-card.orange{--alert-accent:#ff8b32;--alert-tint:rgba(255,139,50,.16)}
+.meteoalarm-alert-card.red{--alert-accent:#ef4444;--alert-tint:rgba(239,68,68,.17)}
+.meteoalarm-alert-card.unknown{--alert-accent:#94a3b8;--alert-tint:rgba(148,163,184,.12)}
+.meteoalarm-alert-hero{min-height:128px;padding:20px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px;color:#fff;background:linear-gradient(115deg,color-mix(in srgb,var(--alert-accent) 88%,#172b3c),color-mix(in srgb,var(--alert-accent) 66%,#263849))}
+.meteoalarm-alert-hero-main{min-width:0}
+.meteoalarm-alert-country{font-size:11px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;opacity:.9;margin-bottom:8px}
+.meteoalarm-alert-title{font-size:clamp(19px,3vw,27px);line-height:1.18;font-weight:800;overflow-wrap:anywhere}
+.meteoalarm-alert-area{font-size:14px;font-weight:650;margin-top:8px;color:rgba(255,255,255,.94)}
+.meteoalarm-alert-icon{flex:0 0 92px;width:92px;height:92px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.42);font-size:52px;line-height:1}
+.meteoalarm-alert-badge{display:inline-flex;align-items:center;gap:6px;font-size:10px;font-weight:900;letter-spacing:.06em;border-radius:6px;padding:6px 9px;margin-bottom:9px;background:rgba(20,30,40,.24);color:#fff;border:1px solid rgba(255,255,255,.45)}
+.meteoalarm-alert-body{padding:17px 20px 18px;background:linear-gradient(180deg,var(--alert-tint),transparent 90%)}
+.meteoalarm-alert-times{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.meteoalarm-alert-time{background:var(--panel);border:1px solid color-mix(in srgb,var(--alert-accent) 35%,transparent);border-radius:10px;padding:11px 13px;min-width:0}
+.meteoalarm-alert-time-label{font-size:10px;font-weight:850;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+.meteoalarm-alert-time-value{font-size:clamp(14px,2vw,18px);font-weight:850;color:var(--text);font-variant-numeric:tabular-nums;line-height:1.3}
+.meteoalarm-alert-time-zone{font-size:10px;color:var(--muted);margin-top:3px}
+.meteoalarm-alert-description{font-size:13px;line-height:1.6;white-space:pre-line;margin:13px 0 6px;color:var(--text)}
+.meteoalarm-alert-meta{font-size:11px;color:var(--muted);margin-top:9px}
+.meteoalarm-alert-link{display:inline-block;margin-top:12px;font-size:11px;font-weight:750;color:var(--cyan);text-decoration:none}
+@media(max-width:520px){.meteoalarm-alert-hero{min-height:112px;padding:16px}.meteoalarm-alert-icon{flex-basis:70px;width:70px;height:70px;font-size:40px}.meteoalarm-alert-body{padding:13px}.meteoalarm-alert-times{gap:7px}.meteoalarm-alert-time{padding:9px}.meteoalarm-alert-time-label{font-size:9px}.meteoalarm-alert-time-value{font-size:14px}}
+
 </style>
 </head>
 <body>
@@ -331,7 +369,7 @@ select.btn{color:var(--text);background:var(--panel2);border:1px solid var(--lin
         <button data-layer="wind">➤ Άνεμος GFS</button>
         <button data-layer="none" class="active">Καθαρός χάρτης</button>
       </div>
-      <div class="map-tools" style="margin:8px 0"><label class="small" for="gfsLead">Πρόγνωση:</label><select id="gfsLead" class="btn"><option value="0">+0h</option><option value="6">+6h</option><option value="12">+12h</option><option value="24" selected>+24h</option><option value="48">+48h</option><option value="72">+72h</option></select></div>
+      <div class="map-tools" style="margin:8px 0"><label class="small" for="gfsLead">Πρόγνωση:</label><select id="gfsLead" class="btn"><option value="0">+0h</option><option value="3">+3h</option><option value="6">+6h</option><option value="9">+9h</option><option value="12">+12h</option><option value="15">+15h</option><option value="18">+18h</option><option value="21">+21h</option><option value="24" selected>+24h</option><option value="27">+27h</option><option value="30">+30h</option><option value="33">+33h</option><option value="36">+36h</option><option value="39">+39h</option><option value="42">+42h</option><option value="45">+45h</option><option value="48">+48h</option><option value="51">+51h</option><option value="54">+54h</option><option value="57">+57h</option><option value="60">+60h</option><option value="63">+63h</option><option value="66">+66h</option><option value="69">+69h</option><option value="72">+72h</option></select></div>
       <div class="layer-status" id="layerStatus">Επίλεξε ένα επίπεδο GFS για απεικόνιση στον χάρτη.</div>
       <div id="map" class="map"></div>
       <div class="layer-legend" id="layerLegend"></div></div>
@@ -346,8 +384,27 @@ select.btn{color:var(--text);background:var(--panel2);border:1px solid var(--lin
   <div class="map-title"><div><h3>ΔΙΑΔΡΑΣΤΙΚΟΙ ΠΡΟΓΝΩΣΤΙΚΟΙ ΧΑΡΤΕΣ GFS</h3><p class="small">Παγκόσμιο μοντέλο NOAA GFS · επιλέξτε μετεωρολογικό πεδίο και χρονικό ορίζοντα.</p></div></div>
   <div class="forecast-toolbar" style="margin:12px 0">
    <label class="small" for="gfsLeadLarge">Χρόνος πρόγνωσης</label>
-   <select id="gfsLeadLarge" class="btn"><option value="0">Τώρα / +0h</option><option value="6">+6 ώρες</option><option value="12">+12 ώρες</option><option value="24" selected>+24 ώρες</option><option value="48">+48 ώρες</option><option value="72">+72 ώρες</option></select>
+   <select id="gfsLeadLarge" class="btn"><option value="0">Τώρα / +0h</option><option value="3">+3h</option><option value="6">+6h</option><option value="9">+9h</option><option value="12">+12h</option><option value="15">+15h</option><option value="18">+18h</option><option value="21">+21h</option><option value="24" selected>+24h</option><option value="27">+27h</option><option value="30">+30h</option><option value="33">+33h</option><option value="36">+36h</option><option value="39">+39h</option><option value="42">+42h</option><option value="45">+45h</option><option value="48">+48h</option><option value="51">+51h</option><option value="54">+54h</option><option value="57">+57h</option><option value="60">+60h</option><option value="63">+63h</option><option value="66">+66h</option><option value="69">+69h</option><option value="72">+72h</option></select>
    <span id="gfsRunLarge" class="small">Πηγή: NOAA GFS μέσω Open-Meteo</span>
+  </div>
+  <div class="gfs-player" id="gfsPlayer">
+   <div class="gfs-player-top">
+    <div><strong>ΕΝΙΑΙΟΣ PLAYER ΠΡΟΓΝΩΣΗΣ</strong><div class="small" id="gfsPlayerTime">GFS · +24h</div></div>
+    <label class="gfs-speed-label">Ταχύτητα
+     <select id="gfsPlayerSpeed" class="btn"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option></select>
+    </label>
+   </div>
+   <input id="gfsPlayerSlider" class="gfs-player-slider" type="range" min="0" max="72" step="3" value="24" aria-label="Χρόνος πρόγνωσης GFS">
+   <div class="gfs-player-scale"><span>+0h</span><span>+24h</span><span>+48h</span><span>+72h</span></div>
+   <div class="gfs-player-controls">
+    <button type="button" id="gfsPlayerStart" title="Αρχή">|◀</button>
+    <button type="button" id="gfsPlayerBack" title="Προηγούμενο βήμα">◀</button>
+    <button type="button" id="gfsPlayerToggle" class="gfs-player-play" title="Αναπαραγωγή">▶</button>
+    <button type="button" id="gfsPlayerForward" title="Επόμενο βήμα">▶|</button>
+    <button type="button" id="gfsPlayerEnd" title="Τέλος">▶▶</button>
+    <label class="gfs-loop"><input type="checkbox" id="gfsPlayerLoop" checked> Loop</label>
+   </div>
+   <div class="small gfs-player-note">Κοινός χρόνος για όλους τους προγνωστικούς χάρτες GFS. Βήμα 3 ωρών · χρόνος UTC.</div>
   </div>
   <div class="layerbar" id="layerBarLarge">
    <button data-layer="gfs-temp">🌡 Θερμοκρασία 2m</button><button data-layer="rainforecast">💧 Υετός</button><button data-layer="cloudforecast">☁ Νεφοκάλυψη</button><button data-layer="wind">➤ Άνεμος 10m</button><button data-layer="gfs-cape">⛈ CAPE</button><button data-layer="gfs-pressure">〰 Πίεση MSL</button><button data-layer="none" class="active">Καθαρός χάρτης</button>
@@ -590,8 +647,56 @@ function initMap(){
  largeMap=L.map('mapLarge').setView([lat,lon],5);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap'}).addTo(largeMap);L.marker([lat,lon]).addTo(largeMap).bindPopup(city);
  document.querySelectorAll('#layerBarLarge button').forEach(b=>b.onclick=()=>selectLargeLayer(b.dataset.layer));
  const syncLead=(from,to)=>{if($(to))$(to).value=$(from).value};
- $('gfsLead').addEventListener('change',()=>{syncLead('gfsLead','gfsLeadLarge');const active=document.querySelector('#layerBar button.active')?.dataset.layer;if(active&&active!=='none')selectLayer(active)});
- $('gfsLeadLarge').addEventListener('change',()=>{syncLead('gfsLeadLarge','gfsLead');const active=document.querySelector('#layerBarLarge button.active')?.dataset.layer;if(active&&active!=='none')selectLargeLayer(active)});
+ // Shared player handlers below replace the previous independent lead handlers.
+
+ // One shared GFS timeline drives both forecast-map views.
+ const playerSlider=$('gfsPlayerSlider'),playerTime=$('gfsPlayerTime'),playerToggle=$('gfsPlayerToggle');
+ let gfsPlayerTimer=null,playerBusy=false;
+ const activeGfsLayers=['cloudforecast','rainforecast','wind','gfs-temp','gfs-cape','gfs-pressure'];
+ function showPlayerTime(v){if(playerSlider)playerSlider.value=String(v);if(playerTime)playerTime.textContent=`NOAA GFS · +${v}h · UTC`}
+ async function setSharedLead(v,redraw=true){
+  const lead=Math.max(0,Math.min(72,Math.round(Number(v)/3)*3));
+  $('gfsLead').value=String(lead);$('gfsLeadLarge').value=String(lead);showPlayerTime(lead);
+  if(!redraw||playerBusy)return;
+  playerBusy=true;
+  try{
+   const small=document.querySelector('#layerBar button.active')?.dataset.layer;
+   const large=document.querySelector('#layerBarLarge button.active')?.dataset.layer;
+   const tasks=[];
+   if(small&&activeGfsLayers.includes(small))tasks.push(selectLayer(small));
+   if(large&&activeGfsLayers.includes(large))tasks.push(selectLargeLayer(large));
+   await Promise.allSettled(tasks);
+  }finally{playerBusy=false}
+ }
+ function stopGfsPlayer(){if(gfsPlayerTimer){clearInterval(gfsPlayerTimer);gfsPlayerTimer=null}if(playerToggle){playerToggle.textContent='▶';playerToggle.title='Αναπαραγωγή'}}
+ function playerStep(delta){
+  let n=Number(playerSlider?.value||$('gfsLeadLarge').value||24)+delta;
+  if(n>72)n=$('gfsPlayerLoop').checked?0:72;
+  if(n<0)n=$('gfsPlayerLoop').checked?72:0;
+  setSharedLead(n,true);
+ }
+ function startGfsPlayer(){
+  if(gfsPlayerTimer){stopGfsPlayer();return}
+  if(Number(playerSlider.value)>=72)playerSlider.value='0';
+  playerToggle.textContent='Ⅱ';playerToggle.title='Παύση';
+  const tickMs=1800/Number($('gfsPlayerSpeed').value||1);
+  gfsPlayerTimer=setInterval(()=>{
+   const current=Number(playerSlider.value);
+   if(current>=72){if($('gfsPlayerLoop').checked){setSharedLead(0,true)}else{stopGfsPlayer()}return}
+   playerStep(3);
+  },tickMs);
+ }
+ playerSlider.addEventListener('input',()=>showPlayerTime(Number(playerSlider.value)));
+ playerSlider.addEventListener('change',()=>setSharedLead(playerSlider.value,true));
+ $('gfsLead').addEventListener('change',()=>setSharedLead($('gfsLead').value,true));
+ $('gfsLeadLarge').addEventListener('change',()=>setSharedLead($('gfsLeadLarge').value,true));
+ playerToggle.addEventListener('click',startGfsPlayer);
+ $('gfsPlayerStart').addEventListener('click',()=>{stopGfsPlayer();setSharedLead(0,true)});
+ $('gfsPlayerBack').addEventListener('click',()=>{stopGfsPlayer();playerStep(-3)});
+ $('gfsPlayerForward').addEventListener('click',()=>{stopGfsPlayer();playerStep(3)});
+ $('gfsPlayerEnd').addEventListener('click',()=>{stopGfsPlayer();setSharedLead(72,true)});
+ $('gfsPlayerSpeed').addEventListener('change',()=>{if(gfsPlayerTimer){stopGfsPlayer();startGfsPlayer()}});
+ showPlayerTime(Number($('gfsLeadLarge').value||24));
 
  $('mapTerrain').onclick=()=>{if(map.hasLayer(baseLayer))map.removeLayer(baseLayer);terrainLayer.addTo(map)};
  $('mapStandard').onclick=()=>{if(map.hasLayer(terrainLayer))map.removeLayer(terrainLayer);baseLayer.addTo(map)};
@@ -644,7 +749,7 @@ async function drawGfsGrid(targetMap,kind,areaLayer,vectorLayer,statusId,legendI
  try{
   areaLayer.clearLayers();vectorLayer.clearLayers();
   const b=targetMap.getBounds(),south=b.getSouth(),north=b.getNorth(),west=b.getWest(),east=b.getEast();
-  const rows=7,cols=7,lats=[],lons=[],points=[];
+  const rows=9,cols=9,lats=[],lons=[],points=[];
   for(let y=0;y<rows;y++)for(let x=0;x<cols;x++){
    const la=south+(north-south)*y/(rows-1),lo=west+(east-west)*x/(cols-1);
    lats.push(la.toFixed(3));lons.push(lo.toFixed(3));points.push([la,lo]);
@@ -653,53 +758,49 @@ async function drawGfsGrid(targetMap,kind,areaLayer,vectorLayer,statusId,legendI
   const url=`https://api.open-meteo.com/v1/gfs?latitude=${lats.join(',')}&longitude=${lons.join(',')}&hourly=${fields}&forecast_hours=73&timezone=UTC`;
   const resp=await fetch(url);if(!resp.ok)throw Error('GFS HTTP '+resp.status);
   const payload=await resp.json(),items=Array.isArray(payload)?payload:[payload];
-  const lead=Math.max(0,Math.min(72,Number($(leadId)?.value||24)));
-  let validTime='';
+  const lead=Math.max(0,Math.min(72,Number($(leadId)?.value||24))),values=new Array(rows*cols).fill(null);
+  let validTime='',windMarkers=[];
   items.forEach((d,i)=>{
-   if(!d.hourly)return;
-   const times=d.hourly.time||[];
-   let idx=times.findIndex(t=>new Date(t).getTime()>=Date.now()+lead*3600000);
-   if(idx<0)idx=Math.min(times.length-1,lead);
+   if(!d.hourly)return;const times=d.hourly.time||[];
+   let idx=times.findIndex(t=>new Date(t).getTime()>=Date.now()+lead*3600000);if(idx<0)idx=Math.min(times.length-1,lead);
    if(!validTime)validTime=times[idx]||'';
    const h=d.hourly,[la,lo]=points[i];
-   const tempV=h.temperature_2m?.[idx],rainV=h.precipitation?.[idx],cloudV=h.cloud_cover?.[idx],
-         windV=h.wind_speed_10m?.[idx],dirV=h.wind_direction_10m?.[idx],
-         capeV=h.cape?.[idx],pressureV=h.pressure_msl?.[idx];
+   const tv=h.temperature_2m?.[idx],rv=h.precipitation?.[idx],cv=h.cloud_cover?.[idx],wv=h.wind_speed_10m?.[idx],dv=h.wind_direction_10m?.[idx],cape=h.cape?.[idx],pv=h.pressure_msl?.[idx];
    if(kind==='wind'){
-    if(windV==null||dirV==null)return;
-    const html=`<div class="wind-arrow" style="transform:rotate(${(dirV+180)%360}deg)">↑</div>`;
-    L.marker([la,lo],{icon:L.divIcon({className:'',html,iconSize:[22,22],iconAnchor:[11,11]})})
-     .bindTooltip(`GFS άνεμος ${Math.round(windV)} km/h · διεύθυνση ${Math.round(dirV)}°`)
-     .addTo(vectorLayer);
-    return;
+    if(wv==null||dv==null)return;
+    const html=`<div class="wind-arrow" style="transform:rotate(${(dv+180)%360}deg)">↑</div>`;
+    windMarkers.push(L.marker([la,lo],{icon:L.divIcon({className:'',html,iconSize:[22,22],iconAnchor:[11,11]})}).bindTooltip(`GFS άνεμος ${Math.round(wv)} km/h · διεύθυνση ${Math.round(dv)}°`));return;
    }
-   let v,color,opacity,unit,label;
-   if(kind==='cloudforecast'){v=cloudV;unit='%';label='Νεφοκάλυψη';color=v>85?'#e8f3ff':v>65?'#a9c7e4':v>40?'#668fb7':v>20?'#3d668e':'#203d5e';opacity=.22+(v||0)/230}
-   else if(kind==='rainforecast'){v=rainV;unit='mm/h';label='Υετός';color=v>=10?'#8b36b5':v>=5?'#d13d9a':v>=2?'#ed843c':v>=.5?'#f0c34d':v>.1?'#58cce0':'#52677c';opacity=v>.1?Math.min(.78,.28+v/18):.035}
-   else if(kind==='gfs-temp'){v=tempV;unit='°C';label='Θερμοκρασία 2 m';color=v<=0?'#6844bd':v<=5?'#367bd0':v<=10?'#36b8d0':v<=15?'#48b879':v<=20?'#d1c64c':v<=25?'#e99a3d':'#d84b43';opacity=.52}
-   else if(kind==='gfs-cape'){v=capeV;unit='J/kg';label='CAPE';color=v>=2000?'#a52b35':v>=1000?'#e45c35':v>=500?'#e7a13a':v>=100?'#d8d34b':'#426b91';opacity=.18+Math.min(0.58,(v||0)/3500)}
-   else if(kind==='gfs-pressure'){v=pressureV;unit='hPa';label='Πίεση MSL';color=v<990?'#7752bd':v<1000?'#4c86c6':v<1010?'#48a99b':v<1020?'#d0b24c':'#d47c45';opacity=.42}
-   else return;
-   if(v==null)return;
-   const dy=(north-south)/(rows-1)*.49,dx=(east-west)/(cols-1)*.49;
-   L.rectangle([[la-dy,lo-dx],[la+dy,lo+dx]],{color,weight:0,fillColor:color,fillOpacity:opacity,interactive:true})
-    .bindTooltip(`${label}: ${kind==='gfs-temp'?v.toFixed(1):kind==='gfs-pressure'?Math.round(v):Math.round(v*10)/10} ${unit}`)
-    .addTo(areaLayer);
+   const v=kind==='cloudforecast'?cv:kind==='rainforecast'?rv:kind==='gfs-temp'?tv:kind==='gfs-cape'?cape:kind==='gfs-pressure'?pv:null;
+   if(v!=null&&Number.isFinite(Number(v)))values[i]=Number(v);
   });
-  if(kind==='wind')vectorLayer.addTo(targetMap);else areaLayer.addTo(targetMap);
-  const parsedTime=validTime?(/[zZ]|[+-]\\d{2}:\\d{2}$/.test(validTime)?new Date(validTime):new Date(validTime+'Z')):null;
+  if(kind==='wind'){windMarkers.forEach(m=>m.addTo(vectorLayer));vectorLayer.addTo(targetMap);}
+  else{
+   const valid=values.filter(v=>v!=null);if(!valid.length)throw Error('No valid GFS values');
+   const min=Math.min(...valid),max=Math.max(...valid);
+   const ramps={
+    'gfs-pressure':[[0,[75,55,150]],[.18,[65,115,185]],[.38,[65,165,160]],[.58,[205,190,85]],[.78,[225,125,65]],[1,[170,55,55]]],
+    'gfs-temp':[[0,[75,55,150]],[.18,[55,125,205]],[.36,[50,185,205]],[.54,[65,175,115]],[.72,[220,205,75]],[.86,[230,135,55]],[1,[200,55,55]]],
+    'rainforecast':[[0,[30,70,120]],[.08,[55,175,210]],[.25,[70,190,140]],[.48,[235,210,65]],[.7,[240,130,45]],[.86,[210,55,135]],[1,[145,55,185]]],
+    'cloudforecast':[[0,[30,55,85]],[.25,[65,105,145]],[.5,[120,155,185]],[.75,[185,205,220]],[1,[245,250,255]]],
+    'gfs-cape':[[0,[35,75,120]],[.15,[75,160,175]],[.35,[205,205,65]],[.58,[240,150,45]],[.78,[220,65,65]],[1,[150,45,145]]]
+   };
+   const ramp=ramps[kind]||ramps['gfs-pressure'];
+   const colorAt=t=>{t=Math.max(0,Math.min(1,t));let a=ramp[0],z=ramp[ramp.length-1];for(let k=1;k<ramp.length;k++)if(t<=ramp[k][0]){a=ramp[k-1];z=ramp[k];break}const q=(t-a[0])/(z[0]-a[0]||1);return a[1].map((c,j)=>Math.round(c+(z[1][j]-c)*q))};
+   const W=640,H=640,canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;const ctx=canvas.getContext('2d'),img=ctx.createImageData(W,H),data=img.data;
+   const sample=(gx,gy)=>{const x0=Math.max(0,Math.min(cols-1,Math.floor(gx))),y0=Math.max(0,Math.min(rows-1,Math.floor(gy))),x1=Math.min(cols-1,x0+1),y1=Math.min(rows-1,y0+1),fx=gx-x0,fy=gy-y0,at=(x,y)=>values[y*cols+x],q00=at(x0,y0),q10=at(x1,y0),q01=at(x0,y1),q11=at(x1,y1);if([q00,q10,q01,q11].some(v=>v==null))return null;return q00*(1-fx)*(1-fy)+q10*fx*(1-fy)+q01*(1-fx)*fy+q11*fx*fy};
+   for(let py=0;py<H;py++)for(let px=0;px<W;px++){const v=sample(px/(W-1)*(cols-1),(1-py/(H-1))*(rows-1)),o=(py*W+px)*4;if(v==null)continue;const t=(v-min)/(max-min||1),c=colorAt(t);let alpha=kind==='rainforecast'?(v<.05?0:Math.min(.78,.20+Math.sqrt(Math.max(0,t))*.55)):kind==='cloudforecast'?.25+t*.48:kind==='gfs-cape'?.22+t*.60:.48;if(kind==='gfs-pressure')alpha=.52;data[o]=c[0];data[o+1]=c[1];data[o+2]=c[2];data[o+3]=Math.round(alpha*255)}
+   ctx.putImageData(img,0,0);
+   if(kind==='gfs-pressure'&&max-min>0){ctx.lineWidth=1.25;ctx.strokeStyle='rgba(20,30,48,.72)';for(let level=Math.ceil(min/4)*4;level<=max;level+=4){ctx.beginPath();for(let y=0;y<rows-1;y++)for(let x=0;x<cols-1;x++){const c=[[x,y,values[y*cols+x]],[x+1,y,values[y*cols+x+1]],[x+1,y+1,values[(y+1)*cols+x+1]],[x,y+1,values[(y+1)*cols+x]]],cross=[];for(let e=0;e<4;e++){const q=c[e],z=c[(e+1)%4];if(q[2]==null||z[2]==null||(level-q[2])*(level-z[2])>0||q[2]===z[2])continue;const t=(level-q[2])/(z[2]-q[2]);cross.push([(q[0]+(z[0]-q[0])*t)/(cols-1)*W,(1-(q[1]+(z[1]-q[1])*t)/(rows-1))*H])}if(cross.length>=2){ctx.moveTo(...cross[0]);ctx.lineTo(...cross[1])}}ctx.stroke()}}
+   L.imageOverlay(canvas.toDataURL('image/png'),[[south,west],[north,east]],{opacity:1,interactive:false}).addTo(areaLayer);areaLayer.addTo(targetMap);
+  }
+  const parsedTime=validTime?(/[zZ]|[+-]\d{2}:\d{2}$/.test(validTime)?new Date(validTime):new Date(validTime+'Z')):null;
   const stamp=parsedTime&&!isNaN(parsedTime)?parsedTime.toLocaleString('el-GR',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',timeZone:'UTC'})+' UTC':'';
-  const desc={cloudforecast:'Νεφοκάλυψη',rainforecast:'Υετός',wind:'Άνεμος 10 m','gfs-temp':'Θερμοκρασία στα 2 m','gfs-cape':'Convective Available Potential Energy (CAPE)','gfs-pressure':'Πίεση μέσης στάθμης θάλασσας'};
-  const msg=`NOAA GFS · ${desc[kind]} · +${lead}h · έγκυρο: ${stamp}`;
-  $(statusId).textContent=msg;
-  $(legendId).textContent=`${msg}. Η απεικόνιση είναι χωρική δειγματοληψία 7×7 σημείων από το GFS.`;
+  const desc={cloudforecast:'Νεφοκάλυψη',rainforecast:'Υετός',wind:'Άνεμος 10 m','gfs-temp':'Θερμοκρασία στα 2 m','gfs-cape':'Convective Available Potential Energy (CAPE)','gfs-pressure':'Πίεση μέσης στάθμης θάλασσας'},msg=`NOAA GFS · ${desc[kind]} · +${lead}h · έγκυρο: ${stamp}`;
+  $(statusId).textContent=msg;$(legendId).textContent=kind==='gfs-pressure'?`${msg}. Συνεχές raster με παρεμβολή και ισοβαρείς ανά 4 hPa. Η παρεμβολή εξομαλύνει την εμφάνιση, δεν αυξάνει την πραγματική ανάλυση του GFS.`:`${msg}. Συνεχές raster με χωρική παρεμβολή από τα αριθμητικά σημεία GFS.`;
   const runEl=$('gfsRunLarge');if(runEl)runEl.textContent=`NOAA GFS · πρόγνωση +${lead}h · ${stamp}`;
- }catch(e){
-  $(statusId).textContent='Δεν ήταν δυνατή η λήψη των δεδομένων GFS. Δοκιμάστε ξανά ή κάντε zoom σε μικρότερη περιοχή.';
-  console.error('GFS map error',e);
- }
+ }catch(e){$(statusId).textContent='Δεν ήταν δυνατή η λήψη των δεδομένων GFS. Δοκιμάστε ξανά ή κάντε zoom σε μικρότερη περιοχή.';console.error('GFS map error',e)}
 }
-
 async function loadWeather(){
  $('condition').textContent='Φόρτωση…';
  try{
@@ -884,12 +985,59 @@ function meteoAlarmDate(value){
 function meteoAlarmSafe(value){
  return String(value||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
+function meteoAlarmPhenomenonIcon(event,headline,description){
+ const t=`${event||''} ${headline||''} ${description||''}`.toLowerCase();
+ if(/thunder|storm|καταιγ|κεραυν|lightning/.test(t))return '⛈️';
+ if(/snow|χιον|sleet|χιονόνερο/.test(t))return '❄️';
+ if(/rain|precip|βροχ|υετ|καταιγ/.test(t))return '🌧️';
+ if(/wind|άνεμ|θυελλ|gust|ριπή/.test(t))return '💨';
+ if(/heat|hot|καύσων|υψηλ.*θερμοκρασ/.test(t))return '🌡️';
+ if(/cold|παγετ|ψύχος|χαμηλ.*θερμοκρασ/.test(t))return '🥶';
+ if(/fog|ομίχλ/.test(t))return '🌫️';
+ if(/coast|sea|θαλάσσ|κυματ|παράκτι/.test(t))return '🌊';
+ if(/fire|wildfire|πυρκαγ/.test(t))return '🔥';
+ return '⚠️';
+}
+function meteoAlarmLocalDateTime(value){
+ if(!value)return {date:'—',time:'—'};
+ const d=new Date(value);if(isNaN(d))return {date:String(value),time:'—'};
+ const opts={timeZone:'Europe/Athens'};
+ return {
+  date:new Intl.DateTimeFormat('el-GR',{...opts,day:'2-digit',month:'2-digit',year:'numeric'}).format(d),
+  time:new Intl.DateTimeFormat('el-GR',{...opts,hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(d)
+ };
+}
 function renderMeteoAlarmAlerts(entries){
  const host=$('meteoAlarmAlertsList');
  if(!entries.length){
   host.innerHTML='<div class="notice">Η ροή MeteoAlarm ενημερώθηκε επιτυχώς: δεν βρέθηκαν ενεργές προειδοποιήσεις για την Ελλάδα. Για επιβεβαίωση, ανοίξτε την επίσημη σελίδα προειδοποιήσεων της ΕΜΥ.</div>';return;
  }
- host.innerHTML=entries.map(a=>`<article class="meteoalarm-alert-card ${a.level}"><div class="meteoalarm-alert-head"><div class="meteoalarm-alert-title">${meteoAlarmSafe(a.headline||a.event||'Προειδοποίηση καιρού')}</div><span class="meteoalarm-alert-badge ${a.level}">${meteoAlarmGreekSeverity(a.level)}</span></div><div class="meteoalarm-alert-meta">Έκδοση: ${meteoAlarmSafe(meteoAlarmDate(a.sent||a.updated))} · Έναρξη: ${meteoAlarmSafe(meteoAlarmDate(a.effective||a.onset))} · Λήξη: ${meteoAlarmSafe(meteoAlarmDate(a.expires))}</div>${a.description?`<div class="meteoalarm-alert-description">${meteoAlarmSafe(a.description)}</div>`:''}${a.area?`<div class="meteoalarm-alert-area">Περιοχές: ${meteoAlarmSafe(a.area)}</div>`:''}<div class="meteoalarm-alert-meta">Φαινόμενο: ${meteoAlarmSafe(a.event||'—')} · Βεβαιότητα: ${meteoAlarmSafe(a.certainty||'—')}</div>${a.url?`<a href="${meteoAlarmSafe(a.url)}" target="_blank" rel="noopener">Περισσότερες πληροφορίες ↗</a>`:''}</article>`).join('');
+ host.innerHTML=entries.map(a=>{
+  const start=meteoAlarmLocalDateTime(a.effective||a.onset||a.sent);
+  const end=meteoAlarmLocalDateTime(a.expires);
+  const icon=meteoAlarmPhenomenonIcon(a.event,a.headline,a.description);
+  const level=a.level||'unknown';
+  return `<article class="meteoalarm-alert-card ${meteoAlarmSafe(level)}">
+   <div class="meteoalarm-alert-hero">
+    <div class="meteoalarm-alert-hero-main">
+     <div class="meteoalarm-alert-country">Ελλάδα · MeteoAlarm</div>
+     <span class="meteoalarm-alert-badge">${meteoAlarmGreekSeverity(level)} ΠΡΟΕΙΔΟΠΟΙΗΣΗ</span>
+     <div class="meteoalarm-alert-title">${meteoAlarmSafe(a.headline||a.event||'Προειδοποίηση καιρού')}</div>
+     ${a.area?`<div class="meteoalarm-alert-area">${meteoAlarmSafe(a.area)}</div>`:''}
+    </div>
+    <div class="meteoalarm-alert-icon" role="img" aria-label="${meteoAlarmSafe(a.event||'Καιρικό φαινόμενο')}">${icon}</div>
+   </div>
+   <div class="meteoalarm-alert-body">
+    <div class="meteoalarm-alert-times">
+     <div class="meteoalarm-alert-time"><div class="meteoalarm-alert-time-label">Έναρξη</div><div class="meteoalarm-alert-time-value">${meteoAlarmSafe(start.date)}</div><div class="meteoalarm-alert-time-value">${meteoAlarmSafe(start.time)}</div><div class="meteoalarm-alert-time-zone">Τοπική ώρα Ελλάδας</div></div>
+     <div class="meteoalarm-alert-time"><div class="meteoalarm-alert-time-label">Λήξη</div><div class="meteoalarm-alert-time-value">${meteoAlarmSafe(end.date)}</div><div class="meteoalarm-alert-time-value">${meteoAlarmSafe(end.time)}</div><div class="meteoalarm-alert-time-zone">Τοπική ώρα Ελλάδας</div></div>
+    </div>
+    ${a.description?`<div class="meteoalarm-alert-description">${meteoAlarmSafe(a.description)}</div>`:''}
+    <div class="meteoalarm-alert-meta">Φαινόμενο: ${meteoAlarmSafe(a.event||'—')} · Βεβαιότητα: ${meteoAlarmSafe(a.certainty||'—')} · Έκδοση: ${meteoAlarmSafe(meteoAlarmDate(a.sent||a.updated))}</div>
+    ${a.url?`<a class="meteoalarm-alert-link" href="${meteoAlarmSafe(a.url)}" target="_blank" rel="noopener">Περισσότερες πληροφορίες ↗</a>`:''}
+   </div>
+  </article>`;
+ }).join('');
 }
 async function loadMeteoAlarmAlerts(){
  const statusEl=$('meteoAlarmFeedStatus'),updatedEl=$('meteoAlarmUpdated'),host=$('meteoAlarmAlertsList');
