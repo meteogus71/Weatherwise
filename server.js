@@ -16,36 +16,77 @@ let lastGoodFeed = null;
 
 const weatherCache = new Map();
 const weatherInflight = new Map();
-const WEATHER_CACHE_MS = 2 * 60 * 1000;
+const WEATHER_CACHE_MS = 30 * 60 * 1000;
+const WEATHER_STALE_MAX_MS = 24 * 60 * 60 * 1000;
+const WEATHER_DISK_CACHE_DIR = '/tmp/weatherwise-api-cache';
+try { fs.mkdirSync(WEATHER_DISK_CACHE_DIR, { recursive: true }); } catch {}
+
+function weatherDiskPath(cacheKey) {
+  const hash = require('node:crypto').createHash('sha256').update(cacheKey).digest('hex');
+  return path.join(WEATHER_DISK_CACHE_DIR, `${hash}.json`);
+}
+
+async function readWeatherDiskCache(cacheKey) {
+  try {
+    const raw = await fs.promises.readFile(weatherDiskPath(cacheKey), 'utf8');
+    const item = JSON.parse(raw);
+    if (item && item.data && Number.isFinite(item.at)) {
+      weatherCache.set(cacheKey, item);
+      return item;
+    }
+  } catch {}
+  return null;
+}
+
+async function writeWeatherDiskCache(cacheKey, item) {
+  try {
+    await fs.promises.writeFile(weatherDiskPath(cacheKey), JSON.stringify(item));
+  } catch (err) {
+    console.warn('[Weather cache] Could not persist cache:', err.message);
+  }
+}
 
 async function cachedOpenMeteoJson(cacheKey, url, ttl = WEATHER_CACHE_MS) {
   const now = Date.now();
-  const hit = weatherCache.get(cacheKey);
+  let hit = weatherCache.get(cacheKey);
+  if (!hit) hit = await readWeatherDiskCache(cacheKey);
+
   if (hit && now - hit.at < ttl) return { data: hit.data, cache: 'HIT' };
   if (weatherInflight.has(cacheKey)) {
-    const data = await weatherInflight.get(cacheKey);
-    return { data, cache: 'COALESCED' };
+    const result = await weatherInflight.get(cacheKey);
+    return { data: result.data || result, cache: 'COALESCED' };
   }
+
   const task = (async () => {
-    const upstream = await fetch(url, {
-      headers: { 'Accept': 'application/json', 'User-Agent': 'WeatherWise/1.0' },
-      signal: AbortSignal.timeout(25000)
-    });
-    if (!upstream.ok) {
-      const detail = (await upstream.text()).slice(0, 300);
-      const err = new Error(`Open-Meteo HTTP ${upstream.status}: ${detail}`);
-      err.status = upstream.status;
+    try {
+      const upstream = await fetch(url, {
+        headers: { 'Accept': 'application/json', 'User-Agent': 'WeatherWise/1.0' },
+        signal: AbortSignal.timeout(25000)
+      });
+      if (!upstream.ok) {
+        const detail = (await upstream.text()).slice(0, 300);
+        const err = new Error(`Open-Meteo HTTP ${upstream.status}: ${detail}`);
+        err.status = upstream.status;
+        throw err;
+      }
+      const data = await upstream.json();
+      if (data && data.error) throw new Error(data.reason || 'Open-Meteo API error');
+      const item = { data, at: Date.now() };
+      weatherCache.set(cacheKey, item);
+      await writeWeatherDiskCache(cacheKey, item);
+      return { data, cache: 'MISS' };
+    } catch (err) {
+      if (hit && now - hit.at <= WEATHER_STALE_MAX_MS) {
+        console.warn(`[Weather cache] Serving stale data after upstream error: ${err.message}`);
+        return { data: hit.data, cache: 'STALE', staleReason: err.message };
+      }
       throw err;
     }
-    const data = await upstream.json();
-    if (data && data.error) throw new Error(data.reason || 'Open-Meteo API error');
-    weatherCache.set(cacheKey, { data, at: Date.now() });
-    return data;
   })();
+
   weatherInflight.set(cacheKey, task);
   try {
-    const data = await task;
-    return { data, cache: 'MISS' };
+    return await task;
   } finally {
     weatherInflight.delete(cacheKey);
   }
@@ -179,11 +220,14 @@ const server = http.createServer(async (req, res) => {
         ? 'https://api.open-meteo.com/v1/gfs'
         : 'https://api.open-meteo.com/v1/forecast';
       const key = url.pathname + '?' + query;
-      const result = await cachedOpenMeteoJson(key, endpoint + '?' + query, 120000);
+      const isMultiPoint = (url.searchParams.get('latitude') || '').includes(',');
+      const ttl = isMultiPoint ? 6 * 60 * 60 * 1000 : WEATHER_CACHE_MS;
+      const result = await cachedOpenMeteoJson(key, endpoint + '?' + query, ttl);
       return send(res, 200, JSON.stringify(result.data), {
         'Content-Type': 'application/json; charset=utf-8',
         'Cache-Control': 'public, max-age=120',
         'X-WeatherWise-Cache': result.cache,
+        ...(result.staleReason ? { 'Warning': '110 - "Serving stale weather data"' } : {}),
         'Access-Control-Allow-Origin': '*'
       });
     } catch (err) {
@@ -200,7 +244,7 @@ const server = http.createServer(async (req, res) => {
       const key = 'ecmwf?' + url.searchParams.toString();
       const cached = weatherCache.get(key);
       let items;
-      if (cached && Date.now() - cached.at < WEATHER_CACHE_MS) items = cached.data;
+      if (cached && Date.now() - cached.at < 6 * 60 * 60 * 1000) items = cached.data;
       else if (weatherInflight.has(key)) items = await weatherInflight.get(key);
       else {
         const task = getEcmwfGrid(url).then(data => { weatherCache.set(key, { data, at: Date.now() }); return data; });

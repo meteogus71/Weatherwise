@@ -42,3 +42,14 @@
 
 ## Άδειες και attribution
 Τα ECMWF Open Data διατίθενται με CC-BY-4.0 και τους όρους χρήσης ECMWF. Να διατηρείται η αναφορά πηγής ECMWF στην εφαρμογή.
+
+
+## Weather API reliability patch
+
+- Successful Open-Meteo responses are cached on disk under `/tmp/weatherwise-api-cache` and in memory.
+- Single-point weather requests use a 30-minute cache; multi-point city batches use a 6-hour cache.
+- If Open-Meteo returns an error (including HTTP 429), the server serves a successful cached response up to 24 hours old, when one exists.
+- European city measurements now go through `/api/weather` rather than calling Open-Meteo directly from each visitor's browser.
+- ECMWF grid responses are retained in memory for up to 6 hours; the worker also caches downloaded GRIB files under `/tmp/weatherwise-ecmwf`.
+
+Important: this reliability patch reduces duplicate API calls and can serve stale data after a successful earlier request. It does not yet migrate the dashboard's current conditions and 7-day forecast away from Open-Meteo; the existing ECMWF Open Data integration is used by the forecast-map grid endpoints. A full dashboard migration requires a multi-step ECMWF forecast data pipeline and field mapping.
