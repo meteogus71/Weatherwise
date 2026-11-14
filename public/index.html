@@ -391,7 +391,7 @@ select.btn{color:var(--text);background:var(--panel2);border:1px solid var(--lin
       <div class="card"><div class="card-head"><h3>ΠΡΟΓΝΩΣΗ 5 ΗΜΕΡΩΝ</h3><span>ΗΜΕΡΗΣΙΑ</span></div><div class="forecast-list" id="forecastList"></div></div>
     </div>
     <div class="card chart-card"><div class="card-head"><h3>ΕΞΕΛΙΞΗ ΘΕΡΜΟΚΡΑΣΙΑΣ</h3><span>ΕΠΟΜΕΝΕΣ 24 ΩΡΕΣ</span></div><div class="chart-wrap"><canvas id="tempChart"></canvas></div></div>
-    <div class="notice">Οι τρέχουσες συνθήκες και οι λοιπές προγνώσεις παρέχονται από Open-Meteo. Τα προγνωστικά πεδία ECMWF IFS προέρχονται απευθείας από το ECMWF Open Data. Τα πεδία NOAA GFS παραμένουν ξεχωριστή επιλογή. Η σελίδα δεν αποτελεί επίσημη υπηρεσία προειδοποιήσεων.</div>
+    <div class="notice">Οι τρέχουσες συνθήκες και οι λοιπές προγνώσεις παρέχονται από Open-Meteo μέσω του WeatherWise cache. Τα προγνωστικά πεδία ECMWF IFS προέρχονται απευθείας από το ECMWF Open Data. Τα πεδία NOAA GFS παραμένουν ξεχωριστή επιλογή. Η σελίδα δεν αποτελεί επίσημη υπηρεσία προειδοποιήσεων.</div>
   </section>
 
   <section class="section" id="maps">
@@ -540,8 +540,8 @@ async function loadEuropeWeather(){
  const statusEl=$('europeStatus');if(statusEl)statusEl.textContent='Ανάκτηση ζωντανών μετρήσεων…';
  try{
   const lats=europeCities.map(c=>c.lat).join(','),lons=europeCities.map(c=>c.lon).join(',');
-  const url=`https://api.open-meteo.com/v1/forecast?latitude=${lats}&longitude=${lons}&current=temperature_2m,wind_speed_10m&timezone=auto`;
-  const response=await fetch(url);if(!response.ok)throw Error('HTTP '+response.status);
+  const url=`/api/weather?latitude=${encodeURIComponent(lats)}&longitude=${encodeURIComponent(lons)}&current=temperature_2m,wind_speed_10m&timezone=auto`;
+  const response=await fetch(url);if(!response.ok)throw Error('WeatherWise API HTTP '+response.status);
   const payload=await response.json(),items=Array.isArray(payload)?payload:[payload];
   europeRows=europeCities.map((city,i)=>({ ...city,temp:items[i]?.current?.temperature_2m,wind:items[i]?.current?.wind_speed_10m,time:items[i]?.current?.time }))
     .filter(x=>Number.isFinite(x.temp)&&Number.isFinite(x.wind));
