@@ -34,7 +34,8 @@ def main():
 
     cache_dir = Path(os.environ.get("ECMWF_CACHE_DIR", "/tmp/weatherwise-ecmwf"))
     cache_dir.mkdir(parents=True, exist_ok=True)
-    cache_key = hashlib.sha1(f"ifs-oper-fc-{step}-{os.environ.get('ECMWF_RESOLUTION', '0p4')}".encode()).hexdigest()
+    # Use the supported ECMWF Open Data resolution (0p25); 0p4 is invalid.
+    cache_key = hashlib.sha1(f"ifs-oper-fc-{step}-0p25".encode()).hexdigest()
     cache_seconds = int(os.environ.get("ECMWF_CACHE_HOURS", "6")) * 3600
 
     def cache_is_valid(path):
@@ -51,7 +52,7 @@ def main():
         client = Client(
             source=os.environ.get("ECMWF_OPEN_DATA_SOURCE", "ecmwf"),
             model="ifs",
-            resol=os.environ.get("ECMWF_RESOLUTION", "0p4"),
+            resol="0p25",
         )
         try:
             # stdout is reserved for the JSON response read by server.js.
