@@ -1,0 +1,15 @@
+{
+  "name": "weatherwise-meteoalarm",
+  "version": "1.0.0",
+  "private": true,
+  "description": "WeatherWise website and cached MeteoAlarm Greece Atom/CAP proxy",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "openmeteo": "^1.2.3"
+  }
+}
