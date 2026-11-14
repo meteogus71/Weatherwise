@@ -1,46 +1,44 @@
-# WeatherWise — δωρεάν αρχική φιλοξενία
+# WeatherWise — ECMWF Open Data + ECDS/MARS
 
-Το πακέτο περιέχει την ιστοσελίδα WeatherWise και τον proxy MeteoAlarm στην ίδια υπηρεσία Node.js. Έτσι το HTML καλεί το `/api/meteoalarm` στο ίδιο domain: δεν χρειάζεται CORS ρύθμιση, EDR endpoint ή MeteoAlarm token.
+## Τι περιλαμβάνει
+- Τα προγνωστικά πεδία ECMWF IFS χαρτών λαμβάνονται απευθείας από το ECMWF Open Data σε GRIB2.
+- Ο server αποκωδικοποιεί τα GRIB με ecCodes και επιστρέφει τιμές στα σημεία του χάρτη.
+- Το `/api/ecmwf` δέχεται συντεταγμένες, μεταβλητές και forecast lead (`step`).
+- Η λήψη GRIB αποθηκεύεται προσωρινά στον server ώστε να αποφεύγονται επαναλαμβανόμενες λήψεις.
+- Το `/api/ecds/status` ελέγχει αν έχουν ρυθμιστεί τα διαπιστευτήρια ECDS.
+- Υπάρχει admin-side helper `ecds_archive_client.py` για αρχειακά datasets μέσω CDS API. Δεν εκτίθεται ως δημόσιο endpoint.
 
-## Τι κάνει ο proxy
-- Ανακτά το δημόσιο Greece legacy Atom/CAP feed του MeteoAlarm.
-- Κρατά την τελευταία επιτυχημένη απάντηση στη μνήμη για 5 λεπτά.
-- Αν το upstream feed αποτύχει προσωρινά, επιστρέφει την τελευταία καλή απάντηση με ένδειξη `X-WeatherWise-Cache: STALE`.
-- Health check στο `/health`.
-- Δεν αποθηκεύει προσωπικά δεδομένα.
+## ECMWF Open Data
+Το Open Data είναι δημόσιο και δεν χρειάζεται API key. Το πακέτο χρησιμοποιεί το επίσημο `ecmwf-opendata` Python client και ecCodes. Τα επιχειρησιακά IFS δεδομένα είναι GRIB2. Οι διαθέσιμοι χρόνοι πρόγνωσης εξαρτώνται από τον κύκλο:
+- 00/12 UTC: 0–144h ανά 3h και 150–360h ανά 6h.
+- 06/18 UTC: 0–90h ανά 3h.
 
-## Δωρεάν δημοσίευση στο Render
-1. Δημιούργησε λογαριασμό στο GitHub και στο Render.
-2. Στο GitHub δημιούργησε ένα νέο repository με όνομα `weatherwise` (Public ή Private).
-3. Ανέβασε ΟΛΑ τα αρχεία και τους φακέλους αυτού του ZIP στο repository, διατηρώντας τη δομή:
-   - `server.js`
-   - `package.json`
-   - `render.yaml`
-   - `public/index.html`
-4. Στο Render επίλεξε **New → Blueprint** και σύνδεσε το GitHub repository `weatherwise`.
-5. Το Render θα εντοπίσει το `render.yaml`. Επίλεξε το Free plan και ολοκλήρωσε το deploy.
-6. Θα δημιουργηθεί διεύθυνση τύπου `https://weatherwise-xxxx.onrender.com`.
+Το UI του WeatherWise έχει χρονικό ορίζοντα έως 240h. Η διαθεσιμότητα συγκεκριμένου lead εξαρτάται από τον τελευταίο διαθέσιμο κύκλο ECMWF.
 
-## Έλεγχος μετά το deploy
-- Άνοιξε `https://ΤΟ-DOMAIN-ΣΟΥ/health` και επιβεβαίωσε ότι επιστρέφει `{"ok":true,...}`.
-- Άνοιξε `https://ΤΟ-DOMAIN-ΣΟΥ/api/meteoalarm` και επιβεβαίωσε ότι επιστρέφει XML/Atom.
-- Άνοιξε την αρχική σελίδα και έλεγξε το τμήμα προειδοποιήσεων MeteoAlarm.
+## ECDS / MARS αρχειακά δεδομένα
+Στο Render → Environment πρόσθεσε:
+- `CDSAPI_URL` = `https://ecds.ecmwf.int/api`
+- `CDSAPI_KEY` = το προσωπικό API token που εμφανίζει ο λογαριασμός σου στο ECDS.
 
-## Σημαντικοί περιορισμοί δωρεάν υπηρεσίας
-Το Render Free μπορεί να απενεργοποιεί προσωρινά το service μετά από 15 λεπτά χωρίς κίνηση. Η πρώτη κλήση μετά από αδράνεια μπορεί να χρειαστεί περίπου ένα λεπτό για επανεκκίνηση. Η προσωρινή cache είναι στη μνήμη και μηδενίζεται σε restart/sleep. Αυτό είναι κατάλληλο για δοκιμή και αρχική χρήση, όχι για κρίσιμη επιχειρησιακή προειδοποίηση ή εγγυημένη 24/7 διαθεσιμότητα.
+Μην βάλεις το token στο `index.html`, στο GitHub ή σε δημόσιο αρχείο. Το `/api/ecds/status` επιβεβαιώνει μόνο ότι οι μεταβλητές έχουν οριστεί· δεν εγγυάται πρόσβαση σε κάθε dataset. Πρέπει πρώτα να αποδεχθείς χειροκίνητα τους Terms of Use στη σελίδα κάθε dataset. Τα διαθέσιμα datasets, τα πεδία και τα χρονικά βήματα διαφέρουν ανά dataset.
 
-## Τοπική δοκιμή (προαιρετικά)
-Απαιτείται Node.js 20 ή νεότερο:
-```bash
-npm start
-```
-Έπειτα άνοιξε `http://localhost:3000`.
+Το `ecds_archive_client.py` είναι εργαλείο server-side για ενσωμάτωση σε ελεγχόμενη εργασία διαχείρισης. Για κάθε dataset πρέπει να δημιουργηθεί συγκεκριμένο, ελεγμένο request από το κουμπί “Show API request code” της σελίδας του dataset. Δεν υπάρχει γενικό MARS endpoint που να μπορεί να υποθέσει με ασφάλεια όλα τα ονόματα datasets/πεδίων.
 
+## Deploy στο Render
+1. Αντικατάστησε τα αρχεία του repository με τα περιεχόμενα αυτού του ZIP.
+2. Το Render θα κάνει deploy μέσω του `Dockerfile` (Node + Python + ecCodes).
+3. Στο Render → Environment πρόσθεσε τα `CDSAPI_URL` και `CDSAPI_KEY`.
+4. Κάνε Manual Deploy → Clear build cache & deploy.
+5. Έλεγξε:
+   - `/health`
+   - `/api/ecds/status`
+   - `/api/ecmwf?latitude=37.98&longitude=23.72&hourly=temperature_2m&step=24`
 
-## ECMWF IFS forecast integration
-The `/api/ecmwf` server endpoint uses the official `openmeteo` JavaScript SDK to retrieve ECMWF IFS native-resolution hourly data. Requests are limited to 100 grid coordinates per batch and an allowlist of supported hourly variables. The map model selector switches between the existing NOAA GFS request path and the server-side ECMWF endpoint. ECMWF requests use a 10-day forecast horizon, 24 past hours, UTC and native temporal resolution.
+## Σημαντική διάκριση πηγών
+- Οι προγνωστικοί χάρτες ECMWF IFS χρησιμοποιούν απευθείας ECMWF Open Data.
+- Η επιλογή NOAA GFS παραμένει ξεχωριστή.
+- Τα υπάρχοντα τμήματα τρέχουσας κατάστασης/παρατηρήσεων και ορισμένες συγκρίσεις πόλεων εξακολουθούν να χρησιμοποιούν Open-Meteo. Δεν παρουσιάζονται ως δεδομένα ECMWF, επειδή η πρόγνωση μοντέλου δεν είναι ισοδύναμη με πραγματική παρατήρηση σταθμού.
+- Οι χάρτες καιρού δεν αποτελούν επίσημη υπηρεσία προειδοποιήσεων.
 
-
-## Open-Meteo request protection
-
-The browser now calls same-origin `/api/weather` and `/api/gfs` routes. The server caches identical upstream requests for two minutes and coalesces simultaneous identical requests. ECMWF responses are also cached/deduplicated. This reduces repeated calls during refreshes and map redraws; it cannot override an upstream provider-wide rate limit, but it prevents avoidable duplicate requests from this app.
+## Άδειες και attribution
+Τα ECMWF Open Data διατίθενται με CC-BY-4.0 και τους όρους χρήσης ECMWF. Να διατηρείται η αναφορά πηγής ECMWF στην εφαρμογή.

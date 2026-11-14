@@ -1,9 +1,7 @@
 services:
   - type: web
     name: weatherwise
-    runtime: node
+    runtime: docker
     plan: free
-    buildCommand: npm install
-    startCommand: npm start
     healthCheckPath: /health
     autoDeploy: true

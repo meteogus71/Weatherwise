@@ -1,4 +1,5 @@
 const http = require('node:http');
+const { spawn } = require('node:child_process');
 const fs = require('node:fs');
 const path = require('node:path');
 let openMeteoClientPromise;
@@ -92,62 +93,46 @@ async function getOpenMeteoClient() {
   return openMeteoClientPromise;
 }
 
+
+function runEcmwfWorker(payload) {
+  return new Promise((resolve, reject) => {
+    const worker = spawn(process.env.PYTHON_BIN || 'python3', [
+      path.join(__dirname, 'ecmwf_worker.py')
+    ], { stdio: ['pipe', 'pipe', 'pipe'], env: process.env });
+    let stdout = '', stderr = '';
+    worker.stdout.setEncoding('utf8');
+    worker.stderr.setEncoding('utf8');
+    worker.stdout.on('data', chunk => { stdout += chunk; });
+    worker.stderr.on('data', chunk => { stderr += chunk; });
+    worker.on('error', reject);
+    worker.on('close', code => {
+      if (code !== 0) return reject(new Error(stderr.slice(-1800) || `ECMWF worker exited ${code}`));
+      try { resolve(JSON.parse(stdout)); }
+      catch (err) { reject(new Error(`Invalid ECMWF worker response: ${err.message}; ${stderr.slice(-500)}`)); }
+    });
+    worker.stdin.end(JSON.stringify(payload));
+  });
+}
+
 async function getEcmwfGrid(url) {
   const latitudes = (url.searchParams.get('latitude') || '').split(',').map(Number);
   const longitudes = (url.searchParams.get('longitude') || '').split(',').map(Number);
-  const hourlyFields = (url.searchParams.get('hourly') || '').split(',').filter(Boolean);
+  const fields = (url.searchParams.get('hourly') || '').split(',').filter(Boolean);
   if (!latitudes.length || latitudes.length !== longitudes.length ||
       latitudes.some(v => !Number.isFinite(v) || Math.abs(v) > 90) ||
       longitudes.some(v => !Number.isFinite(v) || Math.abs(v) > 180)) {
     throw new Error('Invalid latitude/longitude coordinates');
   }
-  if (latitudes.length > 100) throw new Error('Maximum 100 coordinates per request');
-  if (!hourlyFields.length) throw new Error('At least one hourly variable is required');
+  if (latitudes.length > 400) throw new Error('Maximum 400 coordinates per request');
   const allowed = new Set([
     'temperature_2m','precipitation','rain','pressure_msl','cloud_cover',
     'wind_speed_10m','wind_direction_10m','wind_gusts_10m','cape',
-    'temperature_850hPa','temperature_500hPa','precipitation_type',
-    'snowfall_water_equivalent'
+    'temperature_850hPa','temperature_500hPa'
   ]);
-  if (!hourlyFields.length || hourlyFields.some(f => !allowed.has(f))) {
-    throw new Error('Unsupported hourly variable requested');
-  }
-
-  const { fetchWeatherApi } = await getOpenMeteoClient();
-  const params = {
-    latitude: latitudes,
-    longitude: longitudes,
-    hourly: hourlyFields,
-    models: 'ecmwf_ifs',
-    wind_speed_unit: 'kn',
-    forecast_days: 10,
-    past_hours: 24,
-    temporal_resolution: 'native',
-    timezone: 'UTC'
-  };
-  const responses = await fetchWeatherApi('https://api.open-meteo.com/v1/forecast', params);
-  return responses.map(response => {
-    const hourly = response.hourly();
-    if (!hourly) return { latitude: response.latitude(), longitude: response.longitude(), hourly: null };
-    const start = Number(hourly.time());
-    const end = Number(hourly.timeEnd());
-    const interval = hourly.interval();
-    const length = Math.max(0, Math.ceil((end - start) / interval));
-    const time = Array.from({ length }, (_, i) =>
-      new Date((start + i * interval + response.utcOffsetSeconds()) * 1000).toISOString().slice(0, 16)
-    );
-    const data = { time, interval };
-    hourlyFields.forEach((field, index) => {
-      const variable = hourly.variables(index);
-      data[field] = variable ? Array.from(variable.valuesArray() || []) : [];
-    });
-    return {
-      latitude: response.latitude(),
-      longitude: response.longitude(),
-      elevation: response.elevation(),
-      hourly: data
-    };
-  });
+  if (!fields.length || fields.some(f => !allowed.has(f))) throw new Error('Unsupported ECMWF variable');
+  const step = Math.max(0, Math.min(240, Number(url.searchParams.get('step') || 24)));
+  if (!Number.isFinite(step)) throw new Error('Invalid forecast step');
+  return runEcmwfWorker({ latitudes, longitudes, fields, step });
 }
 
 async function getMeteoAlarmFeed() {
@@ -225,16 +210,29 @@ const server = http.createServer(async (req, res) => {
       return send(res, 200, JSON.stringify(items), {
         'Content-Type': 'application/json; charset=utf-8',
         'Cache-Control': 'public, max-age=120',
-        'Access-Control-Allow-Origin': '*'
+        'Access-Control-Allow-Origin': '*',
+        'X-WeatherWise-Provider': 'ECMWF Open Data'
       });
     } catch (err) {
-      console.error('[ECMWF API]', err && err.stack ? err.stack : err);
+      console.error('[ECMWF Open Data]', err && err.stack ? err.stack : err);
       return send(res, 502, JSON.stringify({
-        error: 'ECMWF data temporarily unavailable',
+        error: 'Direct ECMWF Open Data temporarily unavailable',
         detail: String(err && err.message || err),
-        hint: 'Check Render logs for [ECMWF API]'
+        hint: 'Check Render logs for [ECMWF Open Data]'
       }), { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' });
     }
+  }
+
+  if (req.method === 'GET' && url.pathname === '/api/ecds/status') {
+    const configured = Boolean(process.env.CDSAPI_URL && process.env.CDSAPI_KEY);
+    return send(res, 200, JSON.stringify({
+      configured,
+      endpoint: configured ? process.env.CDSAPI_URL : null,
+      service: 'ECMWF Data Store (ECDS)',
+      note: configured
+        ? 'Credentials detected. Dataset Terms of Use must be accepted in the ECDS website before retrieval.'
+        : 'Set CDSAPI_URL and CDSAPI_KEY in the hosting environment.'
+    }), { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' });
   }
 
   if (req.method === 'GET' && url.pathname === '/api/meteoalarm') {
