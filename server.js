@@ -182,13 +182,12 @@ async function cachedOpenMeteoJson(
 
         const status = Number(err.status || 0);
 
-        const retryable =
-          status === 429 ||
-          status === 500 ||
-          status === 502 ||
-          status === 503 ||
-          status === 504 ||
-          status === 0;
+       const retryable =
+  status === 500 ||
+  status === 502 ||
+  status === 503 ||
+  status === 504 ||
+  status === 0;
 
         if (!retryable || attempt === 2) {
           break;
