@@ -15,6 +15,24 @@ let lastGoodFeed = null;
 
 const weatherCache = new Map();
 const weatherInflight = new Map();
+// Keep ECMWF output separate and small: GRIB-derived grids can be large.
+const ecmwfCache = new Map();
+const ecmwfInflight = new Map();
+let ecmwfQueue = Promise.resolve();
+const MAX_WEATHER_CACHE_ENTRIES = 60;
+const MAX_ECMWF_CACHE_ENTRIES = 2;
+
+function setBoundedCache(map, key, value, maxEntries) {
+  if (map.has(key)) map.delete(key);
+  map.set(key, value);
+  while (map.size > maxEntries) map.delete(map.keys().next().value);
+}
+
+function runEcmwfWorkerSerialized(payload) {
+  const task = ecmwfQueue.then(() => runEcmwfWorker(payload));
+  ecmwfQueue = task.catch(() => undefined);
+  return task;
+}
 const WEATHER_CACHE_MS = 30 * 60 * 1000;
 const WEATHER_STALE_MAX_MS = 24 * 60 * 60 * 1000;
 const WEATHER_DISK_CACHE_DIR = '/tmp/weatherwise-api-cache';
@@ -30,7 +48,7 @@ async function readWeatherDiskCache(cacheKey) {
     const raw = await fs.promises.readFile(weatherDiskPath(cacheKey), 'utf8');
     const item = JSON.parse(raw);
     if (item && item.data && Number.isFinite(item.at)) {
-      weatherCache.set(cacheKey, item);
+      setBoundedCache(weatherCache, cacheKey, item, MAX_WEATHER_CACHE_ENTRIES);
       return item;
     }
   } catch {}
@@ -71,7 +89,7 @@ async function cachedOpenMeteoJson(cacheKey, url, ttl = WEATHER_CACHE_MS) {
       const data = await upstream.json();
       if (data && data.error) throw new Error(data.reason || 'Open-Meteo API error');
       const item = { data, at: Date.now() };
-      weatherCache.set(cacheKey, item);
+      setBoundedCache(weatherCache, cacheKey, item, MAX_WEATHER_CACHE_ENTRIES);
       await writeWeatherDiskCache(cacheKey, item);
       return { data, cache: 'MISS' };
     } catch (err) {
@@ -177,7 +195,7 @@ async function getEcmwfGrid(url) {
   if (!fields.length || fields.some(f => !allowed.has(f))) throw new Error('Unsupported ECMWF variable');
   const step = Math.max(0, Math.min(240, Number(url.searchParams.get('step') || 24)));
   if (!Number.isFinite(step)) throw new Error('Invalid forecast step');
-  return runEcmwfWorker({ latitudes, longitudes, fields, step });
+  return runEcmwfWorkerSerialized({ latitudes, longitudes, fields, step });
 }
 
 async function getMeteoAlarmFeed() {
@@ -361,7 +379,7 @@ async function getMetNorwayPoint(lat, lon) {
     const raw = await response.json();
     const data = buildMetNorwayOpenMeteoShape(raw);
     const item = { data, at: Date.now() };
-    weatherCache.set(key, item);
+    setBoundedCache(weatherCache, key, item, MAX_WEATHER_CACHE_ENTRIES);
     await writeWeatherDiskCache(key, item);
     return data;
   })();
@@ -459,14 +477,22 @@ const server = http.createServer(async (req, res) => {
   if (req.method === 'GET' && url.pathname === '/api/ecmwf') {
     try {
       const key = 'ecmwf?' + url.searchParams.toString();
-      const cached = weatherCache.get(key);
+      const cached = ecmwfCache.get(key);
       let items;
-      if (cached && Date.now() - cached.at < 6 * 60 * 60 * 1000) items = cached.data;
-      else if (weatherInflight.has(key)) items = await weatherInflight.get(key);
-      else {
-        const task = getEcmwfGrid(url).then(data => { weatherCache.set(key, { data, at: Date.now() }); return data; });
-        weatherInflight.set(key, task);
-        try { items = await task; } finally { weatherInflight.delete(key); }
+      if (cached && Date.now() - cached.at < 6 * 60 * 60 * 1000) {
+        // Refresh LRU position on hit.
+        ecmwfCache.delete(key);
+        ecmwfCache.set(key, cached);
+        items = cached.data;
+      } else if (ecmwfInflight.has(key)) {
+        items = await ecmwfInflight.get(key);
+      } else {
+        const task = getEcmwfGrid(url).then(data => {
+          setBoundedCache(ecmwfCache, key, { data, at: Date.now() }, MAX_ECMWF_CACHE_ENTRIES);
+          return data;
+        });
+        ecmwfInflight.set(key, task);
+        try { items = await task; } finally { ecmwfInflight.delete(key); }
       }
       return send(res, 200, JSON.stringify(items), {
         'Content-Type': 'application/json; charset=utf-8',

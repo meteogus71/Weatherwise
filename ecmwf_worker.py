@@ -34,7 +34,7 @@ def main():
 
     cache_dir = Path(os.environ.get("ECMWF_CACHE_DIR", "/tmp/weatherwise-ecmwf"))
     cache_dir.mkdir(parents=True, exist_ok=True)
-    cache_key = hashlib.sha1(f"ifs-oper-fc-{step}".encode()).hexdigest()
+    cache_key = hashlib.sha1(f"ifs-oper-fc-{step}-{os.environ.get('ECMWF_RESOLUTION', '0p4')}".encode()).hexdigest()
     cache_seconds = int(os.environ.get("ECMWF_CACHE_HOURS", "6")) * 3600
 
     def cache_is_valid(path):
@@ -51,7 +51,7 @@ def main():
         client = Client(
             source=os.environ.get("ECMWF_OPEN_DATA_SOURCE", "ecmwf"),
             model="ifs",
-            resol="0p25",
+            resol=os.environ.get("ECMWF_RESOLUTION", "0p4"),
         )
         try:
             # stdout is reserved for the JSON response read by server.js.
@@ -108,12 +108,25 @@ def main():
                     eccodes.codes_release(gid)
         return sampled, timestamp
 
-    # Surface fields: one GRIB handle at a time; no retained ecCodes handles.
-    surface_path = cache_dir / f"{cache_key}.grib2"
-    ensure_download(surface_path, param=["2t", "tp", "msl", "tcc", "10u", "10v"])
-    surface, timestamp = sample_grib(
-        surface_path, {"2t", "tp", "msl", "tcc", "10u", "10v"}
-    )
+    # Request only fields needed by this layer to reduce GRIB size and RAM.
+    surface_wanted = set()
+    if "temperature_2m" in fields:
+        surface_wanted.add("2t")
+    if "precipitation" in fields or "rain" in fields:
+        surface_wanted.add("tp")
+    if "pressure_msl" in fields:
+        surface_wanted.add("msl")
+    if "cloud_cover" in fields:
+        surface_wanted.add("tcc")
+    if "wind_speed_10m" in fields or "wind_direction_10m" in fields:
+        surface_wanted.update(("10u", "10v"))
+
+    surface_path = cache_dir / f"{cache_key}-{'-'.join(sorted(surface_wanted)) or 'none'}.grib2"
+    surface = {name: [None] * len(lats) for name in surface_wanted}
+    timestamp = ""
+    if surface_wanted:
+        ensure_download(surface_path, param=sorted(surface_wanted))
+        surface, timestamp = sample_grib(surface_path, surface_wanted)
 
     pressure = {}
     for lev, field_name in ((850, "temperature_850hPa"), (500, "temperature_500hPa")):
