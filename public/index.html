@@ -1156,8 +1156,33 @@ async function loadWeather(){
  const currentHourIndex=Array.isArray(h.time)?Math.max(0,h.time.reduce((best,t,i)=>Math.abs(new Date(t)-new Date(c.time))<Math.abs(new Date(h.time[best])-new Date(c.time))?i:best,0)):0;
  const cloudValue=h.cloud_cover?.[currentHourIndex];
  $('cloudCover').textContent=Number.isFinite(cloudValue)?`${Math.round(cloudValue)} %`:'— %';
- const formatSunTime=value=>value?String(value).slice(11,16):'--:--';
- $('sunTimes').textContent=`${formatSunTime(day.sunrise?.[0])} / ${formatSunTime(day.sunset?.[0])}`;
+ // Sunrise / sunset: use the main response first, then fall back to
+ // Open-Meteo directly if the site's /api/weather proxy omits solar fields.
+ const formatSunTime=value=>{
+   if(value==null||value==='')return '--:--';
+   const raw=String(value);
+   const match=raw.match(/T(\d{2}:\d{2})/);
+   if(match)return match[1];
+   const parsed=new Date(raw);
+   return Number.isNaN(parsed.getTime())?'--:--':
+     parsed.toLocaleTimeString('el-GR',{hour:'2-digit',minute:'2-digit',hour12:false});
+ };
+ let sunrise=day.sunrise?.[0],sunset=day.sunset?.[0];
+ if(!sunrise||!sunset){
+   try{
+     const solarUrl=`https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(lat)}&longitude=${encodeURIComponent(lon)}&daily=sunrise,sunset&forecast_days=1&timezone=auto`;
+     const solarResponse=await fetch(solarUrl);
+     if(solarResponse.ok){
+       const solarData=await solarResponse.json();
+       sunrise=sunrise||solarData.daily?.sunrise?.[0];
+       sunset=sunset||solarData.daily?.sunset?.[0];
+     }
+   }catch(solarError){
+     console.warn('WeatherWise sunrise/sunset fallback failed:',solarError);
+   }
+ }
+ $('sunTimes').textContent=`${formatSunTime(sunrise)} / ${formatSunTime(sunset)}`;
+ $('sunTimes').title='Τοπική ώρα ανατολής / δύσης για την επιλεγμένη πόλη';
  const minT=Math.min(...day.temperature_2m_min),maxT=Math.max(...day.temperature_2m_max),span=Math.max(1,maxT-minT);
  const rows=day.time.map((date,i)=>{
    const dt=new Date(date+'T12:00:00'),today=i===0;
