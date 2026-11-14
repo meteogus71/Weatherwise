@@ -8,6 +8,8 @@ import sys
 import hashlib
 import datetime
 import math
+import contextlib
+import uuid
 from pathlib import Path
 
 
@@ -49,7 +51,12 @@ def main():
         )
 
     def download_grib(path, **kwargs):
-        tmp_path = path.with_suffix(".part")
+        # Each worker process gets its own temporary filename. This prevents
+        # simultaneous requests for the same forecast step from deleting or
+        # replacing one another's .part file.
+        tmp_path = path.with_name(
+            f"{path.name}.{os.getpid()}.{uuid.uuid4().hex}.part"
+        )
 
         client = Client(
             source=os.environ.get("ECMWF_OPEN_DATA_SOURCE", "ecmwf"),
@@ -57,20 +64,31 @@ def main():
             resol="0p25"
         )
 
-        client.retrieve(
-            stream="oper",
-            type="fc",
-            step=step,
-            target=str(tmp_path),
-            **kwargs
-        )
+        try:
+            # The Open Data client may print download/progress messages.
+            # Keep stdout reserved for the single JSON response consumed by
+            # server.js; send all library output to stderr instead.
+            with contextlib.redirect_stdout(sys.stderr):
+                client.retrieve(
+                    stream="oper",
+                    type="fc",
+                    step=step,
+                    target=str(tmp_path),
+                    **kwargs
+                )
 
-        if not tmp_path.exists() or tmp_path.stat().st_size < 1000:
-            raise RuntimeError(
-                "ECMWF Open Data returned an empty GRIB file"
-            )
+            if not tmp_path.exists() or tmp_path.stat().st_size < 1000:
+                raise RuntimeError(
+                    "ECMWF Open Data returned an empty GRIB file"
+                )
 
-        tmp_path.replace(path)
+            # Atomic replacement ensures readers never see a partial GRIB.
+            os.replace(tmp_path, path)
+        finally:
+            try:
+                tmp_path.unlink(missing_ok=True)
+            except Exception:
+                pass
 
     # Download surface fields if cache is missing or expired.
     grib_path = cache_dir / f"{cache_key}.grib2"
