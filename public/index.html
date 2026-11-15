@@ -905,10 +905,10 @@ const cityLocalLandmarkFiles={
  "ioannina":"ioannina.jpg",
  "ιωάννινα":"ioannina.jpg",
  "ιωαννινα":"ioannina.jpg",
- "istanbul":"istanbul.jpg",
- "constantinople":"istanbul.jpg",
- "κωνσταντινούπολη":"istanbul.jpg",
- "κωνσταντινουπολη":"istanbul.jpg",
+ "istanbul":"istambul.jpg",
+ "constantinople":"istambul.jpg",
+ "κωνσταντινούπολη":"istambul.jpg",
+ "κωνσταντινουπολη":"istambul.jpg",
  "copenhagen":"kopenhagen.jpg",
  "københavn":"kopenhagen.jpg",
  "κοπεγχάγη":"kopenhagen.jpg",
@@ -920,9 +920,9 @@ const cityLocalLandmarkFiles={
  "κρακoβια":"krakow.jpg",
  "κράκοβο":"krakow.jpg",
  "κρακοβο":"krakow.jpg",
- "las vegas":"las vegas.jpg",
- "λασ βέγκας":"las vegas.jpg",
- "λας βεγκας":"las vegas.jpg",
+ "las vegas":"lasvegas.jpg",
+ "λασ βέγκας":"lasvegas.jpg",
+ "λας βεγκας":"lasvegas.jpg",
  "lisbon":"lisboa.jpg",
  "lisboa":"lisboa.jpg",
  "λισαβόνα":"lisboa.jpg",
@@ -965,10 +965,10 @@ const cityLocalLandmarkFiles={
  "rio de janeiro":"riodejaneiro.jpg",
  "riodejaneiro":"riodejaneiro.jpg",
  "ριο ντε τζανέιρο":"riodejaneiro.jpg",
- "riyadh":"riyadh.jpeg",
- "riyad":"riyadh.jpeg",
- "ριάντ":"riyadh.jpeg",
- "ριαντ":"riyadh.jpeg",
+ "riyadh":"riant.jpg",
+ "riyad":"riant.jpg",
+ "ριάντ":"riant.jpg",
+ "ριαντ":"riant.jpg",
  "rhodes":"rodos.jpg",
  "rodos":"rodos.jpg",
  "ρόδος":"rodos.jpg",
@@ -1023,6 +1023,19 @@ const cityLocalLandmarkFiles={
  "wien":"wien.jpg",
  "βιέννη":"wien.jpg",
  "βιεννη":"wien.jpg",
+
+ "lamia":"lamia.jpeg",
+ "λαμία":"lamia.jpeg",
+ "λαμια":"lamia.jpeg",
+ "kavala":"kabala.jpg",
+ "kabala":"kabala.jpg",
+ "καβάλα":"kabala.jpg",
+ "καβαλα":"kabala.jpg",
+ "ριο ντε τζανειρο":"riodejaneiro.jpg",
+ "corfu":"corfu.jpg",
+ "kerkyra":"corfu.jpg",
+ "κέρκυρα":"corfu.jpg",
+ "κερκυρα":"corfu.jpg"
 };
 const cityLandmarkCache=new Map();
 let cityLandmarkRequest=0;
@@ -1060,7 +1073,20 @@ function updateCityLandmark(cityText){
  const showImage=(url,title,credit='')=>{
   if(requestId!==cityLandmarkRequest)return;
   img.onload=()=>{if(requestId===cityLandmarkRequest)img.style.opacity='.82';};
-  img.onerror=()=>{if(requestId===cityLandmarkRequest){img.style.opacity='0';if(caption)caption.textContent='';}};
+  img.onerror=()=>{
+   if(requestId!==cityLandmarkRequest)return;
+   img.style.opacity='0';
+   if(caption)caption.textContent='';
+   if(url.startsWith('./assets/city-landmarks/')){
+    const match=cityLandmarks.find(item=>item.keys.some(k=>value.includes(k)));
+    if(match){showImage('https://commons.wikimedia.org/wiki/Special:FilePath/'+encodeURIComponent(match.file)+'?width=1600',match.title);return;}
+    findCommonsCityImage(cityText).then(result=>{
+     if(requestId!==cityLandmarkRequest)return;
+     if(result)showImage(result.url,result.title.replace(/\.[^.]+$/,'').replace(/[_-]+/g,' '),[result.credit,result.license,result.descriptionUrl].filter(Boolean).join(' · '));
+     else if(caption)caption.textContent='Δεν βρέθηκε διαθέσιμη φωτογραφία landmark';
+    });
+   }
+  };
   img.alt=title||citySearchName(cityText);img.src=url;
   if(caption){caption.textContent=title||citySearchName(cityText);caption.title=credit||'';}
  };
