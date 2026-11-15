@@ -467,6 +467,27 @@ select.btn{color:var(--text);background:var(--panel2);border:1px solid var(--lin
 .meteoalarm-alert-icon{font-size:calc(var(--ww-weather-icon-size,82px) * .72)!important}
 
 </style>
+
+<style id="weatherwise-larger-header-controls">
+/* Μεγαλύτερα βασικά μεγέθη στα πεδία της επάνω γραμμής */
+.top-actions{gap:12px!important}
+.top-actions #geolocateBtn,
+.top-actions #refresh,
+.top-actions #units{min-height:48px!important;height:48px!important;padding:0 16px!important;font-size:15px!important;line-height:1.2!important}
+.top-actions .city-search-wrap{height:48px!important;min-width:220px}
+.top-actions .city-search-wrap .search{height:48px!important;padding:0 16px!important;font-size:16px!important;line-height:46px!important}
+.top-actions .city-search-wrap .search::placeholder{font-size:15px!important}
+.top-actions .theme-control{height:48px!important;padding:0 13px!important;font-size:14px!important;gap:9px!important}
+.top-actions .theme-control select{height:100%!important;font-size:14px!important;min-width:115px}
+@media(max-width:700px){
+ .top-actions{gap:7px!important;flex-wrap:wrap}
+ .top-actions #geolocateBtn,.top-actions #refresh,.top-actions #units{min-height:42px!important;height:42px!important;font-size:14px!important;padding:0 11px!important}
+ .top-actions .city-search-wrap{height:42px!important;min-width:160px}
+ .top-actions .city-search-wrap .search{height:42px!important;font-size:15px!important;line-height:40px!important}
+ .top-actions .theme-control{height:42px!important;font-size:13px!important}
+ .top-actions .theme-control select{font-size:13px!important}
+}
+</style>
 </head>
 <body>
 <div class="shell">
