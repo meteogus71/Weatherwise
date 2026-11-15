@@ -455,39 +455,6 @@ select.btn{color:var(--text);background:var(--panel2);border:1px solid var(--lin
 @media(max-width:950px){.point-weather-shell{grid-template-columns:1fr}.point-weather-panel{display:grid;grid-template-columns:1fr 1fr;align-items:start}.point-current-card{grid-column:1/-1}.point-metrics{grid-column:1/-1}.point-chart-title,.point-chart-wrap,.point-days,.point-open-forecast,.point-weather-status{grid-column:1/-1}#pointWeatherMap{height:470px}}
 @media(max-width:600px){.point-weather-shell{padding:12px;gap:12px}.point-weather-panel{display:flex}.point-map-heading{font-size:26px}#pointWeatherMap{height:390px;min-height:350px}.point-current-card{padding:16px}.point-temp{font-size:58px}}
 
-
-/* WeatherWise appearance controls: larger typography and toolbar, no glowing frames */
-.ww-appearance-controls{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}
-.ww-setting{min-width:0;padding:10px 12px;background:rgba(20,34,53,.34);border:1px solid var(--line);border-radius:12px}
-.ww-setting label{display:block;line-height:1.5;font-size:13px}
-.ww-setting label b{float:right;color:var(--cyan);font-size:14px}
-.ww-setting input{width:100%;display:block;margin-top:14px;accent-color:var(--cyan)}
-.ww-setting p{margin:9px 0 0;line-height:1.45}
-.ww-presets{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:16px}
-.ww-presets strong{font-size:13px;margin-right:5px}
-.ww-presets .btn{font-size:12px;padding:10px 13px}
-.top-actions .btn,.top-actions .search,.top-actions .theme-control{min-height:52px;height:52px;font-size:15px}
-.top-actions .city-search-wrap{height:52px;flex-basis:300px}
-.top-actions .city-search-wrap .search{height:52px;line-height:normal;padding:0 16px;font-size:15px}
-.top-actions #geolocateBtn,.top-actions #refresh,.top-actions #units{padding:0 17px;font-size:15px}
-.top-actions #geolocateBtn .geo-symbol{font-size:21px}
-.top-actions .theme-control{padding:0 13px;font-size:14px}
-.top-actions .theme-control select{font-size:14px;max-width:150px}
-.nav .ico{font-size:var(--ww-icon-size,30px);width:calc(var(--ww-icon-size,30px) + 4px)}
-.weather-symbol{font-size:calc(72px * var(--ww-font-scale,1))}
-body{zoom:var(--ww-font-scale,1)}
-body .nav{font-size:var(--sidebar-font,16px)}
-body .group-label{font-size:calc(var(--sidebar-font,16px) * .78)}
-body[data-theme="glass"] .card,body[data-theme="glass"] .detail,
-body[data-theme="glass"] .layerbar button,body[data-theme="glass"] .search,
-body[data-theme="glass"] .btn,body[data-theme="glass"] .theme-control{
- box-shadow:none!important;border-color:rgba(177,202,220,.24)!important;
-}
-body[data-theme="glass"] .nav.active{box-shadow:none!important;border:1px solid rgba(177,202,220,.22)}
-body[data-theme="glass"] .theme-preset{box-shadow:none!important}
-@media(max-width:1100px){.ww-appearance-controls{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:700px){.ww-appearance-controls{grid-template-columns:1fr}.top-actions .btn,.top-actions .theme-control{min-height:42px;height:42px}.top-actions .city-search-wrap,.top-actions .city-search-wrap .search{height:42px}}
-
 </style>
 </head>
 <body>
@@ -572,35 +539,17 @@ body[data-theme="glass"] .theme-preset{box-shadow:none!important}
     </div>
     <div class="card" style="margin-bottom:16px" id="sidebarAppearanceCard">
       <div class="card-head"><h3>ΠΛΕΥΡΙΚΗ ΜΠΑΡΑ</h3><span>ΖΩΝΤΑΝΗ ΠΡΟΕΠΙΣΚΟΠΗΣΗ</span></div>
-      <div class="ww-appearance-controls">
-        <div class="ww-setting">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:22px">
+        <div>
           <label class="small" for="sidebarWidthControl">Πλάτος πλευρικής μπάρας <b id="sidebarWidthValue">244 px</b></label>
-          <input id="sidebarWidthControl" type="range" min="200" max="360" step="5" value="260">
-          <p class="small">Ρυθμίστε το διαθέσιμο πλάτος του μενού.</p>
+          <input id="sidebarWidthControl" type="range" min="200" max="340" step="5" value="244" style="width:100%;display:block;margin-top:12px;accent-color:var(--cyan)">
+          <p class="small" style="margin-top:7px">Μικρότερο για περισσότερο χώρο στο περιεχόμενο ή μεγαλύτερο για πιο άνετη πλοήγηση.</p>
         </div>
-        <div class="ww-setting">
-          <label class="small" for="sidebarFontControl">Γραμματοσειρά μενού <b id="sidebarFontValue">16 px</b></label>
-          <input id="sidebarFontControl" type="range" min="13" max="22" step="1" value="16">
-          <p class="small">Αλλάζει το μέγεθος των επιλογών της πλευρικής μπάρας.</p>
+        <div>
+          <label class="small" for="sidebarFontControl">Μέγεθος γραμμάτων μενού <b id="sidebarFontValue">14 px</b></label>
+          <input id="sidebarFontControl" type="range" min="12" max="18" step="1" value="14" style="width:100%;display:block;margin-top:12px;accent-color:var(--cyan)">
+          <p class="small" style="margin-top:7px">Αυξήστε το μέγεθος για πιο ευανάγνωστα ονόματα ενοτήτων.</p>
         </div>
-        <div class="ww-setting">
-          <label class="small" for="appFontControl">Γραμματοσειρά σε όλη την εφαρμογή <b id="appFontValue">130%</b></label>
-          <input id="appFontControl" type="range" min="80" max="175" step="5" value="130">
-          <p class="small">Μεγαλώνει τα κείμενα, τις ενδείξεις, τις κάρτες και τα μενού.</p>
-        </div>
-        <div class="ww-setting">
-          <label class="small" for="iconSizeControl">Μέγεθος εικονιδίων <b id="iconSizeValue">30 px</b></label>
-          <input id="iconSizeControl" type="range" min="18" max="48" step="2" value="30">
-          <p class="small">Μεγαλώνει τα εικονίδια πλοήγησης και καιρού.</p>
-        </div>
-      </div>
-      <div class="ww-presets"><strong>Γρήγορες επιλογές μεγέθους εφαρμογής:</strong>
-        <button class="btn" type="button" data-font-preset="80">Μικρότερο · 80%</button>
-        <button class="btn" type="button" data-font-preset="100">Κανονικό · 100%</button>
-        <button class="btn" type="button" data-font-preset="115">Μεγαλύτερο · 115%</button>
-        <button class="btn" type="button" data-font-preset="130">Μεγάλο · 130%</button>
-        <button class="btn" type="button" data-font-preset="150">Πολύ μεγάλο · 150%</button>
-        <button class="btn" type="button" data-font-preset="175">Μέγιστο · 175%</button>
       </div>
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px">
         <button class="btn" id="sidebarReset" type="button">Επαναφορά προεπιλογών</button>
@@ -1591,39 +1540,32 @@ if(bgUpload)bgUpload.addEventListener('change',e=>{const f=e.target.files?.[0];i
 const removeBg=$('removeBackground');if(removeBg)removeBg.addEventListener('click',()=>{try{localStorage.removeItem('weatherwise-custom-background')}catch(e){}if(bgUpload)bgUpload.value='';applyCustomBackground(null)});
 $('menuBtn').onclick=()=>$('sidebar').classList.toggle('open');
 document.querySelectorAll('.europe-sort-btn').forEach(b=>b.onclick=()=>{document.querySelectorAll('.europe-sort-btn').forEach(x=>x.classList.toggle('active',x===b));europeSort=b.dataset.sort;renderEuropeChart()});
-// Ενιαίες ρυθμίσεις μεγέθους για ολόκληρο το WeatherWise.
+// Προσαρμογή πλάτους πλευρικής μπάρας και μεγέθους γραμμάτων.
 (function initSidebarAppearance(){
- const ids=['sidebarWidthControl','sidebarFontControl','appFontControl','iconSizeControl'];
- const el=id=>document.getElementById(id);
- const defaults={width:260,menuFont:16,appFont:130,iconSize:30};
- let saved={};try{saved=JSON.parse(localStorage.getItem('weatherwise-sidebar-appearance')||'{}')||{};}catch(e){}
- const apply=(v,save=true)=>{
-  const x={
-   width:Math.max(200,Math.min(360,Number(v.width)||defaults.width)),
-   menuFont:Math.max(13,Math.min(22,Number(v.menuFont)||defaults.menuFont)),
-   appFont:Math.max(80,Math.min(175,Number(v.appFont)||defaults.appFont)),
-   iconSize:Math.max(18,Math.min(48,Number(v.iconSize)||defaults.iconSize))
-  };
-  document.documentElement.style.setProperty('--sidebar-width',x.width+'px');
-  document.documentElement.style.setProperty('--sidebar-font',x.menuFont+'px');
-  document.documentElement.style.setProperty('--ww-font-scale',String(x.appFont/100));
-  document.documentElement.style.setProperty('--ww-icon-size',x.iconSize+'px');
-  const vals={sidebarWidthValue:x.width+' px',sidebarFontValue:x.menuFont+' px',appFontValue:x.appFont+'%',iconSizeValue:x.iconSize+' px'};
-  Object.entries(vals).forEach(([id,value])=>{if(el(id))el(id).textContent=value});
-  const values={sidebarWidthControl:x.width,sidebarFontControl:x.menuFont,appFontControl:x.appFont,iconSizeControl:x.iconSize};
-  Object.entries(values).forEach(([id,value])=>{if(el(id))el(id).value=value});
-  if(save){try{localStorage.setItem('weatherwise-sidebar-appearance',JSON.stringify(x));}catch(e){}}
+ const widthInput=document.getElementById('sidebarWidthControl');
+ const fontInput=document.getElementById('sidebarFontControl');
+ const widthLabel=document.getElementById('sidebarWidthValue');
+ const fontLabel=document.getElementById('sidebarFontValue');
+ const status=document.getElementById('sidebarSettingsStatus');
+ const defaults={width:244,font:14};
+ let saved={};
+ try{saved=JSON.parse(localStorage.getItem('weatherwise-sidebar-appearance')||'{}')||{};}catch(e){}
+ const apply=(width,font,save=true)=>{
+  width=Math.max(200,Math.min(340,Number(width)||defaults.width));
+  font=Math.max(12,Math.min(18,Number(font)||defaults.font));
+  document.documentElement.style.setProperty('--sidebar-width',width+'px');
+  document.documentElement.style.setProperty('--sidebar-font',font+'px');
+  if(widthInput)widthInput.value=width;
+  if(fontInput)fontInput.value=font;
+  if(widthLabel)widthLabel.textContent=width+' px';
+  if(fontLabel)fontLabel.textContent=font+' px';
+  if(save){try{localStorage.setItem('weatherwise-sidebar-appearance',JSON.stringify({width,font}));}catch(e){}}
  };
- const initial={width:saved.width||defaults.width,menuFont:saved.menuFont||saved.font||defaults.menuFont,appFont:saved.appFont||130,iconSize:saved.iconSize||defaults.iconSize};
- apply(initial,false);
- ids.forEach(id=>{if(el(id))el(id).addEventListener('input',()=>{
-  apply({width:el('sidebarWidthControl').value,menuFont:el('sidebarFontControl').value,appFont:el('appFontControl').value,iconSize:el('iconSizeControl').value});
- })});
- document.querySelectorAll('[data-font-preset]').forEach(b=>b.addEventListener('click',()=>{
-  apply({width:el('sidebarWidthControl').value,menuFont:el('sidebarFontControl').value,appFont:b.dataset.fontPreset,iconSize:el('iconSizeControl').value});
- }));
- const reset=el('sidebarReset'),status=el('sidebarSettingsStatus');
- if(reset)reset.addEventListener('click',()=>{apply(defaults);if(status)status.textContent='Επαναφέρθηκαν οι προτεινόμενες ρυθμίσεις.'});
+ apply(saved.width||defaults.width,saved.font||defaults.font,false);
+ if(widthInput)widthInput.addEventListener('input',()=>apply(widthInput.value,fontInput.value));
+ if(fontInput)fontInput.addEventListener('input',()=>apply(widthInput.value,fontInput.value));
+ const reset=document.getElementById('sidebarReset');
+ if(reset)reset.addEventListener('click',()=>{apply(defaults.width,defaults.font);if(status)status.textContent='Επαναφέρθηκαν οι αρχικές ρυθμίσεις.';});
 })();
 document.querySelectorAll('.nav').forEach(n=>n.onclick=()=>{document.querySelectorAll('.nav').forEach(x=>x.classList.remove('active'));n.classList.add('active');document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));$(n.dataset.section).classList.add('active');$('pageTitle').textContent=n.textContent.trim();$('sidebar').classList.remove('open');if(n.dataset.section==='europe')loadEuropeWeather();setTimeout(()=>{if(map)map.invalidateSize();if(largeMap)largeMap.invalidateSize();if(europeChart)europeChart.resize()},100)});
 // Live city autocomplete anchored to the search field.
