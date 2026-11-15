@@ -733,6 +733,244 @@ select.btn{color:var(--text);background:var(--panel2);border:1px solid var(--lin
   }
 }
 
+
+/* Obsidian Red — black and crimson as the primary WeatherWise palette */
+body[data-theme="obsidian-red"]{
+ --bg:#090909;
+ --panel:#141414;
+ --panel2:#202020;
+ --line:#3b2528;
+ --muted:#b7a5a7;
+ --text:#f5eeee;
+ --cyan:#ff4354;
+ --blue:#e43b4d;
+ --green:#ef6874;
+ --amber:#ff9b72;
+ background:radial-gradient(ellipse at 78% 0%,#3b1017 0%,transparent 38%),linear-gradient(145deg,#070707,#111010 58%,#1a090c);
+ color:var(--text)
+}
+body[data-theme="obsidian-red"] .sidebar{
+ background:linear-gradient(180deg,#090909,#16090c);
+ border-color:#3b2528
+}
+body[data-theme="obsidian-red"] .card{
+ background:linear-gradient(145deg,#202020,#121212);
+ border-color:#49252b;
+ box-shadow:0 8px 28px #0008
+}
+body[data-theme="obsidian-red"] .detail,
+body[data-theme="obsidian-red"] .layerbar button,
+body[data-theme="obsidian-red"] .search,
+body[data-theme="obsidian-red"] .btn,
+body[data-theme="obsidian-red"] .theme-control{
+ background:#171313;
+ border-color:#54252d;
+ color:#f5eeee
+}
+body[data-theme="obsidian-red"] .nav{color:#c7b9ba}
+body[data-theme="obsidian-red"] .nav:hover,
+body[data-theme="obsidian-red"] .nav.active{
+ background:#35151a;
+ color:#fff;
+ box-shadow:inset 3px 0 #ef3348
+}
+body[data-theme="obsidian-red"] .btn.primary,
+body[data-theme="obsidian-red"] .layerbar button.active{
+ background:linear-gradient(135deg,#d91f36,#8f1022);
+ border-color:#ff4354;
+ color:#fff
+}
+body[data-theme="obsidian-red"] .outlook-shell{
+ background:linear-gradient(145deg,#211316,#121010);
+ border-color:#54252d
+}
+body[data-theme="obsidian-red"] .outlook-title,
+body[data-theme="obsidian-red"] .outlook-date strong,
+body[data-theme="obsidian-red"] .outlook-high{color:#fff0f1}
+body[data-theme="obsidian-red"] .outlook-row{border-color:#48242a;color:#e5d5d7}
+body[data-theme="obsidian-red"] .outlook-track{background:#382126}
+body[data-theme="obsidian-red"] .point-current-card{
+ background:linear-gradient(120deg,#300d13,#151010 78%);
+ border:1px solid #a82a3b;
+ color:#fff1f2;
+ box-shadow:inset 0 1px #ffffff0d,0 8px 24px #0007
+}
+body[data-theme="obsidian-red"] .point-current-card .point-coords,
+body[data-theme="obsidian-red"] .point-current-card .point-localtime,
+body[data-theme="obsidian-red"] .point-current-card .point-current-desc,
+body[data-theme="obsidian-red"] .point-current-card .point-wind{color:#e8bfc4}
+body[data-theme="obsidian-red"] .point-current-card .point-temp,
+body[data-theme="obsidian-red"] .point-current-card .point-current-title,
+body[data-theme="obsidian-red"] .point-current-card .point-current-main{color:#fff}
+body[data-theme="obsidian-red"] .point-weather-panel .point-day,
+body[data-theme="obsidian-red"] .point-weather-panel .point-metric{
+ border-color:#48242a
+}
+body[data-theme="obsidian-red"] .point-weather-panel .point-day{
+ background:#211417
+}
+body[data-theme="obsidian-red"] .point-chart-wrap{
+ color:#ff6574
+}
+body[data-theme="obsidian-red"] .theme-preset[data-theme="obsidian-red"]{
+ outline:2px solid #ff4354
+}
+
+
+/* Complete Obsidian Red pass: replace legacy blue surfaces and accents
+   that were originally hard-coded in the base theme. */
+body[data-theme="obsidian-red"] .brandmark{
+  background:linear-gradient(135deg,#ff5364,#a10f24)!important;
+  color:#fff!important
+}
+body[data-theme="obsidian-red"] .group-label{color:#b68a90}
+body[data-theme="obsidian-red"] .nav{color:#c5b4b6}
+body[data-theme="obsidian-red"] .nav:hover,
+body[data-theme="obsidian-red"] .nav.active{
+  background:#35151a!important;color:#fff!important
+}
+body[data-theme="obsidian-red"] .search,
+body[data-theme="obsidian-red"] .theme-control,
+body[data-theme="obsidian-red"] .theme-control select,
+body[data-theme="obsidian-red"] .report-form input,
+body[data-theme="obsidian-red"] .report-form select,
+body[data-theme="obsidian-red"] .report-form textarea{
+  background:#171313!important;color:#f5eeee!important;border-color:#54252d!important
+}
+body[data-theme="obsidian-red"] .layerbar button{
+  background:#171313!important;color:#e6d6d8!important;border-color:#54252d!important
+}
+body[data-theme="obsidian-red"] .layerbar button.active{
+  background:#8f1022!important;color:#fff!important;border-color:#ff4354!important
+}
+body[data-theme="obsidian-red"] .layer-status,
+body[data-theme="obsidian-red"] .layer-legend,
+body[data-theme="obsidian-red"] .forecast-footnote,
+body[data-theme="obsidian-red"] .forecast-row .day,
+body[data-theme="obsidian-red"] .outlook-subtitle,
+body[data-theme="obsidian-red"] .outlook-metric,
+body[data-theme="obsidian-red"] .europe-meta,
+body[data-theme="obsidian-red"] .europe-foot{
+  color:#b9a5a8!important
+}
+body[data-theme="obsidian-red"] .wind-arrow{
+  color:#ff6978!important;text-shadow:0 1px 5px #090909,0 0 8px #d91f36!important
+}
+body[data-theme="obsidian-red"] .forecast-row{border-bottom-color:#48242a!important}
+body[data-theme="obsidian-red"] .range-btn,
+body[data-theme="obsidian-red"] .forecast-tab{
+  background:#211417!important;color:#e8dadd!important;border-color:#54252d!important
+}
+body[data-theme="obsidian-red"] .range-btn.active,
+body[data-theme="obsidian-red"] .forecast-tab.active{
+  background:#8f1022!important;border-color:#ff4354!important;color:#fff!important
+}
+body[data-theme="obsidian-red"] .forecast-chart-heading,
+body[data-theme="obsidian-red"] .forecast-toolbar h3,
+body[data-theme="obsidian-red"] .forecast-chart-heading span{
+  color:#f5eeee!important
+}
+body[data-theme="obsidian-red"] .outlook-shell{
+  background:linear-gradient(145deg,#211316,#121010)!important;border-color:#54252d!important
+}
+body[data-theme="obsidian-red"] .outlook-row{
+  border-bottom-color:#48242a!important;color:#e5d5d7!important
+}
+body[data-theme="obsidian-red"] .outlook-icon{color:#ff6574!important}
+body[data-theme="obsidian-red"] .outlook-condition{color:#e8c7cb!important}
+body[data-theme="obsidian-red"] .outlook-low,
+body[data-theme="obsidian-red"] .outlook-date span{color:#c4aeb2!important}
+body[data-theme="obsidian-red"] .outlook-tempbar,
+body[data-theme="obsidian-red"] .outlook-track{background:#382126!important}
+body[data-theme="obsidian-red"] .outlook-range{
+  background:linear-gradient(90deg,#8f1022,#ff596a)!important
+}
+body[data-theme="obsidian-red"] .europe-card{
+  background:linear-gradient(145deg,#211316,#121010)!important;border-color:#54252d!important
+}
+body[data-theme="obsidian-red"] .europe-head h2,
+body[data-theme="obsidian-red"] .europe-head p,
+body[data-theme="obsidian-red"] .europe-sort-btn{color:#f1e7e8!important}
+body[data-theme="obsidian-red"] .europe-sort{background:#261619!important}
+body[data-theme="obsidian-red"] .europe-sort-btn.active{
+  background:#a7192d!important;color:#fff!important
+}
+body[data-theme="obsidian-red"] .city-current{
+  background-color:#1b1113!important
+}
+body[data-theme="obsidian-red"] .city-current-shade{
+  background:linear-gradient(90deg,rgba(9,5,7,.84),rgba(18,5,8,.45) 48%,rgba(18,5,8,.22)),linear-gradient(0deg,rgba(9,5,7,.5),transparent 60%)!important
+}
+body[data-theme="obsidian-red"] .city-current .weather-symbol{
+  filter:drop-shadow(0 4px 15px #1c0509)!important
+}
+body[data-theme="obsidian-red"] .dashboard-model-switch{
+  background:rgba(25,10,13,.8)!important;border-color:#54252d!important
+}
+body[data-theme="obsidian-red"] .dashboard-model-switch span{color:#d6b9bd!important}
+body[data-theme="obsidian-red"] .dashboard-model-switch button{
+  background:#1a1113!important;color:#e8dadd!important;border-color:#63303a!important
+}
+body[data-theme="obsidian-red"] .dashboard-model-switch button.active{
+  background:#8f1022!important;border-color:#ff4354!important;color:#fff!important
+}
+body[data-theme="obsidian-red"] .gfs-player{
+  background:linear-gradient(145deg,#211316,#121010)!important;border-color:#54252d!important;color:#f5eeee!important
+}
+body[data-theme="obsidian-red"] .gfs-speed-label,
+body[data-theme="obsidian-red"] .gfs-loop,
+body[data-theme="obsidian-red"] .gfs-player-scale,
+body[data-theme="obsidian-red"] .gfs-player-note{color:#c6adb1!important}
+body[data-theme="obsidian-red"] .gfs-player-slider{accent-color:#ff4354!important}
+body[data-theme="obsidian-red"] .gfs-player-controls button{
+  background:#271317!important;border-color:#71303b!important;color:#fff!important
+}
+body[data-theme="obsidian-red"] .gfs-player-controls .gfs-player-play{
+  background:#b71930!important;color:#fff!important
+}
+body[data-theme="obsidian-red"] .point-weather-shell{
+  background:#141010!important;border-color:#54252d!important
+}
+body[data-theme="obsidian-red"] .point-current-card{
+  background:linear-gradient(120deg,#300d13,#151010 78%)!important;
+  color:#fff1f2!important;border-color:#a82a3b!important
+}
+body[data-theme="obsidian-red"] .point-coords,
+body[data-theme="obsidian-red"] .point-localtime,
+body[data-theme="obsidian-red"] .point-wind{color:#e8bfc4!important}
+body[data-theme="obsidian-red"] .point-metric-icon{color:#ff6574!important}
+body[data-theme="obsidian-red"] .point-metric-label,
+body[data-theme="obsidian-red"] .point-chart-title{color:#c1a9ad!important}
+body[data-theme="obsidian-red"] .point-metric-value,
+body[data-theme="obsidian-red"] .point-day-temps{color:#fff1f2!important}
+body[data-theme="obsidian-red"] .point-day{
+  background:#211417!important;border:1px solid #48242a!important
+}
+body[data-theme="obsidian-red"] .point-day-name,
+body[data-theme="obsidian-red"] .point-day-rain,
+body[data-theme="obsidian-red"] .point-weather-status{color:#c6adb1!important}
+body[data-theme="obsidian-red"] .point-open-forecast{
+  background:linear-gradient(135deg,#d91f36,#8f1022)!important;color:#fff!important
+}
+body[data-theme="obsidian-red"] .report-item{
+  background:#171113!important;border-color:#54252d!important
+}
+body[data-theme="obsidian-red"] .report-meta,
+body[data-theme="obsidian-red"] .report-form label{color:#c6adb1!important}
+body[data-theme="obsidian-red"] .alert-source-links a,
+body[data-theme="obsidian-red"] .meteoalarm-alert-area,
+body[data-theme="obsidian-red"] .meteoalarm-alert-link{color:#ff6978}
+body[data-theme="obsidian-red"] .theme-control option{
+  background:#171313!important;color:#f5eeee!important
+}
+body[data-theme="obsidian-red"] .btn:not(.primary){
+  background:#211417!important;border-color:#54252d!important;color:#f5eeee!important
+}
+body[data-theme="obsidian-red"] .btn.primary{
+  background:linear-gradient(135deg,#d91f36,#8f1022)!important;border-color:#ff4354!important;color:#fff!important
+}
+/* Keep semantic alert colors and the meteorological temperature scale intact. */
+
 </style>
 </head>
 <body>
@@ -759,7 +997,7 @@ select.btn{color:var(--text);background:var(--panel2);border:1px solid var(--lin
 <main class="main">
   <header class="topbar">
     <div><div class="eyebrow">ΚΕΝΤΡΟ ΜΕΤΕΩΡΟΛΟΓΙΚΗΣ ΠΛΗΡΟΦΟΡΗΣΗΣ</div><h1 id="pageTitle">Μετεωρολογική Επισκόπηση</h1></div>
-    <div class="top-actions"><button class="btn" id="geolocateBtn" type="button" title="Εντοπισμός της θέσης μου" aria-label="Εντοπισμός της θέσης μου">⌖ <span>Η τοποθεσία μου</span></button><div class="city-search-wrap"><input class="search" id="citySearch" type="search" placeholder="Αναζήτηση πόλης…" autocomplete="off" aria-autocomplete="list" aria-controls="searchResults" aria-expanded="false"><div class="search-results" id="searchResults" role="listbox" aria-label="Προτεινόμενες πόλεις"></div></div><button class="btn" id="refresh">↻ Ανανέωση</button><button class="btn primary" id="units">°C</button><label class="theme-control" title="Επιλογή εμφάνισης"><span>Θέμα</span><select id="themeSelect" aria-label="Επιλογή θέματος"><option value="midnight">Midnight</option><option value="arctic">Arctic Light</option><option value="ocean">Ocean Blue</option><option value="aurora">Aurora</option><option value="graphite">Graphite</option><option value="contrast">High Contrast</option><option value="glass">Glassmorphism</option><option value="intelligence">Weather Intelligence</option></select></label><button class="btn mobile-head" id="menuBtn">☰</button></div>
+    <div class="top-actions"><button class="btn" id="geolocateBtn" type="button" title="Εντοπισμός της θέσης μου" aria-label="Εντοπισμός της θέσης μου">⌖ <span>Η τοποθεσία μου</span></button><div class="city-search-wrap"><input class="search" id="citySearch" type="search" placeholder="Αναζήτηση πόλης…" autocomplete="off" aria-autocomplete="list" aria-controls="searchResults" aria-expanded="false"><div class="search-results" id="searchResults" role="listbox" aria-label="Προτεινόμενες πόλεις"></div></div><button class="btn" id="refresh">↻ Ανανέωση</button><button class="btn primary" id="units">°C</button><label class="theme-control" title="Επιλογή εμφάνισης"><span>Θέμα</span><select id="themeSelect" aria-label="Επιλογή θέματος"><option value="midnight">Midnight</option><option value="arctic">Arctic Light</option><option value="ocean">Ocean Blue</option><option value="aurora">Aurora</option><option value="graphite">Graphite</option><option value="contrast">High Contrast</option><option value="glass">Glassmorphism</option><option value="intelligence">Weather Intelligence</option><option value="obsidian-red">Obsidian Red</option></select></label><button class="btn mobile-head" id="menuBtn">☰</button></div>
   </header>
 
 
@@ -813,6 +1051,7 @@ select.btn{color:var(--text);background:var(--panel2);border:1px solid var(--lin
         <button class="btn theme-preset" data-theme="contrast" style="text-align:left;padding:13px;background:#000;border-color:#777">◐<br><b>High Contrast</b><br><span class="small">Black / White</span></button>
         <button class="btn theme-preset" data-theme="glass" style="text-align:left;padding:13px;background:linear-gradient(135deg,rgba(79,157,196,.78),rgba(13,29,53,.88));border:1px solid #8bcce8;backdrop-filter:blur(8px)">◇<br><b>Glassmorphism</b><br><span class="small">Frosted Glass / Blue</span></button>
         <button class="btn theme-preset" data-theme="intelligence" style="text-align:left;padding:13px;background:linear-gradient(135deg,#17425e,#07111e);border-color:#42d7e8">⌁<br><b>Weather Intelligence</b><br><span class="small">Command Centre / Cyan</span></button>
+        <button class="btn theme-preset" data-theme="obsidian-red" style="text-align:left;padding:13px;background:linear-gradient(135deg,#3b080d,#090909);border-color:#e11d2e;color:#fff">◉<br><b>Obsidian Red</b><br><span class="small" style="color:#ffc4c9">Black / Crimson Red</span></button>
       </div>
     </div>
     <div class="card" style="margin-bottom:16px" id="sidebarAppearanceCard">
@@ -1844,8 +2083,8 @@ async function loadWeather(){
 $('units').onclick=()=>{isF=!isF;$('units').textContent=isF?'°F':'°C';loadWeather()};
 $('refresh').onclick=loadWeather;
 const themeSelect=$('themeSelect'), appearanceTheme=$('appearanceTheme');
-function applyTheme(theme){const allowed=['midnight','arctic','ocean','aurora','graphite','contrast','glass','intelligence'];const chosen=allowed.includes(theme)?theme:'ocean';document.body.dataset.theme=chosen;if(themeSelect)themeSelect.value=chosen;if(appearanceTheme)appearanceTheme.value=chosen;try{localStorage.setItem('weatherwise-theme',chosen)}catch(e){}document.querySelectorAll('.theme-preset').forEach(b=>{b.style.outline=b.dataset.theme===chosen?'2px solid var(--cyan)':'none'});}
-let savedTheme='ocean';try{savedTheme=localStorage.getItem('weatherwise-theme')||'ocean'}catch(e){}
+function applyTheme(theme){const allowed=['midnight','arctic','ocean','aurora','graphite','contrast','glass','intelligence','obsidian-red'];const chosen=allowed.includes(theme)?theme:'obsidian-red';document.body.dataset.theme=chosen;if(themeSelect)themeSelect.value=chosen;if(appearanceTheme)appearanceTheme.value=chosen;try{localStorage.setItem('weatherwise-theme',chosen)}catch(e){}document.querySelectorAll('.theme-preset').forEach(b=>{b.style.outline=b.dataset.theme===chosen?'2px solid var(--cyan)':'none'});}
+let savedTheme='obsidian-red';try{savedTheme=localStorage.getItem('weatherwise-theme')||'obsidian-red'}catch(e){}
 applyTheme(savedTheme);
 if(themeSelect)themeSelect.addEventListener('change',e=>applyTheme(e.target.value));
 if(appearanceTheme)appearanceTheme.addEventListener('change',e=>applyTheme(e.target.value));
