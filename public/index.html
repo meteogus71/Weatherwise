@@ -12,9 +12,9 @@
 <style>
 :root{--bg:#0b1220;--panel:#111c2e;--panel2:#152238;--line:#26364d;--muted:#8fa3bc;--text:#e9f1fb;--cyan:#48c8e8;--blue:#438cf5;--green:#44d6a1;--amber:#f6bd60}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:"DM Sans",sans-serif}button,input{font:inherit}
-.shell{display:flex;min-height:100vh}.sidebar{width:244px;flex:0 0 244px;background:#0e1929;border-right:1px solid var(--line);padding:22px 14px;display:flex;flex-direction:column;min-height:100vh;position:sticky;top:0;height:100vh}
-.brand{display:flex;align-items:center;gap:11px;padding:4px 10px 25px;font:800 20px Manrope}.brandmark{width:34px;height:34px;border-radius:11px;background:linear-gradient(135deg,#48c8e8,#3578df);display:grid;place-items:center;color:#071525;font-size:20px}
-.group-label{color:#6f849e;font-size:10px;font-weight:700;letter-spacing:1.5px;padding:17px 11px 8px}.nav{display:flex;align-items:center;gap:12px;padding:11px 12px;color:#9fb0c6;border-radius:9px;margin:2px 0;cursor:pointer;font-size:13px;transition:.2s}.nav:hover,.nav.active{background:#1a2b43;color:#f4f8ff}.nav.active{box-shadow:inset 3px 0 var(--cyan)}.nav .ico{width:18px;text-align:center;font-size:16px}.side-bottom{margin-top:auto;border-top:1px solid var(--line);padding:15px 8px 0;color:#7f93ad;font-size:11px;line-height:1.6}
+.shell{display:flex;min-height:100vh}.sidebar{width:var(--sidebar-width,244px);flex:0 0 var(--sidebar-width,244px);background:#0e1929;border-right:1px solid var(--line);padding:22px 14px;display:flex;flex-direction:column;min-height:100vh;position:sticky;top:0;height:100vh}
+.brand{display:flex;align-items:center;gap:11px;padding:4px 10px 25px;font:800 21px Manrope}.brandmark{width:34px;height:34px;border-radius:11px;background:linear-gradient(135deg,#48c8e8,#3578df);display:grid;place-items:center;color:#071525;font-size:20px}
+.group-label{color:#6f849e;font-size:calc(var(--sidebar-font,14px) * .78);font-weight:700;letter-spacing:1.5px;padding:17px 11px 8px}.nav{display:flex;align-items:center;gap:12px;padding:11px 12px;color:#9fb0c6;border-radius:9px;margin:2px 0;cursor:pointer;font-size:var(--sidebar-font,14px);transition:.2s}.nav:hover,.nav.active{background:#1a2b43;color:#f4f8ff}.nav.active{box-shadow:inset 3px 0 var(--cyan)}.nav .ico{width:18px;text-align:center;font-size:16px}.side-bottom{margin-top:auto;border-top:1px solid var(--line);padding:15px 8px 0;color:#7f93ad;font-size:12px;line-height:1.65}
 .main{min-width:0;flex:1;padding:26px 30px 40px;max-width:1800px;margin:0 auto}.topbar{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:26px}.eyebrow{font-size:10px;color:var(--cyan);font-weight:700;letter-spacing:1.7px;text-transform:uppercase}.topbar h1{font:800 25px Manrope;margin:5px 0 0}.top-actions{display:flex;align-items:center;gap:10px}.search{background:#111c2e;border:1px solid var(--line);border-radius:9px;padding:10px 13px;color:var(--text);width:220px;outline:none}.btn{border:1px solid var(--line);background:#142238;color:#dce8f7;padding:10px 13px;border-radius:9px;cursor:pointer}.btn.primary{background:#1b7090;border-color:#258eae;color:white}.grid{display:grid;gap:16px}.stats{grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:16px}.card{background:linear-gradient(145deg,#142238,#101b2d);border:1px solid var(--line);border-radius:14px;padding:17px;min-width:0;box-shadow:0 8px 24px #00000012}.card-head{display:flex;justify-content:space-between;align-items:center;color:#91a6bf;font-size:12px;margin-bottom:13px}.metric{font:700 28px Manrope;letter-spacing:-1px}.unit{font-size:14px;color:#9cb0c7;font-weight:500}.small{font-size:11px;color:#8499b4}.positive{color:var(--green)}.weather-layout{grid-template-columns:minmax(300px,1.45fr) minmax(260px,.8fr);margin-bottom:16px}.current{display:flex;align-items:center;justify-content:space-between;gap:18px;min-height:175px}.place{font:700 19px Manrope}.condition{color:#9db0c7;font-size:13px;margin-top:5px}.bigtemp{font:800 56px Manrope;letter-spacing:-3px;margin-top:10px}.weather-symbol{font-size:72px;filter:drop-shadow(0 8px 18px #48c8e833)}.details{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.detail{background:#0e1929;border:1px solid #22344b;border-radius:10px;padding:12px}.detail span{display:block;color:#8fa3bc;font-size:11px}.detail b{display:block;font-size:16px;margin-top:5px}.content-grid{grid-template-columns:minmax(0,1fr)}.map-card{padding:0;overflow:hidden}.map-title{padding:16px 18px;display:flex;justify-content:space-between;align-items:center}.map-title h3,.card h3{font:700 14px Manrope;margin:0}.map-tools{display:flex;gap:6px}.map-tools button{font-size:11px;padding:7px 9px}.map{height:390px;background:#142238}
 .layerbar{display:flex;gap:7px;flex-wrap:wrap;padding:0 16px 13px}
 .layerbar button{font-size:11px;padding:7px 10px;border:1px solid #30445f;background:#0e1929;color:#a9bdd3;border-radius:7px;cursor:pointer}
@@ -24,8 +24,8 @@
 .wind-arrow{font-size:18px;color:#c6f6ff;text-shadow:0 1px 5px #071525,0 0 8px #48c8e8;font-weight:700}
 .layer-legend{display:flex;gap:10px;align-items:center;flex-wrap:wrap;color:#8fa3bc;font-size:10px;margin-top:9px}
 .legend-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px}.forecast-list{display:flex;flex-direction:column;gap:0}.forecast-row{display:grid;grid-template-columns:1fr 34px 48px 48px;align-items:center;gap:8px;padding:13px 0;border-bottom:1px solid #24354b;font-size:12px}.forecast-row:last-child{border:0}.forecast-row .day{color:#aebed0}.forecast-row .symbol{text-align:center;font-size:19px}.forecast-row strong{text-align:right}.chart-card{margin-top:16px}.chart-wrap{height:210px;margin-top:10px}.section{display:none}.section.active{display:block}.notice{border:1px solid #28465c;background:#10283a;border-radius:10px;padding:12px 14px;color:#a9c7d9;font-size:12px;margin-top:14px}.city-search-wrap{position:relative;flex:0 1 295px;min-width:190px}.city-search-wrap .search{width:100%;display:block}.search-results{position:absolute;top:calc(100% + 8px);left:0;right:0;width:100%;box-sizing:border-box;background:#17263b;border:1px solid #3b506c;border-radius:11px;padding:6px;z-index:3000;display:none;max-height:320px;overflow-y:auto;box-shadow:0 14px 34px #0008}.search-results button{display:block;width:100%;text-align:left;background:transparent;border:0;color:#e9f1fb;padding:10px 11px;border-radius:7px;cursor:pointer;font-size:13px;line-height:1.35}.search-results button:hover,.search-results button[aria-selected="true"]{background:#263b56}.search-results .search-hint{display:block;padding:10px 11px;color:#9eb1c9;font-size:12px}.mobile-head{display:none}
-@media(max-width:1000px){.sidebar{width:205px;flex-basis:205px}.main{padding:22px 18px}.stats{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:700px){.shell{display:block}.sidebar{position:fixed;z-index:120;left:-250px;transition:left .25s;width:240px;height:100vh}.sidebar.open{left:0}.mobile-head{display:inline-block}.main{padding:18px 13px}.topbar{align-items:flex-start}.topbar h1{font-size:20px}.top-actions .search{width:145px}.top-actions .btn{display:none}.weather-layout,.content-grid{grid-template-columns:1fr}.stats{gap:9px}.card{padding:13px}.metric{font-size:24px}.map{height:300px}.current{min-height:150px}.bigtemp{font-size:48px}}
+@media(max-width:1000px){.sidebar{width:var(--sidebar-width,244px);flex-basis:var(--sidebar-width,244px)}.main{padding:22px 18px}.stats{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:700px){.shell{display:block}.sidebar{position:fixed;z-index:120;left:calc(0px - var(--sidebar-width,244px));transition:left .25s;width:var(--sidebar-width,244px);height:100vh}.sidebar.open{left:0}.mobile-head{display:inline-block}.main{padding:18px 13px}.topbar{align-items:flex-start}.topbar h1{font-size:20px}.top-actions .search{width:145px}.top-actions .btn{display:none}.weather-layout,.content-grid{grid-template-columns:1fr}.stats{gap:9px}.card{padding:13px}.metric{font-size:24px}.map{height:300px}.current{min-height:150px}.bigtemp{font-size:48px}}
 
 .forecast-toolbar{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}.forecast-toolbar h3{margin:0 0 5px;font-size:15px;letter-spacing:.4px}
 .range-tabs,.forecast-tabs{display:flex;gap:6px;flex-wrap:wrap}.range-btn,.forecast-tab{border:1px solid var(--line);background:#14243a;color:#aebed0;padding:8px 13px;border-radius:8px;cursor:pointer;font:inherit;font-size:12px}
@@ -535,6 +535,25 @@ select.btn{color:var(--text);background:var(--panel2);border:1px solid var(--lin
         <button class="btn theme-preset" data-theme="contrast" style="text-align:left;padding:13px;background:#000;border-color:#777">◐<br><b>High Contrast</b><br><span class="small">Black / White</span></button>
         <button class="btn theme-preset" data-theme="glass" style="text-align:left;padding:13px;background:linear-gradient(135deg,rgba(79,157,196,.78),rgba(13,29,53,.88));border:1px solid #8bcce8;backdrop-filter:blur(8px)">◇<br><b>Glassmorphism</b><br><span class="small">Frosted Glass / Blue</span></button>
         <button class="btn theme-preset" data-theme="intelligence" style="text-align:left;padding:13px;background:linear-gradient(135deg,#17425e,#07111e);border-color:#42d7e8">⌁<br><b>Weather Intelligence</b><br><span class="small">Command Centre / Cyan</span></button>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px" id="sidebarAppearanceCard">
+      <div class="card-head"><h3>ΠΛΕΥΡΙΚΗ ΜΠΑΡΑ</h3><span>ΖΩΝΤΑΝΗ ΠΡΟΕΠΙΣΚΟΠΗΣΗ</span></div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:22px">
+        <div>
+          <label class="small" for="sidebarWidthControl">Πλάτος πλευρικής μπάρας <b id="sidebarWidthValue">244 px</b></label>
+          <input id="sidebarWidthControl" type="range" min="200" max="340" step="5" value="244" style="width:100%;display:block;margin-top:12px;accent-color:var(--cyan)">
+          <p class="small" style="margin-top:7px">Μικρότερο για περισσότερο χώρο στο περιεχόμενο ή μεγαλύτερο για πιο άνετη πλοήγηση.</p>
+        </div>
+        <div>
+          <label class="small" for="sidebarFontControl">Μέγεθος γραμμάτων μενού <b id="sidebarFontValue">14 px</b></label>
+          <input id="sidebarFontControl" type="range" min="12" max="18" step="1" value="14" style="width:100%;display:block;margin-top:12px;accent-color:var(--cyan)">
+          <p class="small" style="margin-top:7px">Αυξήστε το μέγεθος για πιο ευανάγνωστα ονόματα ενοτήτων.</p>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px">
+        <button class="btn" id="sidebarReset" type="button">Επαναφορά προεπιλογών</button>
+        <span class="small" id="sidebarSettingsStatus" aria-live="polite">Οι επιλογές αποθηκεύονται αυτόματα.</span>
       </div>
     </div>
     <div class="card" style="margin-bottom:16px">
@@ -1521,6 +1540,33 @@ if(bgUpload)bgUpload.addEventListener('change',e=>{const f=e.target.files?.[0];i
 const removeBg=$('removeBackground');if(removeBg)removeBg.addEventListener('click',()=>{try{localStorage.removeItem('weatherwise-custom-background')}catch(e){}if(bgUpload)bgUpload.value='';applyCustomBackground(null)});
 $('menuBtn').onclick=()=>$('sidebar').classList.toggle('open');
 document.querySelectorAll('.europe-sort-btn').forEach(b=>b.onclick=()=>{document.querySelectorAll('.europe-sort-btn').forEach(x=>x.classList.toggle('active',x===b));europeSort=b.dataset.sort;renderEuropeChart()});
+// Προσαρμογή πλάτους πλευρικής μπάρας και μεγέθους γραμμάτων.
+(function initSidebarAppearance(){
+ const widthInput=document.getElementById('sidebarWidthControl');
+ const fontInput=document.getElementById('sidebarFontControl');
+ const widthLabel=document.getElementById('sidebarWidthValue');
+ const fontLabel=document.getElementById('sidebarFontValue');
+ const status=document.getElementById('sidebarSettingsStatus');
+ const defaults={width:244,font:14};
+ let saved={};
+ try{saved=JSON.parse(localStorage.getItem('weatherwise-sidebar-appearance')||'{}')||{};}catch(e){}
+ const apply=(width,font,save=true)=>{
+  width=Math.max(200,Math.min(340,Number(width)||defaults.width));
+  font=Math.max(12,Math.min(18,Number(font)||defaults.font));
+  document.documentElement.style.setProperty('--sidebar-width',width+'px');
+  document.documentElement.style.setProperty('--sidebar-font',font+'px');
+  if(widthInput)widthInput.value=width;
+  if(fontInput)fontInput.value=font;
+  if(widthLabel)widthLabel.textContent=width+' px';
+  if(fontLabel)fontLabel.textContent=font+' px';
+  if(save){try{localStorage.setItem('weatherwise-sidebar-appearance',JSON.stringify({width,font}));}catch(e){}}
+ };
+ apply(saved.width||defaults.width,saved.font||defaults.font,false);
+ if(widthInput)widthInput.addEventListener('input',()=>apply(widthInput.value,fontInput.value));
+ if(fontInput)fontInput.addEventListener('input',()=>apply(widthInput.value,fontInput.value));
+ const reset=document.getElementById('sidebarReset');
+ if(reset)reset.addEventListener('click',()=>{apply(defaults.width,defaults.font);if(status)status.textContent='Επαναφέρθηκαν οι αρχικές ρυθμίσεις.';});
+})();
 document.querySelectorAll('.nav').forEach(n=>n.onclick=()=>{document.querySelectorAll('.nav').forEach(x=>x.classList.remove('active'));n.classList.add('active');document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));$(n.dataset.section).classList.add('active');$('pageTitle').textContent=n.textContent.trim();$('sidebar').classList.remove('open');if(n.dataset.section==='europe')loadEuropeWeather();setTimeout(()=>{if(map)map.invalidateSize();if(largeMap)largeMap.invalidateSize();if(europeChart)europeChart.resize()},100)});
 // Live city autocomplete anchored to the search field.
 let searchTimer=null,searchController=null,searchMatches=[],searchActiveIndex=-1;
