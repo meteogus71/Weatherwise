@@ -234,14 +234,30 @@ select.btn{color:var(--text);background:var(--panel2);border:1px solid var(--lin
 .meteoalarm-alert-description{font-size:14px;line-height:1.65;white-space:pre-line;margin:17px 0 8px;color:#ededed}
 .meteoalarm-alert-meta{font-size:12px;color:#c2c2c2;margin-top:12px}
 .meteoalarm-alert-link{display:inline-block;margin-top:12px;font-size:11px;font-weight:750;color:var(--cyan);text-decoration:none}
+@media(max-width:520px){.meteoalarm-alert-hero{min-height:165px;padding:20px}.meteoalarm-alert-icon{flex-basis:70px;width:70px;height:70px;font-size:40px}.meteoalarm-alert-body{padding:14px}.meteoalarm-alert-times{gap:8px}.meteoalarm-alert-time{padding:11px}.meteoalarm-alert-time-label{font-size:11px}.meteoalarm-alert-time-value{font-size:20px}.meteoalarm-alert-time-zone{font-size:10px}}
 
-/* Ελληνική εμφάνιση και διακριτικό γυάλινο εικονίδιο MeteoAlarm */
+/* Targeted MeteoAlarm refinement: yellow-header contrast + glass phenomenon icon */
+.meteoalarm-alert-card.yellow .meteoalarm-alert-hero,
 .meteoalarm-alert-card.yellow .meteoalarm-alert-country,
 .meteoalarm-alert-card.yellow .meteoalarm-alert-title,
-.meteoalarm-alert-card.yellow .meteoalarm-alert-area{color:#111827;opacity:1}
-.meteoalarm-alert-card.yellow .meteoalarm-alert-badge{color:#111827;background:rgba(45,45,45,.12);border-color:rgba(17,24,39,.28)}
-.meteoalarm-alert-icon{background:rgba(112,122,134,.34);border:1px solid rgba(235,241,247,.58);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);box-shadow:inset 0 1px 0 rgba(255,255,255,.24),0 5px 16px rgba(0,0,0,.10)}
-@media(max-width:520px){.meteoalarm-alert-hero{min-height:165px;padding:20px}.meteoalarm-alert-icon{flex-basis:70px;width:70px;height:70px;font-size:40px}.meteoalarm-alert-body{padding:14px}.meteoalarm-alert-times{gap:8px}.meteoalarm-alert-time{padding:11px}.meteoalarm-alert-time-label{font-size:11px}.meteoalarm-alert-time-value{font-size:20px}.meteoalarm-alert-time-zone{font-size:10px}}
+.meteoalarm-alert-card.yellow .meteoalarm-alert-area{
+  color:#111827;
+}
+.meteoalarm-alert-card.yellow .meteoalarm-alert-country{opacity:1}
+.meteoalarm-alert-card.yellow .meteoalarm-alert-area{color:#111827}
+.meteoalarm-alert-card.yellow .meteoalarm-alert-badge{
+  color:#111827;
+  background:rgba(45,45,45,.12);
+  border-color:rgba(17,24,39,.28);
+}
+.meteoalarm-alert-icon{
+  background:rgba(112,122,134,.34);
+  border:1px solid rgba(235,241,247,.58);
+  -webkit-backdrop-filter:blur(12px);
+  backdrop-filter:blur(12px);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.24),0 5px 16px rgba(0,0,0,.10);
+}
+
 
 
 .dashboard-model-switch{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:10px 16px 12px;margin:0 0 4px;background:rgba(10,24,42,.42);border-top:1px solid #30445f;border-bottom:1px solid #30445f}
@@ -249,6 +265,16 @@ select.btn{color:var(--text);background:var(--panel2);border:1px solid var(--lin
 .dashboard-model-switch button{display:inline-flex!important;align-items:center;justify-content:center;min-height:36px;padding:8px 16px!important;border:1px solid #405875!important;border-radius:8px!important;background:#101d2e!important;color:#c4d3e7!important;font:600 13px Manrope,sans-serif!important;cursor:pointer}
 .dashboard-model-switch button.active{background:#17617b!important;border-color:#52c9e8!important;color:#fff!important;box-shadow:inset 0 0 0 1px #52c9e855}
 
+
+
+/* User geolocation control */
+#geolocateBtn{display:inline-flex;align-items:center;justify-content:center;gap:7px;white-space:nowrap}
+#geolocateBtn:disabled{opacity:.65;cursor:wait}
+#geolocateBtn .geo-symbol{font-size:17px;line-height:1}
+#geolocateBtn .geo-label{font-size:12px}
+#geolocateStatus{font-size:11px;color:var(--muted);margin:0 0 12px;min-height:0}
+#geolocateStatus:empty{display:none}
+@media(max-width:900px){#geolocateBtn .geo-label{display:none}#geolocateBtn{min-width:42px;padding:0 10px}}
 
 /* Header controls: consistent alignment and sizing */
 .top-actions{display:flex;align-items:center;gap:10px}
@@ -455,7 +481,7 @@ select.btn{color:var(--text);background:var(--panel2);border:1px solid var(--lin
 <main class="main">
   <header class="topbar">
     <div><div class="eyebrow">ΚΕΝΤΡΟ ΜΕΤΕΩΡΟΛΟΓΙΚΗΣ ΠΛΗΡΟΦΟΡΗΣΗΣ</div><h1 id="pageTitle">Μετεωρολογική Επισκόπηση</h1></div>
-    <div class="top-actions"><div class="city-search-wrap"><input class="search" id="citySearch" type="search" placeholder="Αναζήτηση πόλης…" autocomplete="off" aria-autocomplete="list" aria-controls="searchResults" aria-expanded="false"><div class="search-results" id="searchResults" role="listbox" aria-label="Προτεινόμενες πόλεις"></div></div><button class="btn" id="refresh">↻ Ανανέωση</button><button class="btn primary" id="units">°C</button><label class="theme-control" title="Επιλογή εμφάνισης"><span>Θέμα</span><select id="themeSelect" aria-label="Επιλογή θέματος"><option value="midnight">Midnight</option><option value="arctic">Arctic Light</option><option value="ocean">Ocean Blue</option><option value="aurora">Aurora</option><option value="graphite">Graphite</option><option value="contrast">High Contrast</option><option value="glass">Glassmorphism</option><option value="intelligence">Weather Intelligence</option></select></label><button class="btn mobile-head" id="menuBtn">☰</button></div>
+    <div class="top-actions"><button class="btn" id="geolocateBtn" type="button" title="Εντοπισμός της θέσης μου" aria-label="Εντοπισμός της θέσης μου">⌖ <span>Η τοποθεσία μου</span></button><div class="city-search-wrap"><input class="search" id="citySearch" type="search" placeholder="Αναζήτηση πόλης…" autocomplete="off" aria-autocomplete="list" aria-controls="searchResults" aria-expanded="false"><div class="search-results" id="searchResults" role="listbox" aria-label="Προτεινόμενες πόλεις"></div></div><button class="btn" id="refresh">↻ Ανανέωση</button><button class="btn primary" id="units">°C</button><label class="theme-control" title="Επιλογή εμφάνισης"><span>Θέμα</span><select id="themeSelect" aria-label="Επιλογή θέματος"><option value="midnight">Midnight</option><option value="arctic">Arctic Light</option><option value="ocean">Ocean Blue</option><option value="aurora">Aurora</option><option value="graphite">Graphite</option><option value="contrast">High Contrast</option><option value="glass">Glassmorphism</option><option value="intelligence">Weather Intelligence</option></select></label><button class="btn mobile-head" id="menuBtn">☰</button></div>
   </header>
 
 
@@ -526,6 +552,7 @@ select.btn{color:var(--text);background:var(--panel2);border:1px solid var(--lin
   </section>
 
   <section class="section active" id="overview">
+    <div id="geolocateStatus" role="status" aria-live="polite"></div>
     <div class="grid stats">
       <div class="card"><div class="card-head">ΘΕΡΜΟΚΡΑΣΙΑ <span>◉</span></div><div class="metric" id="tempStat">--°<span class="unit">C</span></div><div class="small" id="feels">Αίσθηση: --°</div></div>
       <div class="card"><div class="card-head">ΑΝΕΜΟΣ <span>↗</span></div><div class="metric" id="windStat">-- <span class="unit">km/h</span></div><div class="small" id="windDir">Διεύθυνση: --</div></div>
@@ -1506,7 +1533,59 @@ function setActiveCityOption(next){const options=[...cityResults.querySelectorAl
 cityInput.addEventListener('input',()=>{clearTimeout(searchTimer);if(searchController){searchController.abort();searchController=null;}const query=cityInput.value.trim();searchMatches=[];if(query.length<2){closeCityResults();return;}showCityMessage('Αναζήτηση πόλεων…');searchTimer=setTimeout(async()=>{const controller=new AbortController();searchController=controller;try{const url=`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=8&language=el&format=json`;const response=await fetch(url,{signal:controller.signal});if(!response.ok)throw new Error(`HTTP ${response.status}`);const data=await response.json();if(cityInput.value.trim()!==query)return;renderCityMatches(data.results||[]);}catch(error){if(error.name!=='AbortError'&&cityInput.value.trim()===query)showCityMessage('Δεν ήταν δυνατή η αναζήτηση. Έλεγξε τη σύνδεσή σου.');}},180);});
 cityInput.addEventListener('keydown',event=>{if(event.key==='ArrowDown'&&cityResults.style.display==='block'){event.preventDefault();setActiveCityOption(searchActiveIndex+1);}else if(event.key==='ArrowUp'&&cityResults.style.display==='block'){event.preventDefault();setActiveCityOption(searchActiveIndex-1);}else if(event.key==='Enter'&&searchActiveIndex>=0&&searchMatches[searchActiveIndex]){event.preventDefault();chooseCity(searchMatches[searchActiveIndex]);}else if(event.key==='Escape')closeCityResults();});
 cityInput.addEventListener('focus',()=>{if(cityInput.value.trim().length>=2&&cityResults.childElementCount){cityResults.style.display='block';cityInput.setAttribute('aria-expanded','true');}});
+
 document.addEventListener('click',event=>{if(!event.target.closest('.city-search-wrap'))closeCityResults();});
+
+// Locate the visitor and show the nearest locality on the weather dashboard.
+const geolocateBtn=$('geolocateBtn'),geolocateStatus=$('geolocateStatus');
+let geolocationRequestInProgress=false;
+function setGeolocationStatus(message,isError=false){
+ if(!geolocateStatus)return;
+ geolocateStatus.textContent=message;
+ geolocateStatus.style.color=isError?'#f59e0b':'var(--muted)';
+}
+async function reverseGeocodeNearestCity(latitude,longitude){
+ const url=`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${encodeURIComponent(latitude)}&longitude=${encodeURIComponent(longitude)}&localityLanguage=el`;
+ const response=await fetch(url,{headers:{'Accept':'application/json'}});
+ if(!response.ok)throw new Error('Δεν ήταν δυνατή η αναγνώριση της κοντινότερης πόλης.');
+ const data=await response.json();
+ const locality=data.city||data.locality||data.localityInfo?.administrative?.find(x=>x.adminLevel>=8)?.name||data.principalSubdivision||'Κοντινή περιοχή';
+ const region=data.principalSubdivision&&data.principalSubdivision!==locality?data.principalSubdivision:'';
+ const country=data.countryName||'';
+ return {name:locality,region,country,label:[locality,region,country].filter(Boolean).join(', ')};
+}
+function requestUserLocation({automatic=false}={}){
+ if(!navigator.geolocation){
+  setGeolocationStatus('Ο φυλλομετρητής δεν υποστηρίζει γεωεντοπισμό.',true);
+  return;
+ }
+ if(geolocationRequestInProgress)return;
+ geolocationRequestInProgress=true;
+ if(geolocateBtn){geolocateBtn.disabled=true;geolocateBtn.innerHTML='<span class="geo-symbol">⌖</span><span class="geo-label">Εντοπισμός…</span>';}
+ setGeolocationStatus(automatic?'Εντοπισμός της κοντινότερης πόλης…':'Αναζήτηση της θέσης σας…');
+ navigator.geolocation.getCurrentPosition(async position=>{
+  try{
+   const latitude=position.coords.latitude,longitude=position.coords.longitude;
+   const nearest=await reverseGeocodeNearestCity(latitude,longitude);
+   lat=latitude;lon=longitude;city=nearest.label;
+   cityInput.value='';closeCityResults();
+   await loadWeather();
+   setGeolocationStatus(`Εμφανίζεται ο καιρός για την κοντινότερη περιοχή: ${nearest.label}.`);
+  }catch(error){
+   setGeolocationStatus(error.message||'Δεν ήταν δυνατή η αναγνώριση της κοντινότερης πόλης.',true);
+  }finally{
+   geolocationRequestInProgress=false;
+   if(geolocateBtn){geolocateBtn.disabled=false;geolocateBtn.innerHTML='<span class="geo-symbol">⌖</span><span class="geo-label">Η τοποθεσία μου</span>';}
+  }
+ },error=>{
+  geolocationRequestInProgress=false;
+  if(geolocateBtn){geolocateBtn.disabled=false;geolocateBtn.innerHTML='<span class="geo-symbol">⌖</span><span class="geo-label">Η τοποθεσία μου</span>';}
+  const message=error.code===1?'Δεν δόθηκε άδεια πρόσβασης στην τοποθεσία. Μπορείς να την ενεργοποιήσεις από τις ρυθμίσεις του browser.':error.code===2?'Δεν ήταν δυνατός ο προσδιορισμός της θέσης.':'Η αναζήτηση τοποθεσίας έληξε χωρίς απάντηση.';
+  setGeolocationStatus(message,true);
+ },{enableHighAccuracy:false,timeout:12000,maximumAge:300000});
+}
+if(geolocateBtn)geolocateBtn.addEventListener('click',()=>requestUserLocation());
+
 
 // Community weather reports (local prototype; connect to a shared API for cross-user publishing)
 const reportForm=$('weatherReportForm'), reportFiles=$('reportPhotos'), reportPreview=$('reportPhotoPreviews');
@@ -1617,34 +1696,66 @@ function meteoAlarmLocalDateTime(value){
  };
 }
 
-function meteoAlarmGreekText(value){
- if(!value)return value;
- let text=String(value).trim();
- const replacements=[
-  [/\bYellow\b/gi,'Κίτρινη'],[/\bOrange\b/gi,'Πορτοκαλί'],[/\bRed\b/gi,'Κόκκινη'],
-  [/\bGreen\b/gi,'Πράσινη'],[/\bWarning issued for\b/gi,'προειδοποίηση εκδόθηκε για'],
-  [/\bwarning\b/gi,'προειδοποίηση'],[/\bHeavy Rain\b/gi,'Ισχυρή βροχόπτωση'],
-  [/\bModerate Rain\b/gi,'Μέτρια βροχόπτωση'],[/\bRain\b/gi,'Βροχόπτωση'],
-  [/\bSnow\b/gi,'Χιονόπτωση'],[/\bThunderstorms?\b/gi,'Καταιγίδες'],
-  [/\bWind\b/gi,'Άνεμος'],[/\bStrong Wind\b/gi,'Ισχυροί άνεμοι'],
-  [/\bExtreme Temperatures?\b/gi,'Ακραίες θερμοκρασίες'],[/\bHigh Temperatures?\b/gi,'Υψηλές θερμοκρασίες'],
-  [/\bLow Temperatures?\b/gi,'Χαμηλές θερμοκρασίες'],[/\bFog\b/gi,'Ομίχλη'],
-  [/\bFlood(?:ing)?\b/gi,'Πλημμύρα'],[/\bHail\b/gi,'Χαλάζι'],[/\bIce\b/gi,'Παγετός'],
-  [/\bCoastal Event\b/gi,'Παράκτιο φαινόμενο'],[/\bForest Fire\b/gi,'Δασική πυρκαγιά'],
-  [/\bCentral Macedonia\b/gi,'Κεντρική Μακεδονία'],[/\bEast Macedonia and Thrace\b/gi,'Ανατολική Μακεδονία και Θράκη'],
-  [/\bWest Macedonia\b/gi,'Δυτική Μακεδονία'],[/\bThessaly\b/gi,'Θεσσαλία'],
-  [/\bEpirus\b/gi,'Ήπειρος'],[/\bIonian Islands\b/gi,'Ιόνια Νησιά'],
-  [/\bWestern Greece\b/gi,'Δυτική Ελλάδα'],[/\bCentral Greece\b/gi,'Στερεά Ελλάδα'],
-  [/\bAttica\b/gi,'Αττική'],[/\bPeloponnese\b/gi,'Πελοπόννησος'],
-  [/\bNorth Aegean\b/gi,'Βόρειο Αιγαίο'],[/\bSouth Aegean\b/gi,'Νότιο Αιγαίο'],
-  [/\bCrete\b/gi,'Κρήτη'],[/\bGreece\b/gi,'Ελλάδα'],
-  [/\bLikely\b/gi,'Πιθανή'],[/\bPossible\b/gi,'Πιθανή'],[/\bObserved\b/gi,'Παρατηρείται'],
-  [/\bExpected\b/gi,'Αναμένεται'],[/\bVery Likely\b/gi,'Πολύ πιθανή']
+// Πλήρης τοπική απόδοση των πεδίων MeteoAlarm στα ελληνικά.
+// Καλύπτει τίτλους CAP, περιοχές, φαινόμενα, περιγραφές και όρους βεβαιότητας.
+function meteoAlarmGreekText(value, kind='text'){
+ const original=String(value||'').trim();
+ if(!original)return '';
+ const regions={
+  'central macedonia':'Κεντρική Μακεδονία','east macedonia and thrace':'Ανατολική Μακεδονία και Θράκη',
+  'eastern macedonia and thrace':'Ανατολική Μακεδονία και Θράκη','western macedonia':'Δυτική Μακεδονία',
+  'eastern macedonia':'Ανατολική Μακεδονία','east macedonia':'Ανατολική Μακεδονία','west macedonia':'Δυτική Μακεδονία',
+  'epirus':'Ήπειρος','thessaly':'Θεσσαλία','ionian islands':'Ιόνια Νησιά','western greece':'Δυτική Ελλάδα',
+  'central greece':'Στερεά Ελλάδα','mainland greece':'Ηπειρωτική Ελλάδα','attica':'Αττική','peloponnese':'Πελοπόννησος',
+  'north aegean':'Βόρειο Αιγαίο','south aegean':'Νότιο Αιγαίο','crete':'Κρήτη','thrace':'Θράκη',
+  'aegean sea':'Αιγαίο Πέλαγος','ionian sea':'Ιόνιο Πέλαγος','northwest aegean':'Βορειοδυτικό Αιγαίο',
+  'northeast aegean':'Βορειοανατολικό Αιγαίο','central aegean':'Κεντρικό Αιγαίο','southeast aegean':'Νοτιοανατολικό Αιγαίο',
+  'southwest aegean':'Νοτιοδυτικό Αιγαίο','crete sea':'Θάλασσα της Κρήτης','north crete':'Βόρεια Κρήτη',
+  'south crete':'Νότια Κρήτη','east crete':'Ανατολική Κρήτη','west crete':'Δυτική Κρήτη',
+  'north ionian':'Βόρειο Ιόνιο','south ionian':'Νότιο Ιόνιο','north mainland':'Βόρεια Ηπειρωτική Ελλάδα',
+  'south mainland':'Νότια Ηπειρωτική Ελλάδα'
+ };
+ const terms=[
+  [/\bmoderate rain warning\b/gi,'προειδοποίηση για μέτρια βροχόπτωση'],[/\bheavy rain warning\b/gi,'προειδοποίηση για έντονη βροχόπτωση'],[/\bheavy snow warning\b/gi,'προειδοποίηση για έντονη χιονόπτωση'],
+  [/\bvery heavy rain(?:fall)?\b/gi,'πολύ έντονη βροχόπτωση'],[/\bmoderate rain(?:fall)?\b/gi,'μέτρια βροχόπτωση'],[/\bheavy rain(?:fall)?\b/gi,'έντονη βροχόπτωση'],[/\bheavy precipitation\b/gi,'έντονα φαινόμενα υετού'],
+  [/\bprecipitation\b/gi,'υετός'],[/\brain showers?\b/gi,'όμβροι βροχής'],[/\brainfall\b/gi,'βροχόπτωση'],[/\brain\b/gi,'βροχή'],
+  [/\bthunderstorms?\b/gi,'καταιγίδες'],[/\bthunderstorm\b/gi,'καταιγίδα'],[/\blightning\b/gi,'κεραυνοί'],
+  [/\bheavy snow\b/gi,'έντονη χιονόπτωση'],[/\bsnowfall\b/gi,'χιονόπτωση'],[/\bsleet\b/gi,'χιονόνερο'],[/\bsnow\b/gi,'χιόνι'],
+  [/\bstrong winds?\b/gi,'ισχυροί άνεμοι'],[/\bhigh winds?\b/gi,'θυελλώδεις άνεμοι'],[/\bwind gusts?\b/gi,'ριπές ανέμου'],[/\bgusts?\b/gi,'ριπές'],[/\bwind\b/gi,'άνεμος'],
+  [/\bheatwave\b/gi,'καύσωνας'],[/\bextreme heat\b/gi,'ακραία ζέστη'],[/\bhigh temperatures?\b/gi,'υψηλές θερμοκρασίες'],[/\blow temperatures?\b/gi,'χαμηλές θερμοκρασίες'],[/\btemperature\b/gi,'θερμοκρασία'],
+  [/\bfrost\b/gi,'παγετός'],[/\bblack ice\b/gi,'παγετός στο οδόστρωμα'],[/\bice\b/gi,'πάγος'],[/\bfog\b/gi,'ομίχλη'],[/\bfreezing fog\b/gi,'παγωμένη ομίχλη'],
+  [/\bcoastal flooding\b/gi,'παράκτιες πλημμύρες'],[/\bflooding\b/gi,'πλημμύρες'],[/\bflood\b/gi,'πλημμύρα'],[/\brough sea\b/gi,'θαλασσοταραχή'],[/\bhigh waves?\b/gi,'υψηλός κυματισμός'],[/\bwave(?:s)?\b/gi,'κύματα'],[/\bsea conditions?\b/gi,'θαλάσσιες συνθήκες'],
+  [/\bforest fire danger\b/gi,'κίνδυνος δασικής πυρκαγιάς'],[/\bwildfire\b/gi,'δασική πυρκαγιά'],[/\bfire danger\b/gi,'κίνδυνος πυρκαγιάς'],
+  [/\bwarning\b/gi,'προειδοποίηση'],[/\bissued\b/gi,'εκδόθηκε'],[/\bexpected\b/gi,'αναμένεται'],[/\bvery likely\b/gi,'πολύ πιθανό'],[/\bunlikely\b/gi,'απίθανο'],[/\bpossible\b/gi,'πιθανό'],[/\blikely\b/gi,'πιθανό'],[/\bobserved\b/gi,'παρατηρήθηκε'],
+  [/\bmoderate\b/gi,'μέτριο'],[/\bsevere\b/gi,'ισχυρό'],[/\bextreme\b/gi,'ακραίο'],[/\bminor\b/gi,'ήπιο'],[/\byellow\b/gi,'κίτρινο'],[/\borange\b/gi,'πορτοκαλί'],[/\bred\b/gi,'κόκκινο'],[/\bgreen\b/gi,'πράσινο'],
+  [/\bin Greece\b/gi,'στην Ελλάδα'],[/\bfor Greece\b/gi,'για την Ελλάδα'],[/\band\b/gi,'και'],[/\bin\b/gi,'σε'],[/\bwith\b/gi,'με'],[/\bduring\b/gi,'κατά τη διάρκεια'],[/\bbetween\b/gi,'μεταξύ'],[/\bfrom\b/gi,'από'],[/\buntil\b/gi,'έως'],[/\bthrough\b/gi,'κατά τη διάρκεια'],[/\btonight\b/gi,'απόψε'],[/\btomorrow\b/gi,'αύριο'],[/\btoday\b/gi,'σήμερα'],
+  [/\bMonday\b/gi,'Δευτέρα'],[/\bTuesday\b/gi,'Τρίτη'],[/\bWednesday\b/gi,'Τετάρτη'],[/\bThursday\b/gi,'Πέμπτη'],[/\bFriday\b/gi,'Παρασκευή'],[/\bSaturday\b/gi,'Σάββατο'],[/\bSunday\b/gi,'Κυριακή'],
+  [/\bvalidity\b/gi,'διάρκεια ισχύος'],[/\bcertainty\b/gi,'βεβαιότητα'],[/\bseverity\b/gi,'σοβαρότητα'],[/\bupdated\b/gi,'ενημερώθηκε'],[/\bissued at\b/gi,'ώρα έκδοσης']
  ];
- for(const [pattern,replacement] of replacements) text=text.replace(pattern,replacement);
- return text.replace(/\s+[-–]\s+/g,' – ').replace(/\s{2,}/g,' ').trim();
+ let s=original;
+ // Μετάφραση των γεωγραφικών ονομασιών ανεξάρτητα από τη θέση τους στον τίτλο/κείμενο.
+ Object.entries(regions).sort((a,b)=>b[0].length-a[0].length).forEach(([en,el])=>{
+  const escaped=en.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  s=s.replace(new RegExp('(^|[^A-Za-z])'+escaped+'(?=$|[^A-Za-z])','gi'),(m,prefix)=>prefix+el);
+ });
+ // Ειδική κανονικοποίηση των τυπικών τίτλων CAP, ακόμη κι αν η ροή έχει μικτό ελληνικό/αγγλικό κείμενο.
+ s=s.replace(/\b(Yellow|Orange|Red)\s+(.+?)\s+Warning\s+issued\s+for\s+Greece\s*[-–—:]/i,(m,level,event)=>{
+  const levelEl={yellow:'Κίτρινη',orange:'Πορτοκαλί',red:'Κόκκινη'}[level.toLowerCase()];
+  return `${levelEl} προειδοποίηση για ${meteoAlarmGreekText(event,'event')} στην Ελλάδα – `;
+ });
+ terms.forEach(([pattern,replacement])=>{s=s.replace(pattern,replacement)});
+ // Δεύτερο πέρασμα περιοχών: καλύπτει περιοχές που εμφανίζονται μετά από μετατροπή τίτλου.
+ Object.entries(regions).sort((a,b)=>b[0].length-a[0].length).forEach(([en,el])=>{
+  const escaped=en.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  s=s.replace(new RegExp(escaped,'gi'),el);
+ });
+ if(kind==='certainty'){
+  const certainty={likely:'Πιθανή',possible:'Πιθανή',unlikely:'Απίθανη',observed:'Παρατηρήθηκε',verylikely:'Πολύ πιθανή',unknown:'Άγνωστη'};
+  return certainty[original.toLowerCase().replace(/[\\s_-]/g,'')]||s;
+ }
+ if(kind==='area')return s.replace(/\s*[,;]\s*/g,' · ');
+ return s.replace(/\s{2,}/g,' ').trim();
 }
-
 function renderMeteoAlarmAlerts(entries){
  const host=$('meteoAlarmAlertsList');
  if(!entries.length){
@@ -1660,8 +1771,8 @@ function renderMeteoAlarmAlerts(entries){
     <div class="meteoalarm-alert-hero-main">
      <div class="meteoalarm-alert-country">Ελλάδα · MeteoAlarm</div>
      <span class="meteoalarm-alert-badge">${meteoAlarmGreekSeverity(level)} ΠΡΟΕΙΔΟΠΟΙΗΣΗ</span>
-     <div class="meteoalarm-alert-title">${meteoAlarmSafe(meteoAlarmGreekText(a.headline||a.event||'Προειδοποίηση καιρού'))}</div>
-     ${a.area?`<div class="meteoalarm-alert-area">${meteoAlarmSafe(meteoAlarmGreekText(a.area))}</div>`:''}
+     <div class="meteoalarm-alert-title">${meteoAlarmSafe(meteoAlarmGreekText(a.headline||a.event||'Προειδοποίηση καιρού','headline'))}</div>
+     ${a.area?`<div class="meteoalarm-alert-area">${meteoAlarmSafe(meteoAlarmGreekText(a.area,'area'))}</div>`:''}
     </div>
     <div class="meteoalarm-alert-icon" role="img" aria-label="${meteoAlarmSafe(a.event||'Καιρικό φαινόμενο')}">${icon}</div>
    </div>
@@ -1670,8 +1781,8 @@ function renderMeteoAlarmAlerts(entries){
      <div class="meteoalarm-alert-time"><div class="meteoalarm-alert-time-label">Έναρξη</div><div class="meteoalarm-alert-time-value">${meteoAlarmSafe(start.date)}</div><div class="meteoalarm-alert-time-value">${meteoAlarmSafe(start.time)}</div><div class="meteoalarm-alert-time-zone">Τοπική ώρα Ελλάδας</div></div>
      <div class="meteoalarm-alert-time"><div class="meteoalarm-alert-time-label">Λήξη</div><div class="meteoalarm-alert-time-value">${meteoAlarmSafe(end.date)}</div><div class="meteoalarm-alert-time-value">${meteoAlarmSafe(end.time)}</div><div class="meteoalarm-alert-time-zone">Τοπική ώρα Ελλάδας</div></div>
     </div>
-    ${a.description?`<div class="meteoalarm-alert-description">${meteoAlarmSafe(meteoAlarmGreekText(a.description))}</div>`:''}
-    <div class="meteoalarm-alert-meta">Φαινόμενο: ${meteoAlarmSafe(meteoAlarmGreekText(a.event||'—'))} · Βεβαιότητα: ${meteoAlarmSafe(meteoAlarmGreekText(a.certainty||'—'))} · Έκδοση: ${meteoAlarmSafe(meteoAlarmDate(a.sent||a.updated))}</div>
+    ${a.description?`<div class="meteoalarm-alert-description">${meteoAlarmSafe(meteoAlarmGreekText(a.description,'description'))}</div>`:''}
+    <div class="meteoalarm-alert-meta">Φαινόμενο: ${meteoAlarmSafe(meteoAlarmGreekText(a.event||'—','event'))} · Βεβαιότητα: ${meteoAlarmSafe(meteoAlarmGreekText(a.certainty||'—','certainty'))} · Έκδοση: ${meteoAlarmSafe(meteoAlarmDate(a.sent||a.updated))}</div>
     ${a.url?`<a class="meteoalarm-alert-link" href="${meteoAlarmSafe(a.url)}" target="_blank" rel="noopener">Περισσότερες πληροφορίες ↗</a>`:''}
    </div>
   </article>`;
@@ -1727,6 +1838,8 @@ initPointWeatherMap();
 document.querySelectorAll('.nav[data-section]').forEach(n=>n.addEventListener('click',()=>{if(n.dataset.section==='maps')setTimeout(()=>pointWeatherMap?.invalidateSize(),180)}));
 let moveDebounce;
 loadWeather();
+// Ask for location on entry; if permission is denied, the default city remains available.
+setTimeout(()=>requestUserLocation({automatic:true}),650);
 
 // Interactive point weather map: click any coordinate and load local Open-Meteo data.
 let pointWeatherMap=null, pointWeatherMarker=null, pointHourlyChart=null, pointRequestToken=0;
