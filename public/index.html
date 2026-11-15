@@ -1389,8 +1389,27 @@ async function loadWeather(){
  const currentHourIndex=Array.isArray(h.time)?Math.max(0,h.time.reduce((best,t,i)=>Math.abs(new Date(t)-new Date(c.time))<Math.abs(new Date(h.time[best])-new Date(c.time))?i:best,0)):0;
  const cloudValue=h.cloud_cover?.[currentHourIndex];
  $('cloudCover').textContent=Number.isFinite(cloudValue)?`${Math.round(cloudValue)} %`:'— %';
- const formatSunTime=value=>value?String(value).slice(11,16):'--:--';
- $('sunTimes').textContent=`${formatSunTime(day.sunrise?.[0])} / ${formatSunTime(day.sunset?.[0])}`;
+ const formatSunTime=value=>{
+  if(!value)return '--:--';
+  const text=String(value);
+  const match=text.match(/(?:T|^)(\d{2}:\d{2})/);
+  return match?match[1]:(/^\d{2}:\d{2}/.test(text)?text.slice(0,5):'--:--');
+ };
+ let sunriseValue=day.sunrise?.[0], sunsetValue=day.sunset?.[0];
+ // Some proxy responses omit daily sunrise/sunset although they were requested.
+ if(!sunriseValue||!sunsetValue){
+  try{
+   const sunUrl=`https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(lat)}&longitude=${encodeURIComponent(lon)}&daily=sunrise,sunset&forecast_days=1&timezone=auto`;
+   const sunResponse=await fetch(sunUrl);
+   if(sunResponse.ok){
+    const sunData=await sunResponse.json();
+    sunriseValue=sunriseValue||sunData.daily?.sunrise?.[0];
+    sunsetValue=sunsetValue||sunData.daily?.sunset?.[0];
+   }
+  }catch(sunError){console.warn('Sunrise/sunset fallback unavailable',sunError);}
+ }
+ $('sunTimes').textContent=`${formatSunTime(sunriseValue)} / ${formatSunTime(sunsetValue)}`;
+
  const minT=Math.min(...day.temperature_2m_min),maxT=Math.max(...day.temperature_2m_max),span=Math.max(1,maxT-minT);
  const rows=day.time.map((date,i)=>{
    const dt=new Date(date+'T12:00:00'),today=i===0;
