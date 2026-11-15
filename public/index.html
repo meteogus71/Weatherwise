@@ -1696,66 +1696,61 @@ function meteoAlarmLocalDateTime(value){
  };
 }
 
-// Πλήρης τοπική απόδοση των πεδίων MeteoAlarm στα ελληνικά.
-// Καλύπτει τίτλους CAP, περιοχές, φαινόμενα, περιγραφές και όρους βεβαιότητας.
+// Αυτόματη απόδοση των προειδοποιήσεων MeteoAlarm στα ελληνικά.
 function meteoAlarmGreekText(value, kind='text'){
  const original=String(value||'').trim();
  if(!original)return '';
  const regions={
   'central macedonia':'Κεντρική Μακεδονία','east macedonia and thrace':'Ανατολική Μακεδονία και Θράκη',
-  'eastern macedonia and thrace':'Ανατολική Μακεδονία και Θράκη','western macedonia':'Δυτική Μακεδονία',
-  'eastern macedonia':'Ανατολική Μακεδονία','east macedonia':'Ανατολική Μακεδονία','west macedonia':'Δυτική Μακεδονία',
-  'epirus':'Ήπειρος','thessaly':'Θεσσαλία','ionian islands':'Ιόνια Νησιά','western greece':'Δυτική Ελλάδα',
-  'central greece':'Στερεά Ελλάδα','mainland greece':'Ηπειρωτική Ελλάδα','attica':'Αττική','peloponnese':'Πελοπόννησος',
-  'north aegean':'Βόρειο Αιγαίο','south aegean':'Νότιο Αιγαίο','crete':'Κρήτη','thrace':'Θράκη',
-  'aegean sea':'Αιγαίο Πέλαγος','ionian sea':'Ιόνιο Πέλαγος','northwest aegean':'Βορειοδυτικό Αιγαίο',
-  'northeast aegean':'Βορειοανατολικό Αιγαίο','central aegean':'Κεντρικό Αιγαίο','southeast aegean':'Νοτιοανατολικό Αιγαίο',
-  'southwest aegean':'Νοτιοδυτικό Αιγαίο','crete sea':'Θάλασσα της Κρήτης','north crete':'Βόρεια Κρήτη',
-  'south crete':'Νότια Κρήτη','east crete':'Ανατολική Κρήτη','west crete':'Δυτική Κρήτη',
-  'north ionian':'Βόρειο Ιόνιο','south ionian':'Νότιο Ιόνιο','north mainland':'Βόρεια Ηπειρωτική Ελλάδα',
-  'south mainland':'Νότια Ηπειρωτική Ελλάδα'
+  'western macedonia':'Δυτική Μακεδονία','epirus':'Ήπειρος','thessaly':'Θεσσαλία',
+  'ionian islands':'Ιόνια Νησιά','western greece':'Δυτική Ελλάδα','central greece':'Στερεά Ελλάδα',
+  'attica':'Αττική','peloponnese':'Πελοπόννησος','north aegean':'Βόρειο Αιγαίο',
+  'south aegean':'Νότιο Αιγαίο','crete':'Κρήτη','eastern macedonia':'Ανατολική Μακεδονία',
+  'thrace':'Θράκη','aegean sea':'Αιγαίο Πέλαγος','ionian sea':'Ιόνιο Πέλαγος',
+  'northwest aegean':'Βορειοδυτικό Αιγαίο','northeast aegean':'Βορειοανατολικό Αιγαίο',
+  'central aegean':'Κεντρικό Αιγαίο','southeast aegean':'Νοτιοανατολικό Αιγαίο',
+  'southwest aegean':'Νοτιοδυτικό Αιγαίο','crete sea':'Θάλασσα της Κρήτης'
  };
- const terms=[
-  [/\bmoderate rain warning\b/gi,'προειδοποίηση για μέτρια βροχόπτωση'],[/\bheavy rain warning\b/gi,'προειδοποίηση για έντονη βροχόπτωση'],[/\bheavy snow warning\b/gi,'προειδοποίηση για έντονη χιονόπτωση'],
-  [/\bvery heavy rain(?:fall)?\b/gi,'πολύ έντονη βροχόπτωση'],[/\bmoderate rain(?:fall)?\b/gi,'μέτρια βροχόπτωση'],[/\bheavy rain(?:fall)?\b/gi,'έντονη βροχόπτωση'],[/\bheavy precipitation\b/gi,'έντονα φαινόμενα υετού'],
-  [/\bprecipitation\b/gi,'υετός'],[/\brain showers?\b/gi,'όμβροι βροχής'],[/\brainfall\b/gi,'βροχόπτωση'],[/\brain\b/gi,'βροχή'],
-  [/\bthunderstorms?\b/gi,'καταιγίδες'],[/\bthunderstorm\b/gi,'καταιγίδα'],[/\blightning\b/gi,'κεραυνοί'],
-  [/\bheavy snow\b/gi,'έντονη χιονόπτωση'],[/\bsnowfall\b/gi,'χιονόπτωση'],[/\bsleet\b/gi,'χιονόνερο'],[/\bsnow\b/gi,'χιόνι'],
-  [/\bstrong winds?\b/gi,'ισχυροί άνεμοι'],[/\bhigh winds?\b/gi,'θυελλώδεις άνεμοι'],[/\bwind gusts?\b/gi,'ριπές ανέμου'],[/\bgusts?\b/gi,'ριπές'],[/\bwind\b/gi,'άνεμος'],
-  [/\bheatwave\b/gi,'καύσωνας'],[/\bextreme heat\b/gi,'ακραία ζέστη'],[/\bhigh temperatures?\b/gi,'υψηλές θερμοκρασίες'],[/\blow temperatures?\b/gi,'χαμηλές θερμοκρασίες'],[/\btemperature\b/gi,'θερμοκρασία'],
-  [/\bfrost\b/gi,'παγετός'],[/\bblack ice\b/gi,'παγετός στο οδόστρωμα'],[/\bice\b/gi,'πάγος'],[/\bfog\b/gi,'ομίχλη'],[/\bfreezing fog\b/gi,'παγωμένη ομίχλη'],
-  [/\bcoastal flooding\b/gi,'παράκτιες πλημμύρες'],[/\bflooding\b/gi,'πλημμύρες'],[/\bflood\b/gi,'πλημμύρα'],[/\brough sea\b/gi,'θαλασσοταραχή'],[/\bhigh waves?\b/gi,'υψηλός κυματισμός'],[/\bwave(?:s)?\b/gi,'κύματα'],[/\bsea conditions?\b/gi,'θαλάσσιες συνθήκες'],
-  [/\bforest fire danger\b/gi,'κίνδυνος δασικής πυρκαγιάς'],[/\bwildfire\b/gi,'δασική πυρκαγιά'],[/\bfire danger\b/gi,'κίνδυνος πυρκαγιάς'],
-  [/\bwarning\b/gi,'προειδοποίηση'],[/\bissued\b/gi,'εκδόθηκε'],[/\bexpected\b/gi,'αναμένεται'],[/\bvery likely\b/gi,'πολύ πιθανό'],[/\bunlikely\b/gi,'απίθανο'],[/\bpossible\b/gi,'πιθανό'],[/\blikely\b/gi,'πιθανό'],[/\bobserved\b/gi,'παρατηρήθηκε'],
-  [/\bmoderate\b/gi,'μέτριο'],[/\bsevere\b/gi,'ισχυρό'],[/\bextreme\b/gi,'ακραίο'],[/\bminor\b/gi,'ήπιο'],[/\byellow\b/gi,'κίτρινο'],[/\borange\b/gi,'πορτοκαλί'],[/\bred\b/gi,'κόκκινο'],[/\bgreen\b/gi,'πράσινο'],
-  [/\bin Greece\b/gi,'στην Ελλάδα'],[/\bfor Greece\b/gi,'για την Ελλάδα'],[/\band\b/gi,'και'],[/\bin\b/gi,'σε'],[/\bwith\b/gi,'με'],[/\bduring\b/gi,'κατά τη διάρκεια'],[/\bbetween\b/gi,'μεταξύ'],[/\bfrom\b/gi,'από'],[/\buntil\b/gi,'έως'],[/\bthrough\b/gi,'κατά τη διάρκεια'],[/\btonight\b/gi,'απόψε'],[/\btomorrow\b/gi,'αύριο'],[/\btoday\b/gi,'σήμερα'],
-  [/\bMonday\b/gi,'Δευτέρα'],[/\bTuesday\b/gi,'Τρίτη'],[/\bWednesday\b/gi,'Τετάρτη'],[/\bThursday\b/gi,'Πέμπτη'],[/\bFriday\b/gi,'Παρασκευή'],[/\bSaturday\b/gi,'Σάββατο'],[/\bSunday\b/gi,'Κυριακή'],
-  [/\bvalidity\b/gi,'διάρκεια ισχύος'],[/\bcertainty\b/gi,'βεβαιότητα'],[/\bseverity\b/gi,'σοβαρότητα'],[/\bupdated\b/gi,'ενημερώθηκε'],[/\bissued at\b/gi,'ώρα έκδοσης']
- ];
  let s=original;
- // Μετάφραση των γεωγραφικών ονομασιών ανεξάρτητα από τη θέση τους στον τίτλο/κείμενο.
+ // Τυπικός τίτλος CAP: "Yellow Rain Warning issued for Greece - Central Macedonia".
+ const titleMatch=s.match(/^(Yellow|Orange|Red)\s+(.+?)\s+Warning\s+issued\s+for\s+Greece\s*[-–—:]\s*(.+)$/i);
+ if(titleMatch){
+  const level={yellow:'Κίτρινη',orange:'Πορτοκαλί',red:'Κόκκινη'}[titleMatch[1].toLowerCase()];
+  const phenomenon=meteoAlarmGreekText(titleMatch[2],'event');
+  const area=meteoAlarmGreekText(titleMatch[3],'area');
+  return `Εκδόθηκε ${level.toLowerCase()} προειδοποίηση για ${phenomenon} στην Ελλάδα – ${area}`;
+ }
+ const phraseMap=[
+  [/\bmoderate rain\b/gi,'μέτρια βροχόπτωση'],[/\bheavy rain\b/gi,'έντονη βροχόπτωση'],[/\bheavy precipitation\b/gi,'έντονα φαινόμενα υετού'],
+  [/\brain showers?\b/gi,'όμβροι βροχής'],[/\brainfall\b/gi,'βροχόπτωση'],[/\bthunderstorms?\b/gi,'καταιγίδες'],
+  [/\bthunderstorm\b/gi,'καταιγίδα'],[/\bheavy snow\b/gi,'έντονη χιονόπτωση'],[/\bsnowfall\b/gi,'χιονόπτωση'],
+  [/\bsnow\b/gi,'χιόνι'],[/\bstrong winds?\b/gi,'ισχυροί άνεμοι'],[/\bhigh winds?\b/gi,'θυελλώδεις άνεμοι'],
+  [/\bwind gusts?\b/gi,'ριπές ανέμου'],[/\bwind\b/gi,'άνεμος'],[/\bheatwave\b/gi,'καύσωνας'],
+  [/\bhigh temperatures?\b/gi,'υψηλές θερμοκρασίες'],[/\blow temperatures?\b/gi,'χαμηλές θερμοκρασίες'],
+  [/\bfrost\b/gi,'παγετός'],[/\bice\b/gi,'παγετός'],[/\bfog\b/gi,'ομίχλη'],
+  [/\bcoastal flooding\b/gi,'παράκτιες πλημμύρες'],[/\bflooding\b/gi,'πλημμύρες'],[/\bflood\b/gi,'πλημμύρα'],
+  [/\brough sea\b/gi,'θαλασσοταραχή'],[/\bhigh waves?\b/gi,'υψηλός κυματισμός'],
+  [/\bforest fire danger\b/gi,'κίνδυνος δασικής πυρκαγιάς'],[/\bwildfire\b/gi,'δασική πυρκαγιά'],
+  [/\bissued for Greece\b/gi,'εκδόθηκε για την Ελλάδα'],[/\bwarning\b/gi,'προειδοποίηση'],
+  [/\bexpected\b/gi,'αναμένεται'],[/\bpossible\b/gi,'πιθανό'],[/\blikely\b/gi,'πιθανό'],
+  [/\bvery likely\b/gi,'πολύ πιθανό'],[/\bmoderate\b/gi,'μέτριο'],[/\bsevere\b/gi,'ισχυρό'],
+  [/\bextreme\b/gi,'ακραίο'],[/\byellow\b/gi,'κίτρινο'],[/\borange\b/gi,'πορτοκαλί'],[/\bred\b/gi,'κόκκινο'],
+  [/\bfrom\b/gi,'από'],[/\buntil\b/gi,'έως'],[/\bthrough\b/gi,'κατά τη διάρκεια'],
+  [/\btonight\b/gi,'απόψε'],[/\btomorrow\b/gi,'αύριο'],[/\btoday\b/gi,'σήμερα'],
+  [/\bMonday\b/gi,'Δευτέρα'],[/\bTuesday\b/gi,'Τρίτη'],[/\bWednesday\b/gi,'Τετάρτη'],
+  [/\bThursday\b/gi,'Πέμπτη'],[/\bFriday\b/gi,'Παρασκευή'],[/\bSaturday\b/gi,'Σάββατο'],[/\bSunday\b/gi,'Κυριακή']
+ ];
+ phraseMap.forEach(([pattern,replacement])=>{s=s.replace(pattern,replacement)});
  Object.entries(regions).sort((a,b)=>b[0].length-a[0].length).forEach(([en,el])=>{
-  const escaped=en.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
-  s=s.replace(new RegExp('(^|[^A-Za-z])'+escaped+'(?=$|[^A-Za-z])','gi'),(m,prefix)=>prefix+el);
- });
- // Ειδική κανονικοποίηση των τυπικών τίτλων CAP, ακόμη κι αν η ροή έχει μικτό ελληνικό/αγγλικό κείμενο.
- s=s.replace(/\b(Yellow|Orange|Red)\s+(.+?)\s+Warning\s+issued\s+for\s+Greece\s*[-–—:]/i,(m,level,event)=>{
-  const levelEl={yellow:'Κίτρινη',orange:'Πορτοκαλί',red:'Κόκκινη'}[level.toLowerCase()];
-  return `${levelEl} προειδοποίηση για ${meteoAlarmGreekText(event,'event')} στην Ελλάδα – `;
- });
- terms.forEach(([pattern,replacement])=>{s=s.replace(pattern,replacement)});
- // Δεύτερο πέρασμα περιοχών: καλύπτει περιοχές που εμφανίζονται μετά από μετατροπή τίτλου.
- Object.entries(regions).sort((a,b)=>b[0].length-a[0].length).forEach(([en,el])=>{
-  const escaped=en.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
-  s=s.replace(new RegExp(escaped,'gi'),el);
+  s=s.replace(new RegExp(en.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gi'),el);
  });
  if(kind==='certainty'){
-  const certainty={likely:'Πιθανή',possible:'Πιθανή',unlikely:'Απίθανη',observed:'Παρατηρήθηκε',verylikely:'Πολύ πιθανή',unknown:'Άγνωστη'};
-  return certainty[original.toLowerCase().replace(/[\\s_-]/g,'')]||s;
+  const certainty={likely:'Πιθανή',possible:'Πιθανή',unlikely:'Απίθανη',observed:'Παρατηρήθηκε',verylikely:'Πολύ πιθανή'};
+  return certainty[original.toLowerCase().replace(/\s/g,'')]||s;
  }
- if(kind==='area')return s.replace(/\s*[,;]\s*/g,' · ');
- return s.replace(/\s{2,}/g,' ').trim();
+ return s;
 }
+
 function renderMeteoAlarmAlerts(entries){
  const host=$('meteoAlarmAlertsList');
  if(!entries.length){
@@ -1834,8 +1829,7 @@ loadMeteoAlarmAlerts();
 setInterval(loadMeteoAlarmAlerts,5*60*1000);
 
 initMap();
-initPointWeatherMap();
-document.querySelectorAll('.nav[data-section]').forEach(n=>n.addEventListener('click',()=>{if(n.dataset.section==='maps')setTimeout(()=>pointWeatherMap?.invalidateSize(),180)}));
+document.querySelectorAll('.nav[data-section]').forEach(n=>n.addEventListener('click',()=>{if(n.dataset.section==='maps')setTimeout(()=>{initPointWeatherMap();pointWeatherMap?.invalidateSize()},220)}));
 let moveDebounce;
 loadWeather();
 // Ask for location on entry; if permission is denied, the default city remains available.
@@ -1854,8 +1848,17 @@ function pointWindDirection(deg){const dirs=['N','NE','E','SE','S','SW','W','NW'
 function pointSet(id,value){const el=$(id);if(el)el.textContent=value}
 function initPointWeatherMap(){
  const host=$('pointWeatherMap'); if(!host||pointWeatherMap)return;
+ if(!window.L){host.innerHTML='<div style="padding:24px;color:#e9f1fb">Δεν φορτώθηκε η βιβλιοθήκη του χάρτη. Ελέγξτε τη σύνδεση και ανανεώστε τη σελίδα.</div>';return}
  pointWeatherMap=L.map(host,{zoomControl:true,scrollWheelZoom:true}).setView([48.5,15],4);
- L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'© OpenStreetMap contributors © CARTO',maxZoom:19}).addTo(pointWeatherMap);
+ const pointBaseTiles=L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'© OpenStreetMap contributors © CARTO',maxZoom:19});
+ pointBaseTiles.on('tileerror',()=>{
+  if(!pointWeatherMap._pointFallbackTiles){
+   pointWeatherMap._pointFallbackTiles=true;
+   pointWeatherMap.eachLayer(layer=>{if(layer instanceof L.TileLayer)pointWeatherMap.removeLayer(layer)});
+   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap contributors',maxZoom:19}).addTo(pointWeatherMap);
+  }
+ });
+ pointBaseTiles.addTo(pointWeatherMap);
  pointWeatherMap.on('click',e=>loadPointWeather(e.latlng.lat,e.latlng.lng));
  loadPointWeather(37.9838,23.7275);
  setTimeout(()=>pointWeatherMap.invalidateSize(),250);
@@ -1893,6 +1896,24 @@ async function loadPointWeather(latitude,longitude){
  }catch(error){if(token!==pointRequestToken)return;pointSet('pointStatus','Δεν ήταν δυνατή η φόρτωση δεδομένων: '+error.message)}
 }
 
+
+
+// Initialize the selectable-point map only after its lexical variables and functions exist.
+document.addEventListener('DOMContentLoaded',()=>{
+ const startPointMap=()=>{
+  const host=$('pointWeatherMap');
+  if(!host)return;
+  if(!pointWeatherMap)initPointWeatherMap();
+  setTimeout(()=>{if(pointWeatherMap)pointWeatherMap.invalidateSize(true)},300);
+ };
+ const mapNav=document.querySelector('.nav[data-section="maps"]');
+ if(mapNav){
+  mapNav.addEventListener('click',()=>setTimeout(startPointMap,250));
+ }
+ // If the map is already visible on initial page load, initialize it immediately.
+ const host=$('pointWeatherMap');
+ if(host && host.getBoundingClientRect().width>0)startPointMap();
+});
 </script>
 </body>
 </html>
