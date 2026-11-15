@@ -270,21 +270,21 @@ select.btn{color:var(--text);background:var(--panel2);border:1px solid var(--lin
 /* User geolocation control */
 #geolocateBtn{display:inline-flex;align-items:center;justify-content:center;gap:7px;white-space:nowrap}
 #geolocateBtn:disabled{opacity:.65;cursor:wait}
-#geolocateBtn .geo-symbol{font-size:20px;line-height:1}
-#geolocateBtn .geo-label{font-size:15px}
+#geolocateBtn .geo-symbol{font-size:17px;line-height:1}
+#geolocateBtn .geo-label{font-size:12px}
 #geolocateStatus{font-size:11px;color:var(--muted);margin:0 0 12px;min-height:0}
 #geolocateStatus:empty{display:none}
 @media(max-width:900px){#geolocateBtn .geo-label{display:none}#geolocateBtn{min-width:42px;padding:0 10px}}
 
 /* Header controls: consistent alignment and sizing */
 .top-actions{display:flex;align-items:center;gap:10px}
-.top-actions .city-search-wrap,.top-actions #refresh,.top-actions #units,.top-actions .theme-control{height:50px;box-sizing:border-box}
+.top-actions .city-search-wrap,.top-actions #refresh,.top-actions #units,.top-actions .theme-control{height:42px;box-sizing:border-box}
 .top-actions .city-search-wrap{display:flex;align-items:stretch}
-.top-actions .city-search-wrap .search{height:50px;box-sizing:border-box;padding:0 16px;font-size:17px!important;line-height:48px}
-.top-actions #refresh,.top-actions #units{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:0 17px;font-size:16px!important;line-height:1;white-space:nowrap;min-height:50px}
+.top-actions .city-search-wrap .search{height:42px;box-sizing:border-box;padding:0 13px;font-size:14px;line-height:40px}
+.top-actions #refresh,.top-actions #units{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:0 13px;font-size:14px;line-height:1;white-space:nowrap}
 .top-actions #units{min-width:50px}
-.top-actions .theme-control{display:flex;align-items:center;justify-content:center;gap:9px;padding:0 14px;font-size:15px!important;line-height:1}
-.top-actions .theme-control select{height:100%;font-size:15px!important;line-height:1}
+.top-actions .theme-control{display:flex;align-items:center;justify-content:center;gap:7px;padding:0 9px;font-size:12px;line-height:1}
+.top-actions .theme-control select{height:100%;font-size:12px;line-height:1}
 @media(max-width:700px){.top-actions .city-search-wrap{height:38px}.top-actions .city-search-wrap .search{height:38px;line-height:36px}.top-actions .theme-control{height:38px}}
 
 
@@ -455,38 +455,6 @@ select.btn{color:var(--text);background:var(--panel2);border:1px solid var(--lin
 @media(max-width:950px){.point-weather-shell{grid-template-columns:1fr}.point-weather-panel{display:grid;grid-template-columns:1fr 1fr;align-items:start}.point-current-card{grid-column:1/-1}.point-metrics{grid-column:1/-1}.point-chart-title,.point-chart-wrap,.point-days,.point-open-forecast,.point-weather-status{grid-column:1/-1}#pointWeatherMap{height:470px}}
 @media(max-width:600px){.point-weather-shell{padding:12px;gap:12px}.point-weather-panel{display:flex}.point-map-heading{font-size:26px}#pointWeatherMap{height:390px;min-height:350px}.point-current-card{padding:16px}.point-temp{font-size:58px}}
 
-
-/* Καθολική ρύθμιση μεγέθους εικονιδίων */
-.nav .ico{font-size:var(--ww-nav-icon-size,20px)!important;width:24px;flex:0 0 24px}
-.weather-symbol{font-size:var(--ww-weather-icon-size,82px)!important}
-.point-weather-icon{font-size:var(--ww-weather-icon-size,48px)!important}
-.point-metric-icon{font-size:var(--ww-small-icon-size,22px)!important}
-.point-day-icon{font-size:var(--ww-small-icon-size,24px)!important}
-.outlook-icon{font-size:var(--ww-small-icon-size,26px)!important}
-.forecast-row .symbol{font-size:var(--ww-small-icon-size,24px)!important}
-.meteoalarm-alert-icon{font-size:calc(var(--ww-weather-icon-size,82px) * .72)!important}
-
-</style>
-
-<style id="weatherwise-larger-header-controls">
-/* Μεγαλύτερα βασικά μεγέθη στα πεδία της επάνω γραμμής */
-.top-actions{gap:12px!important}
-.top-actions #geolocateBtn,
-.top-actions #refresh,
-.top-actions #units{min-height:48px!important;height:48px!important;padding:0 16px!important;font-size:15px!important;line-height:1.2!important}
-.top-actions .city-search-wrap{height:48px!important;min-width:220px}
-.top-actions .city-search-wrap .search{height:48px!important;padding:0 16px!important;font-size:16px!important;line-height:46px!important}
-.top-actions .city-search-wrap .search::placeholder{font-size:15px!important}
-.top-actions .theme-control{height:48px!important;padding:0 13px!important;font-size:14px!important;gap:9px!important}
-.top-actions .theme-control select{height:100%!important;font-size:14px!important;min-width:115px}
-@media(max-width:700px){
- .top-actions{gap:7px!important;flex-wrap:wrap}
- .top-actions #geolocateBtn,.top-actions #refresh,.top-actions #units{min-height:42px!important;height:42px!important;font-size:14px!important;padding:0 11px!important}
- .top-actions .city-search-wrap{height:42px!important;min-width:160px}
- .top-actions .city-search-wrap .search{height:42px!important;font-size:15px!important;line-height:40px!important}
- .top-actions .theme-control{height:42px!important;font-size:13px!important}
- .top-actions .theme-control select{font-size:13px!important}
-}
 </style>
 </head>
 <body>
@@ -573,24 +541,14 @@ select.btn{color:var(--text);background:var(--panel2);border:1px solid var(--lin
       <div class="card-head"><h3>ΠΛΕΥΡΙΚΗ ΜΠΑΡΑ</h3><span>ΖΩΝΤΑΝΗ ΠΡΟΕΠΙΣΚΟΠΗΣΗ</span></div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:22px">
         <div>
-          <label class="small" for="sidebarWidthControl">Πλάτος πλευρικής μπάρας <b id="sidebarWidthValue">260 px</b></label>
-          <input id="sidebarWidthControl" type="range" min="200" max="360" step="5" value="260" style="width:100%;display:block;margin-top:12px;accent-color:var(--cyan)">
+          <label class="small" for="sidebarWidthControl">Πλάτος πλευρικής μπάρας <b id="sidebarWidthValue">244 px</b></label>
+          <input id="sidebarWidthControl" type="range" min="200" max="340" step="5" value="244" style="width:100%;display:block;margin-top:12px;accent-color:var(--cyan)">
           <p class="small" style="margin-top:7px">Μικρότερο για περισσότερο χώρο στο περιεχόμενο ή μεγαλύτερο για πιο άνετη πλοήγηση.</p>
         </div>
         <div>
-          <label class="small" for="sidebarFontControl">Μέγεθος γραμμάτων μενού <b id="sidebarFontValue">17 px</b></label>
-          <input id="sidebarFontControl" type="range" min="14" max="24" step="1" value="17" style="width:100%;display:block;margin-top:12px;accent-color:var(--cyan)">
+          <label class="small" for="sidebarFontControl">Μέγεθος γραμμάτων μενού <b id="sidebarFontValue">14 px</b></label>
+          <input id="sidebarFontControl" type="range" min="12" max="18" step="1" value="14" style="width:100%;display:block;margin-top:12px;accent-color:var(--cyan)">
           <p class="small" style="margin-top:7px">Αυξήστε το μέγεθος για πιο ευανάγνωστα ονόματα ενοτήτων.</p>
-        </div>
-        <div>
-          <label class="small" for="globalFontControl">Μέγεθος γραμματοσειράς σε όλη την εφαρμογή <b id="globalFontValue">110%</b></label>
-          <input id="globalFontControl" type="range" min="90" max="150" step="5" value="110" style="width:100%;display:block;margin-top:12px;accent-color:var(--cyan)">
-          <p class="small" style="margin-top:7px">Μεγαλώνει ή μικραίνει όλα τα κείμενα: τίτλους, μενού, κάρτες, χάρτες και προγνώσεις.</p>
-        </div>
-        <div>
-          <label class="small" for="iconSizeControl">Μέγεθος εικονιδίων <b id="iconSizeValue">28 px</b></label>
-          <input id="iconSizeControl" type="range" min="16" max="48" step="2" value="28" style="width:100%;display:block;margin-top:12px;accent-color:var(--cyan)">
-          <p class="small" style="margin-top:7px">Ρυθμίζει τα εικονίδια πλοήγησης και τα βασικά εικονίδια καιρού.</p>
         </div>
       </div>
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px">
@@ -1582,80 +1540,32 @@ if(bgUpload)bgUpload.addEventListener('change',e=>{const f=e.target.files?.[0];i
 const removeBg=$('removeBackground');if(removeBg)removeBg.addEventListener('click',()=>{try{localStorage.removeItem('weatherwise-custom-background')}catch(e){}if(bgUpload)bgUpload.value='';applyCustomBackground(null)});
 $('menuBtn').onclick=()=>$('sidebar').classList.toggle('open');
 document.querySelectorAll('.europe-sort-btn').forEach(b=>b.onclick=()=>{document.querySelectorAll('.europe-sort-btn').forEach(x=>x.classList.toggle('active',x===b));europeSort=b.dataset.sort;renderEuropeChart()});
-// Ρυθμίσεις εμφάνισης: άμεση εφαρμογή σε μενού, κεφαλίδα και όλο το δυναμικό περιεχόμενο.
+// Προσαρμογή πλάτους πλευρικής μπάρας και μεγέθους γραμμάτων.
 (function initSidebarAppearance(){
- const el=id=>document.getElementById(id);
- const widthInput=el('sidebarWidthControl'), menuFontInput=el('sidebarFontControl');
- const globalFontInput=el('globalFontControl'), iconInput=el('iconSizeControl');
- const status=el('sidebarSettingsStatus');
- const defaults={width:260,menuFont:17,globalFont:110,iconSize:28};
+ const widthInput=document.getElementById('sidebarWidthControl');
+ const fontInput=document.getElementById('sidebarFontControl');
+ const widthLabel=document.getElementById('sidebarWidthValue');
+ const fontLabel=document.getElementById('sidebarFontValue');
+ const status=document.getElementById('sidebarSettingsStatus');
+ const defaults={width:244,font:14};
  let saved={};
  try{saved=JSON.parse(localStorage.getItem('weatherwise-sidebar-appearance')||'{}')||{};}catch(e){}
- // Αναβάθμιση παλιών αποθηκευμένων προεπιλογών, ώστε να μην παραμένουν τα μικρά μεγέθη.
- const initial={
-  width:Math.max(200,Number(saved.width)||defaults.width),
-  menuFont:Math.max(16,Number(saved.menuFont||saved.font)||defaults.menuFont),
-  globalFont:Math.max(110,Number(saved.globalFont)||defaults.globalFont),
-  iconSize:Math.max(26,Number(saved.iconSize)||defaults.iconSize)
- };
- const originalFontSizes=new WeakMap();
- function applyGlobalFont(scale){
-  document.querySelectorAll('body *').forEach(node=>{
-   if(['SCRIPT','STYLE','SVG','PATH','CANVAS'].includes(node.tagName)||node.closest('svg'))return;
-   if(!originalFontSizes.has(node)){
-    const n=parseFloat(getComputedStyle(node).fontSize);
-    if(Number.isFinite(n))originalFontSizes.set(node,n);
-   }
-   const base=originalFontSizes.get(node);
-   if(Number.isFinite(base))node.style.setProperty('font-size',(base*scale/100).toFixed(2)+'px','important');
-  });
- }
- const apply=(values,save=true)=>{
-  const width=Math.max(200,Math.min(360,Number(values.width)||defaults.width));
-  const menuFont=Math.max(14,Math.min(24,Number(values.menuFont)||defaults.menuFont));
-  const globalFont=Math.max(90,Math.min(150,Number(values.globalFont)||defaults.globalFont));
-  const iconSize=Math.max(16,Math.min(48,Number(values.iconSize)||defaults.iconSize));
+ const apply=(width,font,save=true)=>{
+  width=Math.max(200,Math.min(340,Number(width)||defaults.width));
+  font=Math.max(12,Math.min(18,Number(font)||defaults.font));
   document.documentElement.style.setProperty('--sidebar-width',width+'px');
-  document.documentElement.style.setProperty('--sidebar-font',menuFont+'px');
-  document.documentElement.style.setProperty('--ww-nav-icon-size',Math.round(iconSize*.9)+'px');
-  document.documentElement.style.setProperty('--ww-weather-icon-size',(iconSize*2.7)+'px');
-  document.documentElement.style.setProperty('--ww-small-icon-size',(iconSize*1.1)+'px');
-  document.querySelectorAll('.nav').forEach(n=>n.style.setProperty('font-size',menuFont+'px','important'));
-  document.querySelectorAll('.group-label').forEach(n=>n.style.setProperty('font-size',Math.max(12,menuFont*.85)+'px','important'));
-  if(widthInput)widthInput.value=width;if(menuFontInput)menuFontInput.value=menuFont;
-  if(globalFontInput)globalFontInput.value=globalFont;if(iconInput)iconInput.value=iconSize;
-  const labels={sidebarWidthValue:width+' px',sidebarFontValue:menuFont+' px',globalFontValue:globalFont+'%',iconSizeValue:iconSize+' px'};
-  Object.entries(labels).forEach(([id,value])=>{if(el(id))el(id).textContent=value});
-  applyGlobalFont(globalFont);
-  // Εξασφάλιση μεγάλων, ευανάγνωστων βασικών χειριστηρίων ανεξάρτητα από παλαιότερα CSS.
-  const headerRules=[['#geolocateBtn .geo-label',15],['.top-actions .search',17],['.top-actions #refresh',16],['.top-actions #units',17],['.top-actions .theme-control',15],['.top-actions .theme-control select',15]];
-  headerRules.forEach(([selector,size])=>document.querySelectorAll(selector).forEach(n=>n.style.setProperty('font-size',(size*globalFont/100)+'px','important')));
-  if(save){try{localStorage.setItem('weatherwise-sidebar-appearance',JSON.stringify({width,menuFont,font:menuFont,globalFont,iconSize}));}catch(e){}if(status)status.textContent='Οι ρυθμίσεις εφαρμόστηκαν και αποθηκεύτηκαν.';}
+  document.documentElement.style.setProperty('--sidebar-font',font+'px');
+  if(widthInput)widthInput.value=width;
+  if(fontInput)fontInput.value=font;
+  if(widthLabel)widthLabel.textContent=width+' px';
+  if(fontLabel)fontLabel.textContent=font+' px';
+  if(save){try{localStorage.setItem('weatherwise-sidebar-appearance',JSON.stringify({width,font}));}catch(e){}}
  };
- const getValues=()=>({width:widthInput?.value,menuFont:menuFontInput?.value,globalFont:globalFontInput?.value,iconSize:iconInput?.value});
- // Αύξηση ορίων των ρυθμιστικών ώστε να επιτρέπουν πραγματικά μεγαλύτερα μεγέθη.
- if(widthInput){widthInput.max='360';widthInput.min='200'}
- if(menuFontInput){menuFontInput.min='14';menuFontInput.max='24'}
- if(globalFontInput){globalFontInput.min='90';globalFontInput.max='150'}
- if(iconInput){iconInput.min='16';iconInput.max='48'}
- apply(initial,false);
- [widthInput,menuFontInput,globalFontInput,iconInput].forEach(input=>input&&input.addEventListener('input',()=>apply(getValues())));
- const reset=el('sidebarReset');
- if(reset)reset.addEventListener('click',()=>{apply(defaults);if(status)status.textContent='Επαναφέρθηκαν οι μεγαλύτερες προεπιλογές.';});
- // Εφαρμογή και σε κάρτες/γραμμές πρόγνωσης που δημιουργούνται μετά τη φόρτωση.
- const observer=new MutationObserver(records=>{
-  const scale=Number(globalFontInput?.value)||defaults.globalFont;
-  for(const record of records)for(const node of record.addedNodes){
-   if(node.nodeType!==1)continue;
-   const all=[node,...node.querySelectorAll('*')];
-   all.forEach(child=>{
-    if(['SCRIPT','STYLE','SVG','PATH','CANVAS'].includes(child.tagName)||child.closest('svg'))return;
-    if(!originalFontSizes.has(child)){const n=parseFloat(getComputedStyle(child).fontSize);if(Number.isFinite(n))originalFontSizes.set(child,n)}
-    const base=originalFontSizes.get(child);if(Number.isFinite(base))child.style.setProperty('font-size',(base*scale/100).toFixed(2)+'px','important');
-   });
-  }
- });
- observer.observe(document.body,{childList:true,subtree:true});
+ apply(saved.width||defaults.width,saved.font||defaults.font,false);
+ if(widthInput)widthInput.addEventListener('input',()=>apply(widthInput.value,fontInput.value));
+ if(fontInput)fontInput.addEventListener('input',()=>apply(widthInput.value,fontInput.value));
+ const reset=document.getElementById('sidebarReset');
+ if(reset)reset.addEventListener('click',()=>{apply(defaults.width,defaults.font);if(status)status.textContent='Επαναφέρθηκαν οι αρχικές ρυθμίσεις.';});
 })();
 document.querySelectorAll('.nav').forEach(n=>n.onclick=()=>{document.querySelectorAll('.nav').forEach(x=>x.classList.remove('active'));n.classList.add('active');document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));$(n.dataset.section).classList.add('active');$('pageTitle').textContent=n.textContent.trim();$('sidebar').classList.remove('open');if(n.dataset.section==='europe')loadEuropeWeather();setTimeout(()=>{if(map)map.invalidateSize();if(largeMap)largeMap.invalidateSize();if(europeChart)europeChart.resize()},100)});
 // Live city autocomplete anchored to the search field.
