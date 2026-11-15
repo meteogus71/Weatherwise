@@ -663,6 +663,14 @@ select.btn{color:var(--text);background:var(--panel2);border:1px solid var(--lin
   }
 }
 
+
+/* Selected map place name: show the resolved city/locality without clipping. */
+#maps .point-current-title{
+  max-width:100%;
+  overflow-wrap:anywhere;
+  line-height:1.12;
+}
+
 </style>
 </head>
 <body>
@@ -849,7 +857,7 @@ select.btn{color:var(--text);background:var(--panel2);border:1px solid var(--lin
  </div>
  <aside class="point-weather-panel" aria-live="polite">
   <div class="point-current-card">
-   <div class="point-current-top"><div><h3 class="point-current-title">Selected point</h3><div class="point-coords" id="pointCoords">37.98°N, 23.73°E</div><div class="point-localtime" id="pointLocalTime">Τοπική ώρα —</div></div><div class="point-weather-icon" id="pointIcon">☁</div></div>
+   <div class="point-current-top"><div><h3 class="point-current-title" id="pointPlaceName">Selected point</h3><div class="point-coords" id="pointCoords">37.98°N, 23.73°E</div><div class="point-localtime" id="pointLocalTime">Τοπική ώρα —</div></div><div class="point-weather-icon" id="pointIcon">☁</div></div>
    <div class="point-current-main"><div class="point-temp" id="pointTemp">—°</div><div><div class="point-condition" id="pointCondition">Επιλέξτε σημείο στον χάρτη</div><div class="point-wind" id="pointWind">—</div></div></div>
   </div>
   <div class="point-metrics">
@@ -2159,11 +2167,36 @@ function initPointWeatherMap(){
  loadPointWeather(37.9838,23.7275);
  setTimeout(()=>pointWeatherMap.invalidateSize(),250);
 }
+async function reverseGeocodeMapPoint(latitude,longitude){
+ const url=`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${encodeURIComponent(latitude)}&longitude=${encodeURIComponent(longitude)}&localityLanguage=el`;
+ const response=await fetch(url,{headers:{'Accept':'application/json'}});
+ if(!response.ok)throw new Error('Reverse geocoding unavailable');
+ const data=await response.json();
+ const administrative=[...(data.localityInfo?.administrative||[])].sort((a,b)=>(b.adminLevel||0)-(a.adminLevel||0));
+ // Prefer a city; if there is no city, use the most specific available locality/place name.
+ const candidates=[
+  data.city,
+  data.locality,
+  data.localityInfo?.locality?.name,
+  ...administrative.filter(item=>(item.adminLevel||0)>=8).map(item=>item.name),
+  ...administrative.map(item=>item.name),
+  data.principalSubdivision,
+  data.countryName
+ ].filter(Boolean);
+ const place=candidates.find((value,index)=>candidates.indexOf(value)===index);
+ return place||'Άγνωστο τοπωνύμιο';
+}
 async function loadPointWeather(latitude,longitude){
  const token=++pointRequestToken,latText=Math.abs(latitude).toFixed(2)+'°'+(latitude>=0?'N':'S'),lonText=Math.abs(longitude).toFixed(2)+'°'+(longitude>=0?'E':'W');
- pointSet('pointCoords',latText+', '+lonText);pointSet('pointStatus','Φόρτωση μετεωρολογικών δεδομένων για το επιλεγμένο σημείο…');
+ pointSet('pointCoords',latText+', '+lonText);pointSet('pointPlaceName','Αναζήτηση τοπωνυμίου…');pointSet('pointStatus','Αναγνώριση τοποθεσίας και φόρτωση μετεωρολογικών δεδομένων…');
  if(pointWeatherMarker)pointWeatherMarker.setLatLng([latitude,longitude]);
  else if(pointWeatherMap)pointWeatherMarker=L.circleMarker([latitude,longitude],{radius:8,color:'#fff',weight:3,fillColor:'#d5a43e',fillOpacity:1}).addTo(pointWeatherMap);
+ // Resolve the nearest named place independently, so weather data can load without waiting for geocoding.
+ reverseGeocodeMapPoint(latitude,longitude).then(place=>{
+  if(token===pointRequestToken)pointSet('pointPlaceName',place);
+ }).catch(()=>{
+  if(token===pointRequestToken)pointSet('pointPlaceName','Άγνωστο τοπωνύμιο');
+ });
  try{
   const params=new URLSearchParams({latitude,longitude,current:'temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,wind_speed_10m,wind_direction_10m,surface_pressure',hourly:'temperature_2m,precipitation,cloud_cover,wind_gusts_10m',daily:'weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,uv_index_max,sunrise,sunset',forecast_days:'3',timezone:'auto'});
   const response=await fetch('https://api.open-meteo.com/v1/forecast?'+params.toString());
