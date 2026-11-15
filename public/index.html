@@ -1001,6 +1001,10 @@ body.europe-grid-background{
     linear-gradient(90deg,color-mix(in srgb,var(--text,#ffffff) 5%,transparent) 1px,transparent 1px)!important;
 }
 
+
+/* Day/night weather glyphs in the homepage current-conditions card. */
+#weatherIcon{white-space:nowrap;line-height:1.1}
+
 </style>
 </head>
 <body>
@@ -1325,7 +1329,18 @@ let lat=37.9838,lon=23.7275,city="Αθήνα, Ελλάδα",isF=false,map,marker
 let forecastSeries=null,forecastDaily=null,forecastParam='temperature',forecastHours=24;
 let europeChart=null,europeRows=[],europeSort='windy';
 const codeText=c=>({0:"Αίθριος",1:"Κυρίως αίθριος",2:"Μερική νέφωση",3:"Νεφελώδης",45:"Ομίχλη",48:"Παγωμένη ομίχλη",51:"Ασθενής ψιχάλα",53:"Ψιχάλα",55:"Ισχυρή ψιχάλα",61:"Ασθενής βροχή",63:"Βροχή",65:"Ισχυρή βροχή",71:"Ασθενής χιονόπτωση",73:"Χιονόπτωση",75:"Ισχυρή χιονόπτωση",80:"Μπόρες",81:"Ισχυρές μπόρες",82:"Έντονες μπόρες",95:"Καταιγίδα",96:"Καταιγίδα με χαλάζι",99:"Ισχυρή καταιγίδα"})[c]||"Μεταβλητός καιρός";
-const icon=c=>c===0?"☀️":c<=2?"🌤️":c===3?"☁️":c<=48?"🌫️":c<=67?"🌧️":c<=77?"🌨️":c<=82?"🌦️":"⛈️";
+const icon=(c,isDay=true)=>{
+ if(c===0)return isDay?"☀️":"🌙";
+ if(c===1)return isDay?"🌤️":"🌙☁️";
+ if(c===2)return isDay?"⛅":"☁️🌙";
+ if(c===3)return "☁️";
+ if(c===45||c===48)return "🌫️";
+ if([51,53,55,56,57].includes(c))return isDay?"🌦️":"🌧️";
+ if([61,63,65,66,67,80,81,82].includes(c))return "🌧️";
+ if([71,73,75,77,85,86].includes(c))return "🌨️";
+ if([95,96,99].includes(c))return "⛈️";
+ return isDay?"🌤️":"🌙☁️";
+};
 const dir=d=>["Β","ΒΒΑ","ΒΑ","ΑΒΑ","Α","ΑΝΑ","ΝΑ","ΝΝΑ","Ν","ΝΝΔ","ΝΔ","ΔΝΔ","Δ","ΔΒΔ","ΒΔ","ΒΒΔ"][Math.round(d/22.5)%16];
 const temp=v=>Math.round(isF?v*9/5+32:v);
 let baseLayer,terrainLayer,activeOverlay=null,radarLayer=null,gridLayer=L.layerGroup(),windLayer=L.layerGroup(),radarTimer=null,gridTimer=null,mainGfsActive='none',largeGfsActive='none',largeGfsArea=null,largeGfsVectors=null;
@@ -2030,7 +2045,7 @@ async function loadWeather(){
  $('tempStat').innerHTML=`${temp(c.temperature_2m)}°<span class="unit">${isF?'F':'C'}</span>`;$('windStat').innerHTML=`${Math.round(c.wind_speed_10m*(isF?0.621371:1))} <span class="unit">${isF?'mph':'km/h'}</span>`;
  $('humidityStat').innerHTML=`${c.relative_humidity_2m}<span class="unit">%</span>`;$('rainStat').innerHTML=`${h.precipitation_probability[0]}<span class="unit">%</span>`;
  $('feels').textContent=`Αίσθηση: ${temp(c.apparent_temperature)}°`; $('windDir').textContent=`Διεύθυνση: ${dir(c.wind_direction_10m)} (${c.wind_direction_10m}°)`;
- $('cityName').textContent=city;updateCityLandmark(city);$('condition').textContent=codeText(c.weather_code);$('currentTemp').textContent=temp(c.temperature_2m)+'°';$('weatherIcon').textContent=icon(c.weather_code);
+ $('cityName').textContent=city;updateCityLandmark(city);$('condition').textContent=codeText(c.weather_code);$('currentTemp').textContent=temp(c.temperature_2m)+'°';
  $('updated').textContent='Ενημέρωση: '+new Date(c.time).toLocaleString('el-GR',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'short'});
  $('feels2').textContent=temp(c.apparent_temperature)+'°'+(isF?'F':'C');$('dew').textContent=temp(h.dew_point_2m?.[0] ?? c.temperature_2m)+'°'+(isF?'F':'C');$('pressure').textContent=Math.round(c.surface_pressure)+' hPa';$('visibility').textContent='—';
  const currentHourIndex=Array.isArray(h.time)?Math.max(0,h.time.reduce((best,t,i)=>Math.abs(new Date(t)-new Date(c.time))<Math.abs(new Date(h.time[best])-new Date(c.time))?i:best,0)):0;
@@ -2056,6 +2071,16 @@ async function loadWeather(){
   }catch(sunError){console.warn('Sunrise/sunset fallback unavailable',sunError);}
  }
  $('sunTimes').textContent=`${formatSunTime(sunriseValue)} / ${formatSunTime(sunsetValue)}`;
+ // Current-condition icon follows the actual local sunrise/sunset for this city.
+ // Prefer Open-Meteo's is_day flag; use the local clock and sunrise/sunset as a fallback.
+ let isDayNow=Number(c.is_day)===1;
+ if(c.is_day===undefined||c.is_day===null){
+  const clockPart=value=>{const match=String(value||'').match(/(?:T|^)(\d{2}:\d{2})/);return match?match[1]:null;};
+  const nowClock=clockPart(c.time),sunriseClock=clockPart(sunriseValue),sunsetClock=clockPart(sunsetValue);
+  if(nowClock&&sunriseClock&&sunsetClock)isDayNow=nowClock>=sunriseClock&&nowClock<sunsetClock;
+ }
+ $('weatherIcon').textContent=icon(c.weather_code,isDayNow);
+ $('weatherIcon').setAttribute('aria-label',isDayNow?'Καιρικό εικονίδιο ημέρας':'Καιρικό εικονίδιο νύχτας');
 
  const minT=Math.min(...day.temperature_2m_min),maxT=Math.max(...day.temperature_2m_max),span=Math.max(1,maxT-minT);
  const rows=day.time.map((date,i)=>{
