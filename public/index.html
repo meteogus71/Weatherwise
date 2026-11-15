@@ -266,6 +266,16 @@ select.btn{color:var(--text);background:var(--panel2);border:1px solid var(--lin
 .dashboard-model-switch button.active{background:#17617b!important;border-color:#52c9e8!important;color:#fff!important;box-shadow:inset 0 0 0 1px #52c9e855}
 
 
+
+/* User geolocation control */
+#geolocateBtn{display:inline-flex;align-items:center;justify-content:center;gap:7px;white-space:nowrap}
+#geolocateBtn:disabled{opacity:.65;cursor:wait}
+#geolocateBtn .geo-symbol{font-size:17px;line-height:1}
+#geolocateBtn .geo-label{font-size:12px}
+#geolocateStatus{font-size:11px;color:var(--muted);margin:0 0 12px;min-height:0}
+#geolocateStatus:empty{display:none}
+@media(max-width:900px){#geolocateBtn .geo-label{display:none}#geolocateBtn{min-width:42px;padding:0 10px}}
+
 /* Header controls: consistent alignment and sizing */
 .top-actions{display:flex;align-items:center;gap:10px}
 .top-actions .city-search-wrap,.top-actions #refresh,.top-actions #units,.top-actions .theme-control{height:42px;box-sizing:border-box}
@@ -471,7 +481,7 @@ select.btn{color:var(--text);background:var(--panel2);border:1px solid var(--lin
 <main class="main">
   <header class="topbar">
     <div><div class="eyebrow">ΚΕΝΤΡΟ ΜΕΤΕΩΡΟΛΟΓΙΚΗΣ ΠΛΗΡΟΦΟΡΗΣΗΣ</div><h1 id="pageTitle">Μετεωρολογική Επισκόπηση</h1></div>
-    <div class="top-actions"><div class="city-search-wrap"><input class="search" id="citySearch" type="search" placeholder="Αναζήτηση πόλης…" autocomplete="off" aria-autocomplete="list" aria-controls="searchResults" aria-expanded="false"><div class="search-results" id="searchResults" role="listbox" aria-label="Προτεινόμενες πόλεις"></div></div><button class="btn" id="refresh">↻ Ανανέωση</button><button class="btn primary" id="units">°C</button><label class="theme-control" title="Επιλογή εμφάνισης"><span>Θέμα</span><select id="themeSelect" aria-label="Επιλογή θέματος"><option value="midnight">Midnight</option><option value="arctic">Arctic Light</option><option value="ocean">Ocean Blue</option><option value="aurora">Aurora</option><option value="graphite">Graphite</option><option value="contrast">High Contrast</option><option value="glass">Glassmorphism</option><option value="intelligence">Weather Intelligence</option></select></label><button class="btn mobile-head" id="menuBtn">☰</button></div>
+    <div class="top-actions"><button class="btn" id="geolocateBtn" type="button" title="Εντοπισμός της θέσης μου" aria-label="Εντοπισμός της θέσης μου">⌖ <span>Η τοποθεσία μου</span></button><div class="city-search-wrap"><input class="search" id="citySearch" type="search" placeholder="Αναζήτηση πόλης…" autocomplete="off" aria-autocomplete="list" aria-controls="searchResults" aria-expanded="false"><div class="search-results" id="searchResults" role="listbox" aria-label="Προτεινόμενες πόλεις"></div></div><button class="btn" id="refresh">↻ Ανανέωση</button><button class="btn primary" id="units">°C</button><label class="theme-control" title="Επιλογή εμφάνισης"><span>Θέμα</span><select id="themeSelect" aria-label="Επιλογή θέματος"><option value="midnight">Midnight</option><option value="arctic">Arctic Light</option><option value="ocean">Ocean Blue</option><option value="aurora">Aurora</option><option value="graphite">Graphite</option><option value="contrast">High Contrast</option><option value="glass">Glassmorphism</option><option value="intelligence">Weather Intelligence</option></select></label><button class="btn mobile-head" id="menuBtn">☰</button></div>
   </header>
 
 
@@ -542,6 +552,7 @@ select.btn{color:var(--text);background:var(--panel2);border:1px solid var(--lin
   </section>
 
   <section class="section active" id="overview">
+    <div id="geolocateStatus" role="status" aria-live="polite"></div>
     <div class="grid stats">
       <div class="card"><div class="card-head">ΘΕΡΜΟΚΡΑΣΙΑ <span>◉</span></div><div class="metric" id="tempStat">--°<span class="unit">C</span></div><div class="small" id="feels">Αίσθηση: --°</div></div>
       <div class="card"><div class="card-head">ΑΝΕΜΟΣ <span>↗</span></div><div class="metric" id="windStat">-- <span class="unit">km/h</span></div><div class="small" id="windDir">Διεύθυνση: --</div></div>
@@ -1522,7 +1533,59 @@ function setActiveCityOption(next){const options=[...cityResults.querySelectorAl
 cityInput.addEventListener('input',()=>{clearTimeout(searchTimer);if(searchController){searchController.abort();searchController=null;}const query=cityInput.value.trim();searchMatches=[];if(query.length<2){closeCityResults();return;}showCityMessage('Αναζήτηση πόλεων…');searchTimer=setTimeout(async()=>{const controller=new AbortController();searchController=controller;try{const url=`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=8&language=el&format=json`;const response=await fetch(url,{signal:controller.signal});if(!response.ok)throw new Error(`HTTP ${response.status}`);const data=await response.json();if(cityInput.value.trim()!==query)return;renderCityMatches(data.results||[]);}catch(error){if(error.name!=='AbortError'&&cityInput.value.trim()===query)showCityMessage('Δεν ήταν δυνατή η αναζήτηση. Έλεγξε τη σύνδεσή σου.');}},180);});
 cityInput.addEventListener('keydown',event=>{if(event.key==='ArrowDown'&&cityResults.style.display==='block'){event.preventDefault();setActiveCityOption(searchActiveIndex+1);}else if(event.key==='ArrowUp'&&cityResults.style.display==='block'){event.preventDefault();setActiveCityOption(searchActiveIndex-1);}else if(event.key==='Enter'&&searchActiveIndex>=0&&searchMatches[searchActiveIndex]){event.preventDefault();chooseCity(searchMatches[searchActiveIndex]);}else if(event.key==='Escape')closeCityResults();});
 cityInput.addEventListener('focus',()=>{if(cityInput.value.trim().length>=2&&cityResults.childElementCount){cityResults.style.display='block';cityInput.setAttribute('aria-expanded','true');}});
+
 document.addEventListener('click',event=>{if(!event.target.closest('.city-search-wrap'))closeCityResults();});
+
+// Locate the visitor and show the nearest locality on the weather dashboard.
+const geolocateBtn=$('geolocateBtn'),geolocateStatus=$('geolocateStatus');
+let geolocationRequestInProgress=false;
+function setGeolocationStatus(message,isError=false){
+ if(!geolocateStatus)return;
+ geolocateStatus.textContent=message;
+ geolocateStatus.style.color=isError?'#f59e0b':'var(--muted)';
+}
+async function reverseGeocodeNearestCity(latitude,longitude){
+ const url=`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${encodeURIComponent(latitude)}&longitude=${encodeURIComponent(longitude)}&localityLanguage=el`;
+ const response=await fetch(url,{headers:{'Accept':'application/json'}});
+ if(!response.ok)throw new Error('Δεν ήταν δυνατή η αναγνώριση της κοντινότερης πόλης.');
+ const data=await response.json();
+ const locality=data.city||data.locality||data.localityInfo?.administrative?.find(x=>x.adminLevel>=8)?.name||data.principalSubdivision||'Κοντινή περιοχή';
+ const region=data.principalSubdivision&&data.principalSubdivision!==locality?data.principalSubdivision:'';
+ const country=data.countryName||'';
+ return {name:locality,region,country,label:[locality,region,country].filter(Boolean).join(', ')};
+}
+function requestUserLocation({automatic=false}={}){
+ if(!navigator.geolocation){
+  setGeolocationStatus('Ο φυλλομετρητής δεν υποστηρίζει γεωεντοπισμό.',true);
+  return;
+ }
+ if(geolocationRequestInProgress)return;
+ geolocationRequestInProgress=true;
+ if(geolocateBtn){geolocateBtn.disabled=true;geolocateBtn.innerHTML='<span class="geo-symbol">⌖</span><span class="geo-label">Εντοπισμός…</span>';}
+ setGeolocationStatus(automatic?'Εντοπισμός της κοντινότερης πόλης…':'Αναζήτηση της θέσης σας…');
+ navigator.geolocation.getCurrentPosition(async position=>{
+  try{
+   const latitude=position.coords.latitude,longitude=position.coords.longitude;
+   const nearest=await reverseGeocodeNearestCity(latitude,longitude);
+   lat=latitude;lon=longitude;city=nearest.label;
+   cityInput.value='';closeCityResults();
+   await loadWeather();
+   setGeolocationStatus(`Εμφανίζεται ο καιρός για την κοντινότερη περιοχή: ${nearest.label}.`);
+  }catch(error){
+   setGeolocationStatus(error.message||'Δεν ήταν δυνατή η αναγνώριση της κοντινότερης πόλης.',true);
+  }finally{
+   geolocationRequestInProgress=false;
+   if(geolocateBtn){geolocateBtn.disabled=false;geolocateBtn.innerHTML='<span class="geo-symbol">⌖</span><span class="geo-label">Η τοποθεσία μου</span>';}
+  }
+ },error=>{
+  geolocationRequestInProgress=false;
+  if(geolocateBtn){geolocateBtn.disabled=false;geolocateBtn.innerHTML='<span class="geo-symbol">⌖</span><span class="geo-label">Η τοποθεσία μου</span>';}
+  const message=error.code===1?'Δεν δόθηκε άδεια πρόσβασης στην τοποθεσία. Μπορείς να την ενεργοποιήσεις από τις ρυθμίσεις του browser.':error.code===2?'Δεν ήταν δυνατός ο προσδιορισμός της θέσης.':'Η αναζήτηση τοποθεσίας έληξε χωρίς απάντηση.';
+  setGeolocationStatus(message,true);
+ },{enableHighAccuracy:false,timeout:12000,maximumAge:300000});
+}
+if(geolocateBtn)geolocateBtn.addEventListener('click',()=>requestUserLocation());
+
 
 // Community weather reports (local prototype; connect to a shared API for cross-user publishing)
 const reportForm=$('weatherReportForm'), reportFiles=$('reportPhotos'), reportPreview=$('reportPhotoPreviews');
@@ -1714,6 +1777,8 @@ initPointWeatherMap();
 document.querySelectorAll('.nav[data-section]').forEach(n=>n.addEventListener('click',()=>{if(n.dataset.section==='maps')setTimeout(()=>pointWeatherMap?.invalidateSize(),180)}));
 let moveDebounce;
 loadWeather();
+// Ask for location on entry; if permission is denied, the default city remains available.
+setTimeout(()=>requestUserLocation({automatic:true}),650);
 
 // Interactive point weather map: click any coordinate and load local Open-Meteo data.
 let pointWeatherMap=null, pointWeatherMarker=null, pointHourlyChart=null, pointRequestToken=0;
