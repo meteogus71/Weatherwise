@@ -1114,10 +1114,10 @@ function clearOverlay(){if(activeOverlay&&map.hasLayer(activeOverlay))map.remove
 function setActive(name){document.querySelectorAll('#layerBar button').forEach(b=>b.classList.toggle('active',b.dataset.layer===name))}
 function initMap(){
  map=L.map('map',{zoomControl:true}).setView([lat,lon],6);
- baseLayer=L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=cb1_51yw_1_497f6b7d9f678b3bd71abfc2',{attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a> © <a href="https://carto.com/attributions">CARTO</a>'}).addTo(map);
+ baseLayer=L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=cb1_51yw_1_497f6b7d9f678b3bd71abfc2',{attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a> © <a href="https://carto.com/attributions">CARTO</a>',subdomains:'abcd',maxZoom:20}).addTo(map);
  terrainLayer=L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',{attribution:'© OpenTopoMap'});
  marker=L.marker([lat,lon]).addTo(map).bindPopup(city);
- largeMap=L.map('mapLarge').setView([lat,lon],5);L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=cb1_51yw_1_497f6b7d9f678b3bd71abfc2',{attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a> © <a href="https://carto.com/attributions">CARTO</a>'}).addTo(largeMap);L.marker([lat,lon]).addTo(largeMap).bindPopup(city);
+ largeMap=L.map('mapLarge').setView([lat,lon],5);L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=cb1_51yw_1_497f6b7d9f678b3bd71abfc2',{attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a> © <a href="https://carto.com/attributions">CARTO</a>',subdomains:'abcd',maxZoom:20}).addTo(largeMap);L.marker([lat,lon]).addTo(largeMap).bindPopup(city);
  document.querySelectorAll('#layerBarLarge button').forEach(b=>b.onclick=()=>selectLargeLayer(b.dataset.layer));
  const syncLead=(from,to)=>{if($(to))$(to).value=$(from).value};
  // Shared player handlers below replace the previous independent lead handlers.
@@ -1850,7 +1850,7 @@ function initPointWeatherMap(){
  const host=$('pointWeatherMap'); if(!host||pointWeatherMap)return;
  if(!window.L){host.innerHTML='<div style="padding:24px;color:#e9f1fb">Δεν φορτώθηκε η βιβλιοθήκη του χάρτη. Ελέγξτε τη σύνδεση και ανανεώστε τη σελίδα.</div>';return}
  pointWeatherMap=L.map(host,{zoomControl:true,scrollWheelZoom:true}).setView([48.5,15],4);
- const pointBaseTiles=L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'© OpenStreetMap contributors © CARTO',maxZoom:19});
+ const pointBaseTiles=L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}{r}.png?key=cb1_51yw_1_497f6b7d9f678b3bd71abfc2',{attribution:'© OpenStreetMap contributors © CARTO',maxZoom:19});
  pointBaseTiles.on('tileerror',()=>{
   if(!pointWeatherMap._pointFallbackTiles){
    pointWeatherMap._pointFallbackTiles=true;
