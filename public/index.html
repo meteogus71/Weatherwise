@@ -929,6 +929,8 @@ const cityLocalLandmarkFiles={
  "κrakow":"krakow.jpg",
  "κρακoβία":"krakow.jpg",
  "κρακoβια":"krakow.jpg",
+ "κρακοβία":"krakow.jpg",
+ "κρακοβια":"krakow.jpg",
  "κράκοβο":"krakow.jpg",
  "κρακοβο":"krakow.jpg",
  "las vegas":"lasvegas.jpg",
@@ -998,6 +1000,10 @@ const cityLocalLandmarkFiles={
  "sarajevo":"sarajevo.jpg",
  "σεράγεβο":"sarajevo.jpg",
  "σεραγεβο":"sarajevo.jpg",
+ "σαράγεβο":"sarajevo.jpg",
+ "σαραγεβο":"sarajevo.jpg",
+ "σαράγεο":"sarajevo.jpg",
+ "σαραγεο":"sarajevo.jpg",
  "skopje":"skopje.jpg",
  "σκόπια":"skopje.jpg",
  "σκοπια":"skopje.jpg",
@@ -1038,6 +1044,8 @@ const cityLocalLandmarkFiles={
  "lamia":"lamia.jpeg",
  "λαμία":"lamia.jpeg",
  "λαμια":"lamia.jpeg",
+ "δήμος λαμιέων":"lamia.jpeg",
+ "δημος λαμιεων":"lamia.jpeg",
  "kavala":"kabala.jpg",
  "kabala":"kabala.jpg",
  "καβάλα":"kabala.jpg",
@@ -1051,6 +1059,9 @@ const cityLocalLandmarkFiles={
 const cityLandmarkCache=new Map();
 let cityLandmarkRequest=0;
 function citySearchName(cityText){return String(cityText||'').split(',')[0].trim();}
+function normalizeCityLandmarkKey(value){
+ return String(value||'').toLocaleLowerCase('el').normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').replace(/[’'`]/g,'').replace(/[^\\p{L}\\p{N}]+/gu,' ').trim().replace(/\\s+/g,' ');
+}
 async function findCommonsCityImage(cityText){
  const cityName=citySearchName(cityText);if(!cityName)return null;
  const cacheKey=cityName.toLocaleLowerCase();if(cityLandmarkCache.has(cacheKey))return cityLandmarkCache.get(cacheKey);
@@ -1079,7 +1090,12 @@ function updateCityLandmark(cityText){
  const img=$('cityLandmark'),caption=$('cityLandmarkCaption');if(!img)return;
  const requestId=++cityLandmarkRequest,value=String(cityText||'').toLocaleLowerCase('el');
  const cityName=citySearchName(cityText).toLocaleLowerCase('el').trim();
- const localKey=Object.keys(cityLocalLandmarkFiles).sort((a,b)=>b.length-a.length).find(k=>cityName===k||value.includes(k));
+ const normalizedCity=normalizeCityLandmarkKey(cityName);
+ const normalizedValue=normalizeCityLandmarkKey(value);
+ const localKey=Object.keys(cityLocalLandmarkFiles).sort((a,b)=>b.length-a.length).find(k=>{
+  const normalizedKey=normalizeCityLandmarkKey(k);
+  return normalizedCity===normalizedKey||normalizedValue.includes(normalizedKey);
+ });
  const localFile=cityLocalLandmarkFiles[cityName]||(localKey?cityLocalLandmarkFiles[localKey]:null);
  const showImage=(url,title,credit='')=>{
   if(requestId!==cityLandmarkRequest)return;
@@ -1089,7 +1105,7 @@ function updateCityLandmark(cityText){
    img.style.opacity='0';
    if(caption)caption.textContent='';
    if(url.startsWith('./assets/city-landmarks/')){
-    const match=cityLandmarks.find(item=>item.keys.some(k=>value.includes(k)));
+    const match=cityLandmarks.find(item=>item.keys.some(k=>normalizedValue.includes(normalizeCityLandmarkKey(k))));
     if(match){showImage('https://commons.wikimedia.org/wiki/Special:FilePath/'+encodeURIComponent(match.file)+'?width=1600',match.title);return;}
     findCommonsCityImage(cityText).then(result=>{
      if(requestId!==cityLandmarkRequest)return;
@@ -1106,7 +1122,7 @@ function updateCityLandmark(cityText){
   showImage('./assets/city-landmarks/'+localFile,title+' · επιλεγμένη φωτογραφία');
   return;
  }
- const match=cityLandmarks.find(item=>item.keys.some(k=>value.includes(k)));
+ const match=cityLandmarks.find(item=>item.keys.some(k=>normalizedValue.includes(normalizeCityLandmarkKey(k))));
  if(match){showImage('https://commons.wikimedia.org/wiki/Special:FilePath/'+encodeURIComponent(match.file)+'?width=1600',match.title);return;}
  img.style.opacity='0';if(caption)caption.textContent='Αναζήτηση φωτογραφίας landmark…';
  findCommonsCityImage(cityText).then(result=>{
