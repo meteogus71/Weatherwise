@@ -971,6 +971,36 @@ body[data-theme="obsidian-red"] .btn.primary{
 }
 /* Keep semantic alert colors and the meteorological temperature scale intact. */
 
+
+/* Adaptive Europe Weather grid: the same subtle grid, tinted by the active theme. */
+body.europe-grid-background{
+  background-color:var(--bg,#101010)!important;
+  background-image:
+    radial-gradient(ellipse at 50% 0%,color-mix(in srgb,var(--cyan,#ffffff) 13%,transparent) 0%,color-mix(in srgb,var(--cyan,#ffffff) 4%,transparent) 42%,transparent 74%),
+    linear-gradient(color-mix(in srgb,var(--text,#ffffff) 5%,transparent) 1px,transparent 1px),
+    linear-gradient(90deg,color-mix(in srgb,var(--text,#ffffff) 5%,transparent) 1px,transparent 1px)!important;
+  background-size:100% 100%,68px 68px,68px 68px!important;
+  background-position:center top,center top,center top!important;
+  background-attachment:fixed!important;
+}
+body.europe-grid-background:before{display:none!important}
+/* Ensure the grid inherits the active theme's palette rather than a fixed black tint. */
+body[data-theme="obsidian-red"].europe-grid-background{--grid-accent:#ff4354}
+body[data-theme="ocean"].europe-grid-background{--grid-accent:#55d6e8}
+body[data-theme="midnight"].europe-grid-background{--grid-accent:#6f9ed0}
+body[data-theme="arctic"].europe-grid-background{--grid-accent:#087eaa}
+body[data-theme="aurora"].europe-grid-background{--grid-accent:#9a8cff}
+body[data-theme="graphite"].europe-grid-background{--grid-accent:#a2aab5}
+body[data-theme="contrast"].europe-grid-background{--grid-accent:#00e5ff}
+body[data-theme="glass"].europe-grid-background{--grid-accent:#70e3f2}
+body[data-theme="intelligence"].europe-grid-background{--grid-accent:#42d7e8}
+body.europe-grid-background{
+  background-image:
+    radial-gradient(ellipse at 50% 0%,color-mix(in srgb,var(--grid-accent,var(--cyan,#ffffff)) 14%,transparent) 0%,color-mix(in srgb,var(--grid-accent,var(--cyan,#ffffff)) 4%,transparent) 42%,transparent 74%),
+    linear-gradient(color-mix(in srgb,var(--text,#ffffff) 5%,transparent) 1px,transparent 1px),
+    linear-gradient(90deg,color-mix(in srgb,var(--text,#ffffff) 5%,transparent) 1px,transparent 1px)!important;
+}
+
 </style>
 </head>
 <body>
@@ -1077,7 +1107,12 @@ body[data-theme="obsidian-red"] .btn.primary{
       <div class="card-head"><h3>CUSTOM BACKGROUND</h3><span>OPTIONAL</span></div>
       <p class="small">Χρησιμοποιήστε δική σας εικόνα ως φόντο της εφαρμογής.</p>
       <input id="backgroundUpload" type="file" accept="image/*" class="search" style="width:min(100%,420px);height:auto">
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px"><button class="btn" id="removeBackground">Αφαίρεση εικόνας</button><span class="small" id="backgroundStatus" style="align-self:center">Χωρίς προσαρμοσμένη εικόνα</span></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+        <button class="btn" id="europeGridBackground" type="button">▦ Φόντο Europe Weather</button>
+        <button class="btn" id="removeBackground" type="button">Αφαίρεση φόντου</button>
+        <span class="small" id="backgroundStatus" style="align-self:center">Χωρίς προσαρμοσμένο φόντο</span>
+      </div>
+      <p class="small" style="margin-top:8px">Επιλέξτε το σκούρο φόντο με διακριτικό πλέγμα, όπως στη σελίδα αναφοράς, ή ανεβάστε δική σας εικόνα.</p>
     </div>
     <div class="card">
       <div class="card-head"><h3>DISPLAY</h3><span>INTERFACE</span></div>
@@ -2089,14 +2124,53 @@ applyTheme(savedTheme);
 if(themeSelect)themeSelect.addEventListener('change',e=>applyTheme(e.target.value));
 if(appearanceTheme)appearanceTheme.addEventListener('change',e=>applyTheme(e.target.value));
 document.querySelectorAll('.theme-preset').forEach(b=>b.addEventListener('click',()=>applyTheme(b.dataset.theme)));
-const bgUpload=$('backgroundUpload'),bgStatus=$('backgroundStatus'),dim=$('backgroundDimmer'),dimValue=$('dimValue');
+const bgUpload=$('backgroundUpload'),bgStatus=$('backgroundStatus'),dim=$('backgroundDimmer'),dimValue=$('dimValue'),europeGridBg=$('europeGridBackground');
 function setDim(v){const n=Math.max(0,Math.min(80,Number(v)||0));document.documentElement.style.setProperty('--bg-dim',(n/100).toFixed(2));if(dim)dim.value=n;if(dimValue)dimValue.textContent=n+'%';try{localStorage.setItem('weatherwise-bg-dim',String(n))}catch(e){}}
 let savedDim=35;try{savedDim=Number(localStorage.getItem('weatherwise-bg-dim')??35)}catch(e){}setDim(savedDim);
 if(dim)dim.addEventListener('input',e=>setDim(e.target.value));
-function applyCustomBackground(data){if(data){document.body.style.backgroundImage=`linear-gradient(rgba(4,12,24,var(--bg-dim,.35)),rgba(4,12,24,var(--bg-dim,.35))),url("${data}")`;document.body.classList.add('has-custom-background');if(bgStatus)bgStatus.textContent='Προσαρμοσμένη εικόνα ενεργή'}else{document.body.style.backgroundImage='';document.body.classList.remove('has-custom-background');if(bgStatus)bgStatus.textContent='Χωρίς προσαρμοσμένη εικόνα'}}
-let savedBg=null;try{savedBg=localStorage.getItem('weatherwise-custom-background')}catch(e){}if(savedBg)applyCustomBackground(savedBg);
-if(bgUpload)bgUpload.addEventListener('change',e=>{const f=e.target.files?.[0];if(!f)return;if(!f.type.startsWith('image/')){if(bgStatus)bgStatus.textContent='Επιλέξτε αρχείο εικόνας';return}const reader=new FileReader();reader.onload=()=>{const data=String(reader.result);applyCustomBackground(data);try{localStorage.setItem('weatherwise-custom-background',data)}catch(err){if(bgStatus)bgStatus.textContent='Η εικόνα εφαρμόστηκε, αλλά δεν ήταν δυνατή η αποθήκευσή της λόγω μεγέθους'}};reader.readAsDataURL(f)});
-const removeBg=$('removeBackground');if(removeBg)removeBg.addEventListener('click',()=>{try{localStorage.removeItem('weatherwise-custom-background')}catch(e){}if(bgUpload)bgUpload.value='';applyCustomBackground(null)});
+function applyCustomBackground(data){
+ document.body.classList.remove('europe-grid-background');
+ if(data){
+  document.body.style.backgroundImage=`linear-gradient(rgba(4,12,24,var(--bg-dim,.35)),rgba(4,12,24,var(--bg-dim,.35))),url("${data}")`;
+  document.body.classList.add('has-custom-background');
+  if(bgStatus)bgStatus.textContent='Προσαρμοσμένη εικόνα ενεργή';
+ }else{
+  document.body.style.backgroundImage='';
+  document.body.classList.remove('has-custom-background');
+  if(bgStatus)bgStatus.textContent='Χωρίς προσαρμοσμένο φόντο';
+ }
+}
+function applyEuropeGridBackground(){
+ try{localStorage.removeItem('weatherwise-custom-background');localStorage.setItem('weatherwise-background-preset','europe-grid')}catch(e){}
+ document.body.style.backgroundImage='';
+ document.body.classList.remove('has-custom-background');
+ document.body.classList.add('europe-grid-background');
+ if(bgUpload)bgUpload.value='';
+ if(bgStatus)bgStatus.textContent='Φόντο Europe Weather ενεργό';
+}
+let savedBg=null,savedBgPreset=null;
+try{savedBg=localStorage.getItem('weatherwise-custom-background');savedBgPreset=localStorage.getItem('weatherwise-background-preset')}catch(e){}
+if(savedBg){applyCustomBackground(savedBg)}
+else if(savedBgPreset==='europe-grid'){applyEuropeGridBackground()}
+if(europeGridBg)europeGridBg.addEventListener('click',applyEuropeGridBackground);
+if(bgUpload)bgUpload.addEventListener('change',e=>{
+ const f=e.target.files?.[0];if(!f)return;
+ if(!f.type.startsWith('image/')){if(bgStatus)bgStatus.textContent='Επιλέξτε αρχείο εικόνας';return}
+ const reader=new FileReader();
+ reader.onload=()=>{
+  const data=String(reader.result);applyCustomBackground(data);
+  try{localStorage.setItem('weatherwise-custom-background',data);localStorage.removeItem('weatherwise-background-preset')}
+  catch(err){if(bgStatus)bgStatus.textContent='Η εικόνα εφαρμόστηκε, αλλά δεν ήταν δυνατή η αποθήκευσή της λόγω μεγέθους'}
+ };
+ reader.readAsDataURL(f);
+});
+const removeBg=$('removeBackground');
+if(removeBg)removeBg.addEventListener('click',()=>{
+ try{localStorage.removeItem('weatherwise-custom-background');localStorage.removeItem('weatherwise-background-preset')}catch(e){}
+ if(bgUpload)bgUpload.value='';
+ document.body.classList.remove('europe-grid-background');
+ applyCustomBackground(null);
+});
 $('menuBtn').onclick=()=>$('sidebar').classList.toggle('open');
 document.querySelectorAll('.europe-sort-btn').forEach(b=>b.onclick=()=>{document.querySelectorAll('.europe-sort-btn').forEach(x=>x.classList.toggle('active',x===b));europeSort=b.dataset.sort;renderEuropeChart()});
 // Προσαρμογή πλάτους πλευρικής μπάρας και μεγέθους γραμμάτων.
