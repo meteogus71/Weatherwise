@@ -422,12 +422,12 @@ select.btn{color:var(--text);background:var(--panel2);border:1px solid var(--lin
 
 
 /* Click-to-inspect weather map */
-.point-weather-shell{display:grid;grid-template-columns:minmax(0,2.15fr) minmax(320px,1fr);gap:18px;padding:18px;background:#1b2437;border:1px solid #3a465b;border-radius:18px;margin-bottom:18px}
-.point-map-column{min-width:0}
-.point-map-heading{font:400 30px Georgia,serif;color:#eef2fa;margin:0 0 4px}
-.point-map-sub{font-size:13px;color:#9aaac2;margin:0 0 16px}
-#pointWeatherMap{height:590px;min-height:420px;border-radius:14px;overflow:hidden;background:#273348;border:1px solid #4b5669}
-.point-weather-panel{min-width:0;display:flex;flex-direction:column;gap:14px}
+.point-weather-shell{display:grid;grid-template-columns:minmax(0,2.15fr) minmax(320px,1fr);grid-template-rows:auto auto minmax(0,1fr);gap:8px 18px;padding:18px;background:#1b2437;border:1px solid #3a465b;border-radius:18px;margin-bottom:18px;align-items:stretch}
+.point-map-heading{grid-column:1/-1;font:400 30px Georgia,serif;color:#eef2fa;margin:0}
+.point-map-sub{grid-column:1/-1;font-size:13px;color:#9aaac2;margin:0 0 8px}
+.point-map-column{min-width:0;min-height:0;display:flex;flex-direction:column}
+#pointWeatherMap{height:auto;flex:1;min-height:590px;border-radius:14px;overflow:hidden;background:#273348;border:1px solid #4b5669}
+.point-weather-panel{min-width:0;min-height:0;display:flex;flex-direction:column;gap:14px;height:100%}
 .point-current-card{border-radius:16px;padding:20px;background:linear-gradient(115deg,#9bd39d,#b9c87f);color:#17243a;min-height:178px;position:relative}
 .point-current-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
 .point-current-title{font:400 29px Georgia,serif;margin:0 0 4px}
@@ -615,9 +615,9 @@ select.btn{color:var(--text);background:var(--panel2);border:1px solid var(--lin
   <section class="section" id="maps">
 
 <div class="point-weather-shell">
+ <h2 class="point-map-heading">Weather map</h2>
+ <p class="point-map-sub">Κάντε κλικ σε οποιοδήποτε σημείο του χάρτη για να δείτε τις τρέχουσες καιρικές συνθήκες ακριβώς σε εκείνη τη θέση.</p>
  <div class="point-map-column">
-  <h2 class="point-map-heading">Weather map</h2>
-  <p class="point-map-sub">Κάντε κλικ σε οποιοδήποτε σημείο του χάρτη για να δείτε τις τρέχουσες καιρικές συνθήκες ακριβώς σε εκείνη τη θέση.</p>
   <div id="pointWeatherMap" role="application" aria-label="Διαδραστικός χάρτης επιλογής σημείου"></div>
  </div>
  <aside class="point-weather-panel" aria-live="polite">
