@@ -455,6 +455,17 @@ select.btn{color:var(--text);background:var(--panel2);border:1px solid var(--lin
 @media(max-width:950px){.point-weather-shell{grid-template-columns:1fr}.point-weather-panel{display:grid;grid-template-columns:1fr 1fr;align-items:start}.point-current-card{grid-column:1/-1}.point-metrics{grid-column:1/-1}.point-chart-title,.point-chart-wrap,.point-days,.point-open-forecast,.point-weather-status{grid-column:1/-1}#pointWeatherMap{height:470px}}
 @media(max-width:600px){.point-weather-shell{padding:12px;gap:12px}.point-weather-panel{display:flex}.point-map-heading{font-size:26px}#pointWeatherMap{height:390px;min-height:350px}.point-current-card{padding:16px}.point-temp{font-size:58px}}
 
+
+/* Atmospheric details: use the full height of the weather dashboard column */
+.weather-layout{align-items:stretch}
+.weather-layout>.atmospheric-card{display:flex;flex-direction:column;min-height:100%}
+.weather-layout>.atmospheric-card>.details{flex:1;grid-template-rows:repeat(3,minmax(0,1fr));align-content:stretch}
+.weather-layout>.atmospheric-card .detail{display:flex;flex-direction:column;justify-content:center;min-height:0}
+@media(max-width:760px){
+  .weather-layout>.atmospheric-card{min-height:0}
+  .weather-layout>.atmospheric-card>.details{grid-template-rows:none}
+  .weather-layout>.atmospheric-card .detail{min-height:76px}
+}
 </style>
 </head>
 <body>
@@ -586,7 +597,7 @@ select.btn{color:var(--text);background:var(--panel2);border:1px solid var(--lin
         <div class="city-landmark-caption" id="cityLandmarkCaption"></div>
         <div class="weather-symbol" id="weatherIcon">🌤️</div>
       </div>
-      <div class="card"><div class="card-head">ΑΤΜΟΣΦΑΙΡΙΚΑ ΣΤΟΙΧΕΙΑ <span>LIVE</span></div><div class="details">
+      <div class="card atmospheric-card"><div class="card-head">ΑΤΜΟΣΦΑΙΡΙΚΑ ΣΤΟΙΧΕΙΑ <span>LIVE</span></div><div class="details">
         <div class="detail"><span>Αίσθηση θερμοκρασίας</span><b id="feels2">--°C</b></div>
         <div class="detail"><span>Σημείο δρόσου</span><b id="dew">--°C</b></div>
         <div class="detail"><span>Πίεση</span><b id="pressure">-- hPa</b></div>
