@@ -2790,8 +2790,25 @@ function updateCityLandmark(cityText){
   if(caption){caption.textContent=title||citySearchName(cityText);caption.title=credit||'';}
  };
  if(localFile){
-  const title=citySearchName(cityText);
-  showImage('./assets/city-landmarks/'+localFile,title+' · επιλεγμένη φωτογραφία');
+  const title=citySearchName(cityText), encodedFile=encodeURIComponent(localFile);
+  // Support the current project path plus legacy folder spellings/layouts.
+  const localCandidates=[
+   './assets/city-landmarks/'+encodedFile,
+   './accets/city-landmarks/'+encodedFile,
+   './city-landmarks/'+encodedFile
+  ];
+  if(requestId!==cityLandmarkRequest)return;
+  let localAttempt=0;
+  img.alt=title+' · επιλεγμένη φωτογραφία';
+  if(caption){caption.textContent=title+' · επιλεγμένη φωτογραφία';caption.title='Τοπική φωτογραφία από assets/city-landmarks';}
+  img.onload=()=>{if(requestId===cityLandmarkRequest)img.style.opacity='.82';};
+  img.onerror=()=>{
+   if(requestId!==cityLandmarkRequest)return;
+   localAttempt++;
+   if(localAttempt<localCandidates.length){img.src=localCandidates[localAttempt];return;}
+   img.style.opacity='0';if(caption)caption.textContent='';
+  };
+  img.style.opacity='0';img.src=localCandidates[0];
   return;
  }
  const match=cityLandmarks.find(item=>item.keys.some(k=>value.includes(k)));
