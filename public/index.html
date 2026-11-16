@@ -2051,6 +2051,24 @@ body[data-surface-style="solid"] #overview > .weather-layout > .atmospheric-card
 }
 
 </style>
+
+<style id="weatherwise-remove-forecast-outer-frame">
+/* Remove only the outer card behind the 7-day forecast; keep the inner forecast panel intact. */
+#overview > .card.chart-card {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+}
+#overview > .card.chart-card > .card-head {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+</style>
 </head>
 <body>
 <div id="ww-header-spacer" aria-hidden="true"></div>
