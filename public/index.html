@@ -90,7 +90,9 @@
 .europe-temp-legend i{display:block;width:150px;height:9px;border-radius:99px;background:linear-gradient(90deg,#2563eb 0%,#22b4dc 25%,#74be96 50%,#f5ae41 75%,#dc3737 100%);box-shadow:0 0 0 1px #ffffff18}
 @media(max-width:700px){.europe-temp-legend{justify-content:flex-start}.europe-temp-legend i{width:115px}}
 
-.city-current{position:relative;isolation:isolate;overflow:hidden;min-height:285px!important;padding:26px!important;background:#355d7e!important;border-radius:16px!important}
+.city-current{position:relative;isolation:isolate;overflow:hidden;min-height:285px!important;padding:26px!important;background:var(--panel2,var(--panel,var(--bg)))!important;border-radius:16px!important}
+.city-current[data-landmark-state="fallback"] .city-current-shade{background:transparent!important}
+.city-current[data-landmark-state="loading-local"] .city-current-shade{background:transparent!important}
 .city-landmark{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 48%;z-index:-2;opacity:.82;transition:opacity .35s}
 .city-current-shade{position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,rgba(7,18,32,.78) 0%,rgba(7,18,32,.43) 48%,rgba(7,18,32,.2) 100%),linear-gradient(0deg,rgba(7,18,32,.42),transparent 60%)}
 .city-current-copy{position:relative;z-index:1;max-width:70%}
@@ -2782,45 +2784,68 @@ function updateCityLandmark(cityText){
  const cityName=citySearchName(cityText).toLocaleLowerCase('el').trim();
  const localKey=Object.keys(cityLocalLandmarkFiles).sort((a,b)=>b.length-a.length).find(k=>cityName===k||value.includes(k));
  const localFile=cityLocalLandmarkFiles[cityName]||(localKey?cityLocalLandmarkFiles[localKey]:null);
- const showImage=(url,title,credit='')=>{
+ const setFallback=()=>{
   if(requestId!==cityLandmarkRequest)return;
+  img.onload=null;img.onerror=null;img.removeAttribute('src');img.style.opacity='0';
+  const panel=img.closest('.city-current');if(panel)panel.dataset.landmarkState='fallback';
+  if(caption){caption.textContent='';caption.title='';}
+ };
+ const showImage=(url,title,credit='',onError=null)=>{
+  if(requestId!==cityLandmarkRequest)return;
+  const panel=img.closest('.city-current');if(panel)panel.dataset.landmarkState='image';
   img.onload=()=>{if(requestId===cityLandmarkRequest)img.style.opacity='.82';};
-  img.onerror=()=>{if(requestId===cityLandmarkRequest){img.style.opacity='0';if(caption)caption.textContent='';}};
-  img.alt=title||citySearchName(cityText);img.src=url;
+  img.onerror=()=>{
+   if(requestId!==cityLandmarkRequest)return;
+   img.style.opacity='0';
+   if(typeof onError==='function')onError();else setFallback();
+  };
+  img.alt=title||citySearchName(cityText);img.style.opacity='0';img.src=url;
   if(caption){caption.textContent=title||citySearchName(cityText);caption.title=credit||'';}
  };
+ const searchWikimedia=()=>{
+  if(requestId!==cityLandmarkRequest)return;
+  const match=cityLandmarks.find(item=>item.keys.some(k=>value.includes(k)));
+  if(match){
+   showImage('https://commons.wikimedia.org/wiki/Special:FilePath/'+encodeURIComponent(match.file)+'?width=1600',match.title,'Wikimedia Commons',()=>searchWikimediaApi());
+   return;
+  }
+  searchWikimediaApi();
+ };
+ const searchWikimediaApi=()=>{
+  if(requestId!==cityLandmarkRequest)return;
+  if(caption){caption.textContent='Αναζήτηση φωτογραφίας στο Wikimedia Commons…';caption.title='';}
+  findCommonsCityImage(cityText).then(result=>{
+   if(requestId!==cityLandmarkRequest)return;
+   if(result)showImage(result.url,result.title.replace(/\.[^.]+$/,'').replace(/[_-]+/g,' '),[result.credit,result.license,result.descriptionUrl].filter(Boolean).join(' · '));
+   else setFallback();
+  }).catch(()=>setFallback());
+ };
+ // Priority 1: local project image in assets/city-landmarks/.
  if(localFile){
-  const title=citySearchName(cityText), encodedFile=encodeURIComponent(localFile);
-  // Support the current project path plus legacy folder spellings/layouts.
+  const title=citySearchName(cityText),encodedFile=encodeURIComponent(localFile);
   const localCandidates=[
    './assets/city-landmarks/'+encodedFile,
    './accets/city-landmarks/'+encodedFile,
    './city-landmarks/'+encodedFile
   ];
-  if(requestId!==cityLandmarkRequest)return;
   let localAttempt=0;
-  img.alt=title+' · επιλεγμένη φωτογραφία';
-  if(caption){caption.textContent=title+' · επιλεγμένη φωτογραφία';caption.title='Τοπική φωτογραφία από assets/city-landmarks';}
-  img.onload=()=>{if(requestId===cityLandmarkRequest)img.style.opacity='.82';};
+  const panel=img.closest('.city-current');if(panel)panel.dataset.landmarkState='loading-local';
+  img.alt=title+' · τοπική φωτογραφία';
+  if(caption){caption.textContent=title+' · τοπική φωτογραφία';caption.title='Τοπική φωτογραφία από assets/city-landmarks';}
+  img.onload=()=>{if(requestId===cityLandmarkRequest){img.style.opacity='.82';if(panel)panel.dataset.landmarkState='image';}};
   img.onerror=()=>{
    if(requestId!==cityLandmarkRequest)return;
    localAttempt++;
    if(localAttempt<localCandidates.length){img.src=localCandidates[localAttempt];return;}
-   img.style.opacity='0';if(caption)caption.textContent='';
+   // Priority 2: if the local file is absent, try Wikimedia Commons.
+   searchWikimedia();
   };
   img.style.opacity='0';img.src=localCandidates[0];
   return;
  }
- const match=cityLandmarks.find(item=>item.keys.some(k=>value.includes(k)));
- if(match){showImage('https://commons.wikimedia.org/wiki/Special:FilePath/'+encodeURIComponent(match.file)+'?width=1600',match.title);return;}
- img.style.opacity='0';if(caption)caption.textContent='Αναζήτηση φωτογραφίας landmark…';
- findCommonsCityImage(cityText).then(result=>{
-  if(requestId!==cityLandmarkRequest)return;
-  if(result)showImage(result.url,result.title.replace(/\.[^.]+$/,'').replace(/[_-]+/g,' '),[result.credit,result.license,result.descriptionUrl].filter(Boolean).join(' · '));
-  else if(caption)caption.textContent='Δεν βρέθηκε διαθέσιμη φωτογραφία landmark';
- });
+ // No mapped local file for this city: move directly to priority 2.
+ searchWikimedia();
 }
-
 
 function renderForecastDetail(){
  const chartPanel=$('forecastChartPanel'),outlookPanel=$('forecastOutlookPanel');
