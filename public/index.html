@@ -2751,6 +2751,20 @@ const cityLocalLandmarkFiles={
  "βιέννη":"wien.jpg",
  "βιεννη":"wien.jpg",
 };
+
+// Robust local landmark aliases: keys are normalized (Greek accents/case/punctuation ignored).
+Object.assign(cityLocalLandmarkFiles,{
+ "corfu":"corfu.jpg","kerkyra":"corfu.jpg","κέρκυρα":"corfu.jpg","κερκυρα":"corfu.jpg",
+ "kavala":"kabala.jpg","καβάλα":"kabala.jpg","καβαλα":"kabala.jpg",
+ "lamia":"lamia.jpeg","λαμία":"lamia.jpeg","λαμια":"lamia.jpeg",
+ "las vegas":"lasvegas.jpg","λας βέγκας":"lasvegas.jpg","λας βεγκας":"lasvegas.jpg",
+ "riyadh":"riant.jpg","riyad":"riant.jpg","ριάντ":"riant.jpg","ριαντ":"riant.jpg"
+});
+function normalizeLandmarkCity(value){
+ return String(value||'').normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').toLocaleLowerCase('en')
+  .replace(/[^\\p{L}\\p{N}]+/gu,' ').trim().replace(/\\s+/g,' ');
+}
+
 const cityLandmarkCache=new Map();
 let cityLandmarkRequest=0;
 function citySearchName(cityText){return String(cityText||'').split(',')[0].trim();}
@@ -2780,10 +2794,11 @@ async function findCommonsCityImage(cityText){
 
 function updateCityLandmark(cityText){
  const img=$('cityLandmark'),caption=$('cityLandmarkCaption');if(!img)return;
- const requestId=++cityLandmarkRequest,value=String(cityText||'').toLocaleLowerCase('el');
- const cityName=citySearchName(cityText).toLocaleLowerCase('el').trim();
- const localKey=Object.keys(cityLocalLandmarkFiles).sort((a,b)=>b.length-a.length).find(k=>cityName===k||value.includes(k));
- const localFile=cityLocalLandmarkFiles[cityName]||(localKey?cityLocalLandmarkFiles[localKey]:null);
+ const requestId=++cityLandmarkRequest,value=normalizeLandmarkCity(cityText);
+ const cityName=normalizeLandmarkCity(citySearchName(cityText));
+ const localEntries=Object.entries(cityLocalLandmarkFiles).sort((a,b)=>normalizeLandmarkCity(b[0]).length-normalizeLandmarkCity(a[0]).length);
+ const localMatch=localEntries.find(([key])=>{const k=normalizeLandmarkCity(key);return cityName===k||value===k||value.startsWith(k+' ')||value.includes(' '+k+' ');});
+ const localFile=localMatch?.[1]||null;
  const setFallback=()=>{
   if(requestId!==cityLandmarkRequest)return;
   img.onload=null;img.onerror=null;img.removeAttribute('src');img.style.opacity='0';
@@ -2804,7 +2819,7 @@ function updateCityLandmark(cityText){
  };
  const searchWikimedia=()=>{
   if(requestId!==cityLandmarkRequest)return;
-  const match=cityLandmarks.find(item=>item.keys.some(k=>value.includes(k)));
+  const match=cityLandmarks.find(item=>item.keys.some(k=>value.includes(normalizeLandmarkCity(k))));
   if(match){
    showImage('https://commons.wikimedia.org/wiki/Special:FilePath/'+encodeURIComponent(match.file)+'?width=1600',match.title,'Wikimedia Commons',()=>searchWikimediaApi());
    return;
