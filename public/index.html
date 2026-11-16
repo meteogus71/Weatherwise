@@ -2823,9 +2823,15 @@ function updateCityLandmark(cityText){
  // Priority 1: local project image in assets/city-landmarks/.
  if(localFile){
   const title=citySearchName(cityText),encodedFile=encodeURIComponent(localFile);
+  // Try the public-root path first (works when index.html is served from /public),
+  // then relative paths for deployments mounted below a sub-path, and legacy folder spellings.
   const localCandidates=[
+   '/assets/city-landmarks/'+encodedFile,
+   'assets/city-landmarks/'+encodedFile,
    './assets/city-landmarks/'+encodedFile,
+   '/accets/city-landmarks/'+encodedFile,
    './accets/city-landmarks/'+encodedFile,
+   '/city-landmarks/'+encodedFile,
    './city-landmarks/'+encodedFile
   ];
   let localAttempt=0;
