@@ -102,6 +102,15 @@
 
 
 /* Appearance settings and custom background */
+/* User-adjustable shadow for WeatherWise panels and frames */
+body[data-frame-shadow="off"]{--ww-frame-shadow:none}
+body[data-frame-shadow="soft"]{--ww-frame-shadow:0 3px 10px rgba(0,0,0,.10)}
+body[data-frame-shadow="medium"]{--ww-frame-shadow:0 8px 22px rgba(0,0,0,.18)}
+body[data-frame-shadow="strong"]{--ww-frame-shadow:0 12px 32px rgba(0,0,0,.30)}
+.card,.detail,.city-current,.outlook-shell,.meteoalarm-alert-card,.settings-panel,.report-card,.community-card,.camera-card,.map-card{
+  box-shadow:var(--ww-frame-shadow,0 8px 22px rgba(0,0,0,.18))!important;
+}
+
 body.has-custom-background{background-size:cover;background-position:center;background-attachment:fixed}
 body.has-custom-background:before{content:"";position:fixed;inset:0;z-index:-1;background:rgba(4,12,24,var(--bg-dim, .35));pointer-events:none}
 .theme-preset{min-height:100px;border-color:var(--line);color:var(--text);line-height:1.7}
@@ -2151,6 +2160,17 @@ body[data-surface-style="solid"] #overview > .weather-layout > .atmospheric-card
       </select>
       <p class="small" style="margin-top:9px">Η επιλογή εφαρμόζεται στις κάρτες, στα πλαίσια, στα μενού και στα αναδυόμενα παράθυρα και αποθηκεύεται αυτόματα.</p>
     </div>
+    <div class="card" style="margin-bottom:16px" id="frameShadowAppearanceCard">
+      <div class="card-head"><h3>ΣΚΙΕΣ ΠΛΑΙΣΙΩΝ</h3><span>FRAME SHADOW</span></div>
+      <label for="frameShadowSelect" class="small" style="display:block;margin-bottom:8px">Επιλέξτε την ένταση της σκιάς στα πλαίσια</label>
+      <select id="frameShadowSelect" class="search" style="width:min(100%,360px)" aria-label="Ένταση σκιάς πλαισίων">
+        <option value="off">Χωρίς σκιά</option>
+        <option value="soft">Απαλή σκιά</option>
+        <option value="medium">Μεσαία σκιά</option>
+        <option value="strong">Έντονη σκιά</option>
+      </select>
+      <p class="small" style="margin-top:9px">Η ρύθμιση εφαρμόζεται στις κάρτες, στα πλαίσια και στα βασικά παράθυρα της εφαρμογής και αποθηκεύεται αυτόματα.</p>
+    </div>
     <div class="card" style="margin-bottom:16px" id="sidebarAppearanceCard">
       <div class="card-head"><h3>ΠΛΕΥΡΙΚΗ ΜΠΑΡΑ</h3><span>ΖΩΝΤΑΝΗ ΠΡΟΕΠΙΣΚΟΠΗΣΗ</span></div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:22px">
@@ -3160,6 +3180,7 @@ $('units').onclick=()=>{isF=!isF;$('units').textContent=isF?'°F':'°C';loadWeat
 $('refresh').onclick=loadWeather;
 const themeSelect=$('themeSelect'), appearanceTheme=$('appearanceTheme');
 function applyTheme(theme){const allowed=['midnight','ocean','aurora','forest','graphite','arctic','sandstone'];const chosen=allowed.includes(theme)?theme:'ocean';document.body.dataset.theme=chosen;if(themeSelect)themeSelect.value=chosen;if(appearanceTheme)appearanceTheme.value=chosen;try{localStorage.setItem('weatherwise-theme',chosen)}catch(e){}document.querySelectorAll('.theme-preset').forEach(b=>{b.style.outline=b.dataset.theme===chosen?'2px solid var(--cyan)':'none'});} const surfaceStyleSelect=$('surfaceStyleSelect'); function applySurfaceStyle(style){const mode=style==='solid'?'solid':'glass';document.body.dataset.surfaceStyle=mode;if(surfaceStyleSelect)surfaceStyleSelect.value=mode;try{localStorage.setItem('weatherwise-surface-style',mode)}catch(e){}} let savedSurfaceStyle='glass';try{savedSurfaceStyle=localStorage.getItem('weatherwise-surface-style')||'glass'}catch(e){} applySurfaceStyle(savedSurfaceStyle); if(surfaceStyleSelect)surfaceStyleSelect.addEventListener('change',e=>applySurfaceStyle(e.target.value));
+const frameShadowSelect=$('frameShadowSelect'); function applyFrameShadow(level){const allowed=['off','soft','medium','strong'];const chosen=allowed.includes(level)?level:'medium';document.body.dataset.frameShadow=chosen;if(frameShadowSelect)frameShadowSelect.value=chosen;try{localStorage.setItem('weatherwise-frame-shadow',chosen)}catch(e){}} let savedFrameShadow='medium';try{savedFrameShadow=localStorage.getItem('weatherwise-frame-shadow')||'medium'}catch(e){} applyFrameShadow(savedFrameShadow); if(frameShadowSelect)frameShadowSelect.addEventListener('change',e=>applyFrameShadow(e.target.value));
 let savedTheme='ocean';try{savedTheme=localStorage.getItem('weatherwise-theme')||'ocean'}catch(e){}
 applyTheme(savedTheme);
 if(themeSelect)themeSelect.addEventListener('change',e=>applyTheme(e.target.value));
@@ -3667,6 +3688,52 @@ if (window.Chart && window.Chart.defaults) {
  else initFixedNavigation();
 })();
 </script>
+
+
+<style id="weatherwise-floating-info-panels">
+/* Floating depth for the information tiles highlighted on the overview dashboard.
+   The intensity is controlled by Settings > Appearance > Frame Shadow. */
+body[data-theme] #overview > .stats > .card,
+body[data-theme] #overview > .weather-layout > .city-current,
+body[data-theme] #overview > .weather-layout > .atmospheric-card,
+body[data-theme] #overview > .weather-layout > .atmospheric-card .details > .detail {
+  box-shadow:var(--ww-frame-shadow, 0 8px 22px rgba(0,0,0,.18)) !important;
+  transform:translateY(0);
+  transition:box-shadow .22s ease, transform .22s ease;
+}
+body[data-theme] #overview > .stats > .card:hover,
+body[data-theme] #overview > .weather-layout > .city-current:hover,
+body[data-theme] #overview > .weather-layout > .atmospheric-card:hover,
+body[data-theme] #overview > .weather-layout > .atmospheric-card .details > .detail:hover {
+  transform:translateY(-2px);
+}
+body[data-frame-shadow="off"] #overview > .stats > .card:hover,
+body[data-frame-shadow="off"] #overview > .weather-layout > .city-current:hover,
+body[data-frame-shadow="off"] #overview > .weather-layout > .atmospheric-card:hover,
+body[data-frame-shadow="off"] #overview > .weather-layout > .atmospheric-card .details > .detail:hover {
+  transform:none;
+}
+</style>
+
+
+<style id="weatherwise-top-four-floating-shadow-fix">
+/* FINAL OVERRIDE: the four KPI tiles at the top of the overview.
+   Their legacy #overview>.stats .card rules previously forced a flat shadow. */
+html body[data-theme] section#overview > div.grid.stats > div.card {
+  box-shadow:var(--ww-frame-shadow, 0 8px 22px rgba(0,0,0,.22)) !important;
+  filter:drop-shadow(0 5px 9px rgba(0,0,0,.12));
+  transform:translateY(0);
+  transition:box-shadow .22s ease, filter .22s ease, transform .22s ease;
+}
+html body[data-theme] section#overview > div.grid.stats > div.card:hover {
+  transform:translateY(-3px);
+  box-shadow:var(--ww-frame-shadow, 0 12px 28px rgba(0,0,0,.26)) !important;
+  filter:drop-shadow(0 9px 13px rgba(0,0,0,.17));
+}
+body[data-frame-shadow="off"] section#overview > div.grid.stats > div.card {
+  box-shadow:none !important; filter:none !important;
+}
+</style>
 
 </body>
 </html>
