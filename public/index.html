@@ -2069,6 +2069,58 @@ body[data-surface-style="solid"] #overview > .weather-layout > .atmospheric-card
   box-shadow: none !important;
 }
 </style>
+
+<style id="weatherwise-compact-centered-top-navigation">
+/* Compact first navigation band; keep the four main destinations centered. */
+.wl-sitebar-inner{
+  position:relative!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+  box-sizing:border-box!important;
+  height:76px!important;
+  min-height:76px!important;
+  padding:4px 28px!important;
+  gap:12px!important;
+}
+.wl-sitebar .wl-brand{flex:0 0 auto!important;position:relative!important;z-index:2!important}
+.wl-mainnav{
+  position:absolute!important;
+  left:50%!important;
+  top:50%!important;
+  transform:translate(-50%,-50%)!important;
+  display:grid!important;
+  grid-template-columns:repeat(4,minmax(130px,1fr))!important;
+  grid-template-rows: minmax(36px,auto)!important;
+  grid-auto-flow:row!important;
+  align-items:center!important;
+  justify-items:stretch!important;
+  justify-content:center!important;
+  width:min(72vw,1000px)!important;
+  max-width:calc(100% - 280px)!important;
+  margin:0!important;
+  gap:6px 14px!important;
+}
+.wl-mainnav button{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  text-align:center!important;
+  min-height:38px!important;
+  padding:6px 10px!important;
+  line-height:1.2!important;
+  white-space:nowrap!important;
+}
+@media(max-width:850px){
+ .wl-sitebar-inner{height:auto!important;min-height:0!important;padding:8px 16px!important;display:flex!important;flex-direction:column!important;align-items:center!important;gap:7px!important}
+ .wl-mainnav{position:static!important;left:auto!important;top:auto!important;transform:none!important;order:3!important;width:100%!important;max-width:100%!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;grid-template-rows:auto!important;gap:4px!important}
+ .wl-mainnav button{white-space:normal!important;min-height:34px!important;padding:6px 4px!important}
+}
+@media(max-width:520px){
+ .wl-mainnav{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+</style>
+
 </head>
 <body>
 <div id="ww-header-spacer" aria-hidden="true"></div>
