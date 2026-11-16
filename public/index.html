@@ -2632,10 +2632,6 @@ const cityLocalLandmarkFiles={
  "ioannina":"ioannina.jpg",
  "ιωάννινα":"ioannina.jpg",
  "ιωαννινα":"ioannina.jpg",
- "istanbul":"istanbul.jpg",
- "constantinople":"istanbul.jpg",
- "κωνσταντινούπολη":"istanbul.jpg",
- "κωνσταντινουπολη":"istanbul.jpg",
  "copenhagen":"kopenhagen.jpg",
  "københavn":"kopenhagen.jpg",
  "κοπεγχάγη":"kopenhagen.jpg",
@@ -2647,7 +2643,7 @@ const cityLocalLandmarkFiles={
  "κρακoβια":"krakow.jpg",
  "κράκοβο":"krakow.jpg",
  "κρακοβο":"krakow.jpg",
- "las vegas":"las vegas.jpg",
+ "las vegas":"lasvegas.jpg",
  "λασ βέγκας":"las vegas.jpg",
  "λας βεγκας":"las vegas.jpg",
  "lisbon":"lisboa.jpg",
@@ -2694,8 +2690,8 @@ const cityLocalLandmarkFiles={
  "ριο ντε τζανέιρο":"riodejaneiro.jpg",
  "riyadh":"riyadh.jpeg",
  "riyad":"riyadh.jpeg",
- "ριάντ":"riyadh.jpeg",
- "ριαντ":"riyadh.jpeg",
+ "ριάντ":"riant.jpg",
+ "ριαντ":"riant.jpg",
  "rhodes":"rodos.jpg",
  "rodos":"rodos.jpg",
  "ρόδος":"rodos.jpg",
@@ -2751,20 +2747,6 @@ const cityLocalLandmarkFiles={
  "βιέννη":"wien.jpg",
  "βιεννη":"wien.jpg",
 };
-
-// Robust local landmark aliases: keys are normalized (Greek accents/case/punctuation ignored).
-Object.assign(cityLocalLandmarkFiles,{
- "corfu":"corfu.jpg","kerkyra":"corfu.jpg","κέρκυρα":"corfu.jpg","κερκυρα":"corfu.jpg",
- "kavala":"kabala.jpg","καβάλα":"kabala.jpg","καβαλα":"kabala.jpg",
- "lamia":"lamia.jpeg","λαμία":"lamia.jpeg","λαμια":"lamia.jpeg",
- "las vegas":"lasvegas.jpg","λας βέγκας":"lasvegas.jpg","λας βεγκας":"lasvegas.jpg",
- "riyadh":"riant.jpg","riyad":"riant.jpg","ριάντ":"riant.jpg","ριαντ":"riant.jpg"
-});
-function normalizeLandmarkCity(value){
- return String(value||'').normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').toLocaleLowerCase('en')
-  .replace(/[^\\p{L}\\p{N}]+/gu,' ').trim().replace(/\\s+/g,' ');
-}
-
 const cityLandmarkCache=new Map();
 let cityLandmarkRequest=0;
 function citySearchName(cityText){return String(cityText||'').split(',')[0].trim();}
@@ -2794,77 +2776,72 @@ async function findCommonsCityImage(cityText){
 
 function updateCityLandmark(cityText){
  const img=$('cityLandmark'),caption=$('cityLandmarkCaption');if(!img)return;
- const requestId=++cityLandmarkRequest,value=normalizeLandmarkCity(cityText);
- const cityName=normalizeLandmarkCity(citySearchName(cityText));
- const localEntries=Object.entries(cityLocalLandmarkFiles).sort((a,b)=>normalizeLandmarkCity(b[0]).length-normalizeLandmarkCity(a[0]).length);
- const localMatch=localEntries.find(([key])=>{const k=normalizeLandmarkCity(key);return cityName===k||value===k||value.startsWith(k+' ')||value.includes(' '+k+' ');});
- const localFile=localMatch?.[1]||null;
+ const requestId=++cityLandmarkRequest;
+ const cityName=citySearchName(cityText).trim();
+ const normalizeCityKey=value=>String(value||'').toLocaleLowerCase('el').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[’']/g,'').replace(/\s+/g,' ').trim();
+ const normalizedCity=normalizeCityKey(cityName);
+ const panel=img.closest('.city-current');
+ // Clear the previous city's photo immediately; never leave an old image visible while a new city loads.
+ img.onload=null;img.onerror=null;img.removeAttribute('src');img.style.opacity='0';
+ if(panel)panel.dataset.landmarkState='loading-local';
+ if(caption){caption.textContent='';caption.title='';}
+ const localEntries=Object.entries(cityLocalLandmarkFiles).sort((a,b)=>b[0].length-a[0].length);
+ const localEntry=localEntries.find(([key])=>normalizeCityKey(key)===normalizedCity);
+ const localFile=localEntry?.[1]||null;
  const setFallback=()=>{
   if(requestId!==cityLandmarkRequest)return;
   img.onload=null;img.onerror=null;img.removeAttribute('src');img.style.opacity='0';
-  const panel=img.closest('.city-current');if(panel)panel.dataset.landmarkState='fallback';
+  if(panel)panel.dataset.landmarkState='fallback';
   if(caption){caption.textContent='';caption.title='';}
  };
  const showImage=(url,title,credit='',onError=null)=>{
   if(requestId!==cityLandmarkRequest)return;
-  const panel=img.closest('.city-current');if(panel)panel.dataset.landmarkState='image';
-  img.onload=()=>{if(requestId===cityLandmarkRequest)img.style.opacity='.82';};
-  img.onerror=()=>{
-   if(requestId!==cityLandmarkRequest)return;
-   img.style.opacity='0';
-   if(typeof onError==='function')onError();else setFallback();
-  };
-  img.alt=title||citySearchName(cityText);img.style.opacity='0';img.src=url;
-  if(caption){caption.textContent=title||citySearchName(cityText);caption.title=credit||'';}
- };
- const searchWikimedia=()=>{
-  if(requestId!==cityLandmarkRequest)return;
-  const match=cityLandmarks.find(item=>item.keys.some(k=>value.includes(normalizeLandmarkCity(k))));
-  if(match){
-   showImage('https://commons.wikimedia.org/wiki/Special:FilePath/'+encodeURIComponent(match.file)+'?width=1600',match.title,'Wikimedia Commons',()=>searchWikimediaApi());
-   return;
-  }
-  searchWikimediaApi();
+  img.onload=()=>{if(requestId===cityLandmarkRequest){img.style.opacity='.82';if(panel)panel.dataset.landmarkState='image';}};
+  img.onerror=()=>{if(requestId!==cityLandmarkRequest)return;img.style.opacity='0';if(typeof onError==='function')onError();else setFallback();};
+  img.alt=title||cityName;img.style.opacity='0';img.src=url;
+  if(caption){caption.textContent=title||cityName;caption.title=credit||'';}
  };
  const searchWikimediaApi=()=>{
   if(requestId!==cityLandmarkRequest)return;
   if(caption){caption.textContent='Αναζήτηση φωτογραφίας στο Wikimedia Commons…';caption.title='';}
-  findCommonsCityImage(cityText).then(result=>{
+  findCommonsCityImage(cityName).then(result=>{
    if(requestId!==cityLandmarkRequest)return;
    if(result)showImage(result.url,result.title.replace(/\.[^.]+$/,'').replace(/[_-]+/g,' '),[result.credit,result.license,result.descriptionUrl].filter(Boolean).join(' · '));
    else setFallback();
   }).catch(()=>setFallback());
  };
- // Priority 1: local project image in assets/city-landmarks/.
+ const searchWikimedia=()=>{
+  if(requestId!==cityLandmarkRequest)return;
+  const normalizedValue=normalizeCityKey(cityName);
+  const match=cityLandmarks.find(item=>item.keys.some(k=>normalizeCityKey(k)===normalizedValue));
+  if(match){
+   showImage('https://commons.wikimedia.org/wiki/Special:FilePath/'+encodeURIComponent(match.file)+'?width=1600',match.title,'Wikimedia Commons',searchWikimediaApi);
+   return;
+  }
+  searchWikimediaApi();
+ };
+ // Priority 1: exact city-name match to a real file in public/assets/city-landmarks/.
  if(localFile){
-  const title=citySearchName(cityText),encodedFile=encodeURIComponent(localFile);
-  // Try the public-root path first (works when index.html is served from /public),
-  // then relative paths for deployments mounted below a sub-path, and legacy folder spellings.
+  const encodedFile=encodeURIComponent(localFile);
   const localCandidates=[
-   '/assets/city-landmarks/'+encodedFile,
-   'assets/city-landmarks/'+encodedFile,
-   './assets/city-landmarks/'+encodedFile,
-   '/accets/city-landmarks/'+encodedFile,
-   './accets/city-landmarks/'+encodedFile,
-   '/city-landmarks/'+encodedFile,
-   './city-landmarks/'+encodedFile
+   new URL('/assets/city-landmarks/'+encodedFile,window.location.origin).href,
+   new URL('assets/city-landmarks/'+encodedFile,document.baseURI).href,
+   new URL('./assets/city-landmarks/'+encodedFile,document.baseURI).href
   ];
   let localAttempt=0;
-  const panel=img.closest('.city-current');if(panel)panel.dataset.landmarkState='loading-local';
-  img.alt=title+' · τοπική φωτογραφία';
-  if(caption){caption.textContent=title+' · τοπική φωτογραφία';caption.title='Τοπική φωτογραφία από assets/city-landmarks';}
+  if(caption){caption.textContent=cityName+' · τοπική φωτογραφία';caption.title='Τοπική φωτογραφία από public/assets/city-landmarks';}
+  img.alt=cityName+' · τοπική φωτογραφία';
   img.onload=()=>{if(requestId===cityLandmarkRequest){img.style.opacity='.82';if(panel)panel.dataset.landmarkState='image';}};
   img.onerror=()=>{
    if(requestId!==cityLandmarkRequest)return;
    localAttempt++;
    if(localAttempt<localCandidates.length){img.src=localCandidates[localAttempt];return;}
-   // Priority 2: if the local file is absent, try Wikimedia Commons.
    searchWikimedia();
   };
-  img.style.opacity='0';img.src=localCandidates[0];
+  img.src=localCandidates[0];
   return;
  }
- // No mapped local file for this city: move directly to priority 2.
+ // No exact local file for this city: Priority 2, Wikimedia Commons.
  searchWikimedia();
 }
 
