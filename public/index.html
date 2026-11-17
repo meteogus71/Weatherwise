@@ -2945,7 +2945,25 @@ function renderForecastDetail(){
  }
  const n=Math.min(Math.max(0,a.time.length-startIndex),dailyMode?7:forecastHours);
  const timeSlice=a.time.slice(startIndex,startIndex+n);
- const labels=timeSlice.map(t=>dailyMode?new Date(t+'T12:00:00Z').toLocaleDateString('el-GR',{weekday:'short',day:'numeric',month:'short',timeZone:'UTC'}):new Date(t+'Z').toLocaleString('el-GR',{weekday:'short',hour:'2-digit',minute:'2-digit',timeZone:'UTC'}));
+ // Open-Meteo timestamps may arrive as local ISO strings, UTC strings,
+ // or ISO strings that already include an offset. Never append a second 'Z'.
+ // Read the displayed wall-clock components so chart labels stay in the
+ // selected location's local forecast time and cannot become 'Invalid Date'.
+ const parseForecastLabelDate=value=>{
+  const raw=String(value??'').trim();
+  const match=raw.match(/^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2}))?/);
+  if(!match)return null;
+  const [,year,month,day,hour='12',minute='00']=match;
+  const parsed=new Date(Date.UTC(Number(year),Number(month)-1,Number(day),Number(hour),Number(minute)));
+  return Number.isNaN(parsed.getTime())?null:parsed;
+ };
+ const labels=timeSlice.map(t=>{
+  const parsed=parseForecastLabelDate(t);
+  if(!parsed)return '—';
+  return dailyMode
+   ? parsed.toLocaleDateString('el-GR',{weekday:'short',day:'numeric',month:'short',timeZone:'UTC'})
+   : parsed.toLocaleString('el-GR',{weekday:'short',hour:'2-digit',minute:'2-digit',timeZone:'UTC'});
+ });
  const ds=(label,data,color,fill=false)=>({label,data:data.slice(startIndex,startIndex+n),borderColor:color,backgroundColor:fill?color+'22':'transparent',fill,tension:.28,pointRadius:0,pointHoverRadius:4,borderWidth:2});
  let datasets=[],title='',unit='',note='',type='line';
  if(forecastParam==='temperature'){title=dailyMode?'Θερμοκρασία ελάχιστη / μέγιστη':'Θερμοκρασία αέρα & αισθητή';unit=isF?'°F':'°C';note=dailyMode?'Ημερήσια ελάχιστη και μέγιστη θερμοκρασία για τις επόμενες 7 ημέρες.':'Ωριαία θερμοκρασία αέρα και αισθητή θερμοκρασία.';datasets=dailyMode?[ds('Ελάχιστη θερμοκρασία',a.temperatureMin.map(temp),'#43c7e8',true),ds('Μέγιστη θερμοκρασία',a.temperatureMax.map(temp),'#f4a261')]:[ds('Θερμοκρασία αέρα',a.temperature.map(v=>v==null?null:temp(Number(v))),'#43c7e8',true),ds('Αισθητή θερμοκρασία',a.apparent.map(v=>v!==null&&v!==undefined&&Number.isFinite(Number(v))?temp(Number(v)):null),'#f4a261')];}
