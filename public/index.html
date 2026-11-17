@@ -447,7 +447,7 @@ select.btn{color:var(--text);background:var(--panel2);border:1px solid var(--lin
 .point-temp{font:400 68px Georgia,serif;line-height:1}
 .point-condition{text-align:right;font-size:14px;font-weight:700}
 .point-wind{font-size:13px;font-weight:500;color:#34465a;margin-top:4px}
-.point-weather-icon{font-size:38px;line-height:1}
+.point-weather-icon{font-size:64px;line-height:1;filter:drop-shadow(0 5px 10px rgba(23,36,58,.22))}
 .point-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 12px}
 .point-metric{display:flex;align-items:center;gap:10px;min-width:0;padding:9px 4px}
 .point-metric-icon{width:22px;flex:0 0 22px;text-align:center;color:#9bd39d;font-size:18px}
@@ -2424,7 +2424,7 @@ body[data-theme="sandstone"] #overview .map-card :is(.dashboard-model-switch but
  </div>
  <aside class="point-weather-panel" aria-live="polite">
   <div class="point-current-card">
-   <div class="point-current-top"><div><h3 class="point-current-title">Selected point</h3><div class="point-coords" id="pointCoords">37.98°N, 23.73°E</div><div class="point-localtime" id="pointLocalTime">Τοπική ώρα —</div></div><div class="point-weather-icon" id="pointIcon">☁</div></div>
+   <div class="point-current-top"><div><h3 class="point-current-title" id="pointPlaceName">Επιλεγμένη περιοχή</h3><div class="point-coords" id="pointCoords">37.98°N, 23.73°E</div><div class="point-localtime" id="pointLocalTime">Τοπική ώρα —</div></div><div class="point-weather-icon" id="pointIcon">☁</div></div>
    <div class="point-current-main"><div class="point-temp" id="pointTemp">—°</div><div><div class="point-condition" id="pointCondition">Επιλέξτε σημείο στον χάρτη</div><div class="point-wind" id="pointWind">—</div></div></div>
   </div>
   <div class="point-metrics">
@@ -3781,9 +3781,29 @@ function initPointWeatherMap(){
  loadPointWeather(37.9838,23.7275);
  setTimeout(()=>pointWeatherMap.invalidateSize(),250);
 }
+async function reverseGeocodeWeatherPoint(latitude,longitude,token){
+ const title=$('pointPlaceName');
+ if(title)title.textContent='Αναγνώριση περιοχής…';
+ try{
+  const url=new URL('https://api.bigdatacloud.net/data/reverse-geocode-client');
+  url.search=new URLSearchParams({latitude:String(latitude),longitude:String(longitude),localityLanguage:'el'}).toString();
+  const response=await fetch(url.toString());
+  if(!response.ok)throw new Error('Reverse geocoding HTTP '+response.status);
+  const place=await response.json();
+  if(token!==pointRequestToken)return;
+  const locality=place.city||place.locality||place.localityInfo?.administrative?.find(x=>/town|village|city|municipality|suburb/i.test((x.description||'')+' '+(x.name||'')))?.name;
+  const region=place.principalSubdivision;
+  const country=place.countryName;
+  const parts=[locality,region,country].filter((value,index,array)=>value&&array.indexOf(value)===index);
+  if(title)title.textContent=parts.join(', ')||'Κοντινή περιοχή';
+ }catch(error){
+  if(token===pointRequestToken&&title)title.textContent='Κοντινή περιοχή';
+ }
+}
 async function loadPointWeather(latitude,longitude){
- const token=++pointRequestToken,latText=Math.abs(latitude).toFixed(2)+'°'+(latitude>=0?'N':'S'),lonText=Math.abs(longitude).toFixed(2)+'°'+(longitude>=0?'E':'W');
- pointSet('pointCoords',latText+', '+lonText);pointSet('pointStatus','Φόρτωση μετεωρολογικών δεδομένων για το επιλεγμένο σημείο…');
+ const token=++pointRequestToken,latText=Math.abs(latitude).toFixed(4)+'°'+(latitude>=0?'N':'S'),lonText=Math.abs(longitude).toFixed(4)+'°'+(longitude>=0?'E':'W');
+ reverseGeocodeWeatherPoint(latitude,longitude,token);
+ pointSet('pointCoords',latText+', '+lonText);pointSet('pointStatus','Φόρτωση μετεωρολογικών δεδομένων για την επιλεγμένη περιοχή…');
  if(pointWeatherMarker)pointWeatherMarker.setLatLng([latitude,longitude]);
  else if(pointWeatherMap)pointWeatherMarker=L.circleMarker([latitude,longitude],{radius:8,color:'#fff',weight:3,fillColor:'#d5a43e',fillOpacity:1}).addTo(pointWeatherMap);
  try{
@@ -3976,6 +3996,14 @@ body[data-theme] #overview .map-card .forecast-toolbar button.active * {
   .ww-hero-shortcuts{gap:9px;margin-top:19px}
   .ww-shortcut{min-height:42px;padding:0 13px;font-size:12px}
   .ww-shortcut-arrow{margin-right:-13px;min-width:30px}
+}
+
+/* Live weather map: keep inactive layer tabs filled, matching the supplied reference */
+#layerBar button:not(.active),
+#layerBarLarge button:not(.active){
+  background:#e9e4d8!important;
+  border-color:#d8d0bf!important;
+  color:#34312b!important;
 }
 </style>
 
