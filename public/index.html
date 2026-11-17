@@ -2928,9 +2928,25 @@ function renderForecastDetail(){
    (forecastParam==='temperature'?[a.temperatureMin,a.temperatureMax]:forecastParam==='wind'?[a.windSpeed,a.windGusts,a.windDirection]:forecastParam==='humidity'?[a.humidity,a.cloudCover]:[a.rain,a.rainChance]):
    (forecastParam==='temperature'?[a.temperature,a.apparent]:forecastParam==='wind'?[a.windSpeed,a.windGusts,a.windDirection]:forecastParam==='humidity'?[a.humidity,a.cloudCover]:[a.rain,a.rainChance]);
  if(!a.time?.length||required.some(v=>!Array.isArray(v)))return;
- const n=Math.min(a.time.length,dailyMode?7:forecastHours);
- const labels=a.time.slice(0,n).map(t=>dailyMode?new Date(t+'T12:00:00').toLocaleDateString('el-GR',{weekday:'short',day:'numeric',month:'short'}):new Date(t).toLocaleString('el-GR',{weekday:'short',hour:'2-digit',minute:'2-digit'}));
- const ds=(label,data,color,fill=false)=>({label,data:data.slice(0,n),borderColor:color,backgroundColor:fill?color+'22':'transparent',fill,tension:.28,pointRadius:0,pointHoverRadius:4,borderWidth:2});
+ // Hourly charts must begin at the current forecast hour, not at 00:00.
+ // API timestamps are local wall-clock strings (timezone=auto, without an offset),
+ // so compare their calendar components as UTC-like values to avoid browser-TZ shifts.
+ const localStampValue=value=>{
+  const m=String(value||'').match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/);
+  return m?Date.UTC(+m[1],+m[2]-1,+m[3],+m[4],+m[5]):NaN;
+ };
+ let startIndex=0;
+ if(!dailyMode){
+  const nowValue=localStampValue(a.nowTime);
+  if(Number.isFinite(nowValue)){
+   const firstFuture=a.time.findIndex(t=>localStampValue(t)>=nowValue);
+   if(firstFuture>=0)startIndex=firstFuture;
+  }
+ }
+ const n=Math.min(Math.max(0,a.time.length-startIndex),dailyMode?7:forecastHours);
+ const timeSlice=a.time.slice(startIndex,startIndex+n);
+ const labels=timeSlice.map(t=>dailyMode?new Date(t+'T12:00:00Z').toLocaleDateString('el-GR',{weekday:'short',day:'numeric',month:'short',timeZone:'UTC'}):new Date(t+'Z').toLocaleString('el-GR',{weekday:'short',hour:'2-digit',minute:'2-digit',timeZone:'UTC'}));
+ const ds=(label,data,color,fill=false)=>({label,data:data.slice(startIndex,startIndex+n),borderColor:color,backgroundColor:fill?color+'22':'transparent',fill,tension:.28,pointRadius:0,pointHoverRadius:4,borderWidth:2});
  let datasets=[],title='',unit='',note='',type='line';
  if(forecastParam==='temperature'){title=dailyMode?'Θερμοκρασία ελάχιστη / μέγιστη':'Θερμοκρασία αέρα & αισθητή';unit=isF?'°F':'°C';note=dailyMode?'Ημερήσια ελάχιστη και μέγιστη θερμοκρασία για τις επόμενες 7 ημέρες.':'Ωριαία θερμοκρασία αέρα και αισθητή θερμοκρασία.';datasets=dailyMode?[ds('Ελάχιστη θερμοκρασία',a.temperatureMin.map(temp),'#43c7e8',true),ds('Μέγιστη θερμοκρασία',a.temperatureMax.map(temp),'#f4a261')]:[ds('Θερμοκρασία αέρα',a.temperature.map(temp),'#43c7e8',true),ds('Αισθητή θερμοκρασία',a.apparent.map(temp),'#f4a261')];}
  else if(forecastParam==='wind'){title='Διεύθυνση, ένταση & ριπές ανέμου';unit=isF?'mph / °':'km/h / °';note=dailyMode?'Ημερήσια μέγιστη ένταση, μέγιστες ριπές και επικρατούσα διεύθυνση ανέμου.':'Ωριαία μέση ένταση, ριπές και διεύθυνση ανέμου.';datasets=[{...ds(dailyMode?'Μέγιστη ένταση':'Μέση ένταση',a.windSpeed.map(v=>+(v*(isF?.621371:1)).toFixed(1)),'#43c7e8',true),yAxisID:'y'},{...ds('Ριπές (gust)',a.windGusts.map(v=>Number.isFinite(v)?+(v*(isF?.621371:1)).toFixed(1):null),'#e76f51'),yAxisID:'y',spanGaps:false},{...ds(dailyMode?'Επικρατούσα διεύθυνση':'Διεύθυνση',a.windDirection,'#f4a261'),yAxisID:'y1'}];}
@@ -2941,14 +2957,14 @@ function renderForecastDetail(){
    type='bar';
    datasets=[{
      type:'bar',label:'Ημερήσιο ύψος υετού (mm)',
-     data:a.rain.slice(0,n).map(v=>Math.max(0,Number(v)||0)),
+     data:a.rain.slice(startIndex,startIndex+n).map(v=>Math.max(0,Number(v)||0)),
      backgroundColor:'rgba(48,166,220,.82)',
      hoverBackgroundColor:'rgba(91,205,245,1)',
      borderColor:'#36b8e8',borderWidth:1,borderRadius:4,borderSkipped:false,
      categoryPercentage:.88,barPercentage:.92,maxBarThickness:22,minBarLength:2,yAxisID:'y',order:2
    },{
      type:'line',label:'Πιθανότητα υετού (%)',
-     data:a.rainChance.slice(0,n).map(v=>v==null?null:Math.max(0,Math.min(100,Number(v)))),
+     data:a.rainChance.slice(startIndex,startIndex+n).map(v=>v==null?null:Math.max(0,Math.min(100,Number(v)))),
      borderColor:'#ff9b45',backgroundColor:'#ff9b45',
      borderWidth:3,tension:.25,pointRadius:3,pointHoverRadius:6,pointBackgroundColor:'#ff9b45',
      pointBorderColor:'#fff',pointBorderWidth:1,spanGaps:true,yAxisID:'y1',order:1
@@ -3360,6 +3376,7 @@ async function loadWeather(){
  const labels=h.time.slice(0,24).map(t=>new Date(t).toLocaleTimeString('el-GR',{hour:'2-digit',minute:'2-digit'})),vals=h.temperature_2m.slice(0,24).map(temp);
  forecastSeries=h&&h.time?{
    time:h.time,
+   nowTime:c.time,
    temperature:h.temperature_2m,
    apparent:h.apparent_temperature,
    humidity:h.relative_humidity_2m,
