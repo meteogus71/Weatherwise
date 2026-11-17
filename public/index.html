@@ -3876,5 +3876,34 @@ body[data-frame-shadow="off"] section#overview > div.grid.stats > div.card {
 }
 </style>
 
+
+<style id="weatherwise-unified-highlight-style">
+/* Unified selected/highlight appearance: filled light-blue surface with dark readable text. */
+body[data-theme] #overview .map-card .dashboard-model-switch button.active,
+body[data-theme] #overview .map-card .layerbar button.active,
+body[data-theme] #overview .map-card .map-tools button.active,
+body[data-theme] #overview .map-card .forecast-toolbar button.active,
+body[data-theme] #overview .map-card .dashboard-model-switch button[aria-pressed="true"],
+body[data-theme] #overview .map-card .layerbar button[aria-pressed="true"],
+body[data-theme] #overview .map-card .map-tools button[aria-pressed="true"],
+body[data-theme] #overview .map-card .forecast-toolbar button[aria-pressed="true"] {
+  background: #b9cbd9 !important;
+  background-color: #b9cbd9 !important;
+  color: #102333 !important;
+  -webkit-text-fill-color: #102333 !important;
+  border: 1px solid #b9cbd9 !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+  font-weight: 600 !important;
+}
+body[data-theme] #overview .map-card .dashboard-model-switch button.active *,
+body[data-theme] #overview .map-card .layerbar button.active *,
+body[data-theme] #overview .map-card .map-tools button.active *,
+body[data-theme] #overview .map-card .forecast-toolbar button.active * {
+  color: #102333 !important;
+  -webkit-text-fill-color: #102333 !important;
+}
+</style>
+
 </body>
 </html>
