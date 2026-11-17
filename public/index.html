@@ -2336,7 +2336,7 @@ body[data-theme="sandstone"] #overview .map-card :is(.dashboard-model-switch but
     <div id="geolocateStatus" role="status" aria-live="polite"></div>
     <div class="grid stats">
       <div class="card"><div class="card-head">ΘΕΡΜΟΚΡΑΣΙΑ <span>◉</span></div><div class="metric" id="tempStat">--°<span class="unit">C</span></div><div class="small" id="feels">Αίσθηση: --°</div></div>
-      <div class="card"><div class="card-head">ΑΝΕΜΟΣ <span>↗</span></div><div class="metric" id="windStat">-- <span class="unit">km/h</span></div><div class="small" id="windDir">Διεύθυνση: --</div></div>
+      <div class="card"><div class="card-head">ΑΝΕΜΟΣ <span>↗</span></div><div class="metric" id="windStat">-- <span class="unit">kt</span></div><div class="small" id="windDir">Διεύθυνση: --</div></div>
       <div class="card"><div class="card-head">ΥΓΡΑΣΙΑ <span>◌</span></div><div class="metric" id="humidityStat">--<span class="unit">%</span></div><div class="small">Σχετική υγρασία</div></div>
       <div class="card"><div class="card-head">ΠΙΘΑΝΟΤΗΤΑ ΥΕΤΟΥ <span>⌁</span></div><div class="metric" id="rainStat">--<span class="unit">%</span></div><div class="small">Επόμενες ώρες</div></div>
     </div>
@@ -2606,8 +2606,8 @@ function renderEuropeChart(){
  const canvas=$('europeChart');if(!canvas||!europeRows.length)return;
  const key=europeSort==='warmest'?'temp':europeSort==='coldest'?'temp':'wind';
  const rows=[...europeRows].sort((a,b)=>europeSort==='warmest'?b.temp-a.temp:europeSort==='coldest'?a.temp-b.temp:b.wind-a.wind);
- const values=rows.map(r=>+(r[key]*(key==='wind'&&isF?.621371:1)).toFixed(1));
- const unit=key==='temp'?(isF?'°F':'°C'):(isF?'mph':'km/h');
+ const values=rows.map(r=>+(r[key]*(key==='wind'?0.5399568:1)).toFixed(1));
+ const unit=key==='temp'?(isF?'°F':'°C'):'kt';
  const tMin=Math.min(...europeRows.map(r=>r.temp)),tMax=Math.max(...europeRows.map(r=>r.temp));
  const ramp=[{p:0,c:[37,99,235]},{p:.25,c:[34,180,220]},{p:.5,c:[116,190,150]},{p:.75,c:[245,174,65]},{p:1,c:[220,55,55]}];
  const tempColor=t=>{
@@ -2967,7 +2967,7 @@ function renderForecastDetail(){
  const ds=(label,data,color,fill=false)=>({label,data:data.slice(startIndex,startIndex+n),borderColor:color,backgroundColor:fill?color+'22':'transparent',fill,tension:.28,pointRadius:0,pointHoverRadius:4,borderWidth:2});
  let datasets=[],title='',unit='',note='',type='line';
  if(forecastParam==='temperature'){title=dailyMode?'Θερμοκρασία ελάχιστη / μέγιστη':'Θερμοκρασία αέρα & αισθητή';unit=isF?'°F':'°C';note=dailyMode?'Ημερήσια ελάχιστη και μέγιστη θερμοκρασία για τις επόμενες 7 ημέρες.':'Ωριαία θερμοκρασία αέρα και αισθητή θερμοκρασία.';datasets=dailyMode?[ds('Ελάχιστη θερμοκρασία',a.temperatureMin.map(temp),'#43c7e8',true),ds('Μέγιστη θερμοκρασία',a.temperatureMax.map(temp),'#f4a261')]:[ds('Θερμοκρασία αέρα',a.temperature.map(v=>v==null?null:temp(Number(v))),'#43c7e8',true),ds('Αισθητή θερμοκρασία',a.apparent.map(v=>v!==null&&v!==undefined&&Number.isFinite(Number(v))?temp(Number(v)):null),'#f4a261')];}
- else if(forecastParam==='wind'){title='Διεύθυνση, ένταση & ριπές ανέμου';unit=isF?'mph / °':'km/h / °';note=dailyMode?'Ημερήσια μέγιστη ένταση, μέγιστες ριπές και επικρατούσα διεύθυνση ανέμου.':'Ωριαία μέση ένταση, ριπές και διεύθυνση ανέμου.';datasets=[{...ds(dailyMode?'Μέγιστη ένταση':'Μέση ένταση',a.windSpeed.map(v=>+(v*(isF?.621371:1)).toFixed(1)),'#43c7e8',true),yAxisID:'y'},{...ds('Ριπές (gust)',a.windGusts.map(v=>v!==null&&v!==undefined&&Number.isFinite(Number(v))?+(Number(v)*(isF?.621371:1)).toFixed(1):null),'#e76f51'),yAxisID:'y',spanGaps:false},{...ds(dailyMode?'Επικρατούσα διεύθυνση':'Διεύθυνση',a.windDirection,'#f4a261'),yAxisID:'y1'}];}
+ else if(forecastParam==='wind'){title='Διεύθυνση, ένταση & ριπές ανέμου';unit='kt / °';note=dailyMode?'Ημερήσια μέγιστη ένταση, μέγιστες ριπές και επικρατούσα διεύθυνση ανέμου.':'Ωριαία μέση ένταση, ριπές και διεύθυνση ανέμου.';datasets=[{...ds(dailyMode?'Μέγιστη ένταση':'Μέση ένταση',a.windSpeed.map(v=>+(v*0.5399568).toFixed(1)),'#43c7e8',true),yAxisID:'y'},{...ds('Ριπές (gust)',a.windGusts.map(v=>v!==null&&v!==undefined&&Number.isFinite(Number(v))?+(Number(v)*0.5399568).toFixed(1):null),'#e76f51'),yAxisID:'y',spanGaps:false},{...ds(dailyMode?'Επικρατούσα διεύθυνση':'Διεύθυνση',a.windDirection,'#f4a261'),yAxisID:'y1'}];}
  else if(forecastParam==='humidity'){title='Υγρασία & νεφοκάλυψη';unit='%';note=dailyMode?'Ημερήσια μέση σχετική υγρασία και μέση νεφοκάλυψη.':'Ωριαία σχετική υγρασία και συνολική νεφοκάλυψη.';datasets=[ds('Σχετική υγρασία',a.humidity,'#62d6a5',true),ds('Νεφοκάλυψη',a.cloudCover,'#9b8af5')];}
  else{
    title=dailyMode?'Ημερήσιο ύψος υετού & πιθανότητα':'Ύψος υετού & πιθανότητα βροχής';unit=dailyMode?'mm/ημέρα · %':'mm/h · %';
@@ -3205,7 +3205,7 @@ async function drawGfsGrid(targetMap,kind,areaLayer,vectorLayer,statusId,legendI
       if(speed==null||direction==null)return;
       const arrow=`<div class="wind-arrow" style="transform:rotate(${(direction+180)%360}deg)">↑</div>`;
       windMarkers.push(L.marker([la,lo],{icon:L.divIcon({className:'',html:arrow,iconSize:[22,22],iconAnchor:[11,11]})})
-       .bindTooltip(`${window.weatherwiseForecastModel==='ecmwf'?'ECMWF':'GFS'} άνεμος ${Math.round(speed)} ${window.weatherwiseForecastModel==='ecmwf'?'kt':'km/h'} · διεύθυνση ${Math.round(direction)}°`));
+       .bindTooltip(`${window.weatherwiseForecastModel==='ecmwf'?'ECMWF':'GFS'} άνεμος ${Math.round(window.weatherwiseForecastModel==='ecmwf'?speed:speed*0.5399568)} kt · διεύθυνση ${Math.round(direction)}°`));
       return;
      }
      const field=fields.split(',')[0],v=h[field]?.[idx];
@@ -3372,7 +3372,7 @@ async function loadWeather(){
  }catch(extraForecastError){
   console.warn('Open-Meteo apparent-temperature / gust fallback unavailable; using primary feed',extraForecastError);
  }
- $('tempStat').innerHTML=`${temp(c.temperature_2m)}°<span class="unit">${isF?'F':'C'}</span>`;$('windStat').innerHTML=`${Math.round(c.wind_speed_10m*(isF?0.621371:1))} <span class="unit">${isF?'mph':'km/h'}</span>`;
+ $('tempStat').innerHTML=`${temp(c.temperature_2m)}°<span class="unit">${isF?'F':'C'}</span>`;$('windStat').innerHTML=`${Math.round(c.wind_speed_10m*0.5399568)} <span class="unit">kt</span>`;
  $('humidityStat').innerHTML=`${c.relative_humidity_2m}<span class="unit">%</span>`;$('rainStat').innerHTML=`${h.precipitation_probability[0]}<span class="unit">%</span>`;
  $('feels').textContent=`Αίσθηση: ${temp(c.apparent_temperature)}°`; $('windDir').textContent=`Διεύθυνση: ${dir(c.wind_direction_10m)} (${c.wind_direction_10m}°)`;
  $('cityName').textContent=city;updateCityLandmark(city);$('condition').textContent=codeText(c.weather_code);$('currentTemp').textContent=temp(c.temperature_2m)+'°';$('weatherIcon').textContent=icon(c.weather_code);
@@ -3421,7 +3421,7 @@ async function loadWeather(){
     <div class="outlook-tempbar"><span class="outlook-track"></span><span class="outlook-range" style="left:${left}%;width:${width}%"></span></div>
     <strong class="outlook-high">${temp(day.temperature_2m_max[i])}°</strong>
     <div class="outlook-metric" title="Πιθανότητα υετού και συνολικό ύψος"><span>💧 ${rainProb}% · ${rainMm} mm</span></div>
-    <div class="outlook-metric" title="Μέγιστη ταχύτητα ανέμου / ριπές"><span>≋ ${wind} / ${gust}</span></div>
+    <div class="outlook-metric" title="Μέγιστη ταχύτητα ανέμου / ριπές"><span>≋ ${Math.round(wind*0.5399568)} / ${Math.round(gust*0.5399568)} kt</span></div>
     <div class="outlook-metric" title="Μέγιστος δείκτης UV"><span>☼ UV ${uv}</span></div>
    </div>`;
  }).join('');
@@ -3914,10 +3914,10 @@ async function loadPointWeather(latitude,longitude){
   const d=await response.json();if(token!==pointRequestToken)return;
   const c=d.current,h=d.hourly,day=d.daily;if(!c||!h||!day)throw new Error('Δεν επιστράφηκαν πλήρη δεδομένα');
   pointSet('pointTemp',Math.round(c.temperature_2m)+'°');pointSet('pointCondition',codeText(c.weather_code));
-  pointSet('pointIcon',pointWeatherIcon(c.weather_code));pointSet('pointWind',`${pointWindDirection(c.wind_direction_10m)} ${Math.round(c.wind_speed_10m)} km/h`);
+  pointSet('pointIcon',pointWeatherIcon(c.weather_code));pointSet('pointWind',`${pointWindDirection(c.wind_direction_10m)} ${Math.round(c.wind_speed_10m*0.5399568)} kt`);
   pointSet('pointFeels',Math.round(c.apparent_temperature)+'°C');pointSet('pointHumidity',Math.round(c.relative_humidity_2m)+'%');
   const nearIndex=Math.max(0,h.time.findIndex(t=>t>=c.time));
-  pointSet('pointGusts',Math.round(h.wind_gusts_10m?.[nearIndex]??c.wind_speed_10m)+' km/h');
+  pointSet('pointGusts',Math.round((h.wind_gusts_10m?.[nearIndex]??c.wind_speed_10m)*0.5399568)+' kt');
   pointSet('pointPressure',Math.round(c.surface_pressure)+' hPa');
   pointSet('pointClouds',Math.round(h.cloud_cover?.[nearIndex]??0)+'%');
   pointSet('pointRain',Number(c.precipitation||0).toFixed(1)+' mm');
