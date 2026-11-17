@@ -3371,7 +3371,7 @@ let searchTimer=null,searchController=null,searchMatches=[],searchActiveIndex=-1
 const cityInput=$('citySearch'),cityResults=$('searchResults');
 function closeCityResults(){cityResults.style.display='none';cityInput.setAttribute('aria-expanded','false');searchActiveIndex=-1;}
 function showCityMessage(message){cityResults.replaceChildren();const hint=document.createElement('span');hint.className='search-hint';hint.textContent=message;cityResults.appendChild(hint);cityResults.style.display='block';cityInput.setAttribute('aria-expanded','true');}
-function chooseCity(place){lat=place.latitude;lon=place.longitude;city=[place.name,place.admin1,place.country].filter(Boolean).join(', ');cityInput.value='';closeCityResults();loadWeather();}
+function chooseCity(place){lat=place.latitude;lon=place.longitude;city=[place.name,place.country].filter(Boolean).join(', ');cityInput.value='';closeCityResults();loadWeather();}
 function renderCityMatches(items){searchMatches=items||[];searchActiveIndex=-1;cityResults.replaceChildren();if(!searchMatches.length){showCityMessage('Δεν βρέθηκαν πόλεις. Δοκίμασε διαφορετική γραφή.');return;}searchMatches.slice(0,8).forEach((place,index)=>{const button=document.createElement('button');button.type='button';button.setAttribute('role','option');button.setAttribute('aria-selected','false');const title=document.createElement('strong');title.textContent=place.name||'Άγνωστη πόλη';const detail=document.createElement('span');detail.style.cssText='display:block;color:#9eb1c9;font-size:11px;margin-top:2px';detail.textContent=[place.admin1,place.country].filter(Boolean).join(' · ');button.append(title,detail);button.addEventListener('mousedown',event=>event.preventDefault());button.addEventListener('click',()=>chooseCity(place));cityResults.appendChild(button);});cityResults.style.display='block';cityInput.setAttribute('aria-expanded','true');}
 function setActiveCityOption(next){const options=[...cityResults.querySelectorAll('button[role="option"]')];if(!options.length)return;searchActiveIndex=(next+options.length)%options.length;options.forEach((option,index)=>{option.setAttribute('aria-selected',String(index===searchActiveIndex));if(index===searchActiveIndex)option.scrollIntoView({block:'nearest'});});}
 cityInput.addEventListener('input',()=>{clearTimeout(searchTimer);if(searchController){searchController.abort();searchController=null;}const query=cityInput.value.trim();searchMatches=[];if(query.length<2){closeCityResults();return;}showCityMessage('Αναζήτηση πόλεων…');searchTimer=setTimeout(async()=>{const controller=new AbortController();searchController=controller;try{const url=`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=8&language=el&format=json`;const response=await fetch(url,{signal:controller.signal});if(!response.ok)throw new Error(`HTTP ${response.status}`);const data=await response.json();if(cityInput.value.trim()!==query)return;renderCityMatches(data.results||[]);}catch(error){if(error.name!=='AbortError'&&cityInput.value.trim()===query)showCityMessage('Δεν ήταν δυνατή η αναζήτηση. Έλεγξε τη σύνδεσή σου.');}},180);});
@@ -3411,10 +3411,10 @@ function requestUserLocation({automatic=false}={}){
   try{
    const latitude=position.coords.latitude,longitude=position.coords.longitude;
    const nearest=await reverseGeocodeNearestCity(latitude,longitude);
-   lat=latitude;lon=longitude;city=nearest.label;
+   lat=latitude;lon=longitude;city=[nearest.name,nearest.country].filter(Boolean).join(', ');
    cityInput.value='';closeCityResults();
    await loadWeather();
-   setGeolocationStatus(`Εμφανίζεται ο καιρός για την κοντινότερη περιοχή: ${nearest.label}.`);
+   setGeolocationStatus(`Εμφανίζεται ο καιρός για: ${[nearest.name,nearest.country].filter(Boolean).join(', ')}.`);
   }catch(error){
    setGeolocationStatus(error.message||'Δεν ήταν δυνατή η αναγνώριση της κοντινότερης πόλης.',true);
   }finally{
