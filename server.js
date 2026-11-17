@@ -301,7 +301,7 @@ function buildMetNorwayOpenMeteoShape(raw, requested) {
     hourly.dew_point_2m.push(d.dew_point_temperature ?? null);
     hourly.cloud_cover.push(d.cloud_area_fraction ?? null);
     hourly.precipitation.push(period?.details?.precipitation_amount ?? 0);
-    hourly.precipitation_probability.push(period?.details?.probability_of_precipitation ?? 0);
+    hourly.precipitation_probability.push(Number.isFinite(period?.details?.probability_of_precipitation) ? period.details.probability_of_precipitation : null);
     hourly.wind_speed_10m.push(d.wind_speed != null ? d.wind_speed * 3.6 : null);
     hourly.wind_direction_10m.push(d.wind_from_direction ?? null);
     hourly.wind_gusts_10m.push(d.wind_speed_of_gust != null ? d.wind_speed_of_gust * 3.6 : null);
@@ -339,7 +339,7 @@ function buildMetNorwayOpenMeteoShape(raw, requested) {
     daily.weather_code.push(day.weather_code);
     daily.temperature_2m_max.push(day.temps.length ? Math.max(...day.temps) : null);
     daily.temperature_2m_min.push(day.temps.length ? Math.min(...day.temps) : null);
-    daily.precipitation_probability_max.push(day.rainProb.length ? Math.max(...day.rainProb) : 0);
+    daily.precipitation_probability_max.push(day.rainProb.length ? Math.max(...day.rainProb) : null);
     daily.precipitation_sum.push(Number(day.rain.toFixed(2)));
     daily.wind_speed_10m_max.push(day.winds.length ? Math.max(...day.winds) : null);
     daily.wind_gusts_10m_max.push(day.gusts.length ? Math.max(...day.gusts) : null);
@@ -355,6 +355,51 @@ function buildMetNorwayOpenMeteoShape(raw, requested) {
     _provider: 'MET Norway Locationforecast',
     _updated_at: raw.properties?.meta?.updated_at || null
   };
+}
+
+
+async function getOpenMeteoPrecipitationProbability(lat, lon) {
+  const params = new URLSearchParams({
+    latitude: Number(lat).toFixed(4),
+    longitude: Number(lon).toFixed(4),
+    hourly: 'precipitation_probability',
+    daily: 'precipitation_probability_max',
+    forecast_days: '7',
+    timezone: 'UTC'
+  });
+  const response = await fetch(`https://api.open-meteo.com/v1/forecast?${params}`, {
+    headers: { Accept: 'application/json', 'User-Agent': 'WeatherWise/1.0' },
+    signal: AbortSignal.timeout(15000)
+  });
+  if (!response.ok) throw new Error(`Open-Meteo precipitation probability HTTP ${response.status}`);
+  const payload = await response.json();
+  if (payload?.error) throw new Error(payload.reason || 'Open-Meteo precipitation probability error');
+  return payload;
+}
+
+function mergePrecipitationProbability(target, probability) {
+  if (!target?.hourly || !target?.daily || !probability?.hourly || !probability?.daily) return target;
+  const hourlyByTime = new Map();
+  (probability.hourly.time || []).forEach((time, i) => {
+    const value = probability.hourly.precipitation_probability?.[i];
+    if (Number.isFinite(value)) hourlyByTime.set(Date.parse(`${time}:00Z`), value);
+  });
+  target.hourly.precipitation_probability = (target.hourly.time || []).map(time => {
+    const value = hourlyByTime.get(Date.parse(time));
+    return Number.isFinite(value) ? value : null;
+  });
+
+  const dailyByDate = new Map();
+  (probability.daily.time || []).forEach((date, i) => {
+    const value = probability.daily.precipitation_probability_max?.[i];
+    if (Number.isFinite(value)) dailyByDate.set(String(date).slice(0, 10), value);
+  });
+  target.daily.precipitation_probability_max = (target.daily.time || []).map(date => {
+    const value = dailyByDate.get(String(date).slice(0, 10));
+    return Number.isFinite(value) ? value : null;
+  });
+  target._precipitation_probability_provider = 'Open-Meteo';
+  return target;
 }
 
 async function getMetNorwayPoint(lat, lon) {
@@ -378,6 +423,13 @@ async function getMetNorwayPoint(lat, lon) {
     }
     const raw = await response.json();
     const data = buildMetNorwayOpenMeteoShape(raw);
+    try {
+      const probability = await getOpenMeteoPrecipitationProbability(lat, lon);
+      mergePrecipitationProbability(data, probability);
+    } catch (probabilityError) {
+      console.warn('[Precipitation probability] Open-Meteo enrichment unavailable:', probabilityError.message);
+      // Keep missing values as null; never report a false 0% probability.
+    }
     const item = { data, at: Date.now() };
     setBoundedCache(weatherCache, key, item, MAX_WEATHER_CACHE_ENTRIES);
     await writeWeatherDiskCache(key, item);

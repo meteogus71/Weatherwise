@@ -2746,15 +2746,18 @@ function renderForecastDetail(){
      categoryPercentage:.88,barPercentage:.92,maxBarThickness:22,minBarLength:2,yAxisID:'y'
    },{
      type:'line',label:'Πιθανότητα υετού (%)',
-     data:a.rainChance.slice(0,n),borderColor:'#f4a261',backgroundColor:'transparent',
-     borderWidth:2,tension:.25,pointRadius:0,pointHoverRadius:4,yAxisID:'y1'
+     data:a.rainChance.slice(0,n).map(v=>Number.isFinite(Number(v))?Number(v):null),
+     borderColor:'#ff8a3d',backgroundColor:'rgba(255,138,61,.14)',
+     borderWidth:3,tension:.28,spanGaps:false,
+     pointRadius:3,pointHoverRadius:6,pointBackgroundColor:'#ff8a3d',
+     pointBorderColor:'#fff',pointBorderWidth:1,yAxisID:'y1'
    }];
 }
  $('forecastChartTitle').textContent=title;$('forecastChartUnit').textContent=unit;$('forecastFootnote').textContent=note;
  if(forecastChart)forecastChart.destroy();
  const scales={x:{ticks:{color:'#8298b0',maxTicksLimit:forecastHours===24?12:forecastHours===48?12:14,maxRotation:0},grid:{color:'rgba(120,150,180,.08)'}},y:{beginAtZero:forecastParam==='humidity'||forecastParam==='rain',title:{display:forecastParam==='rain',text:'Ύψος υετού (mm)',color:'#aebed0'},ticks:{color:'#8298b0'},grid:{color:'rgba(120,150,180,.08)'}}};
  if(forecastParam==='wind')scales.y1={position:'right',min:0,max:360,title:{display:true,text:'Διεύθυνση (°)',color:'#f4a261'},ticks:{color:'#f4a261',stepSize:90},grid:{drawOnChartArea:false}};
- if(forecastParam==='rain')scales.y1={position:'right',min:0,max:100,title:{display:true,text:'Πιθανότητα (%)',color:'#f4a261'},ticks:{color:'#f4a261',callback:v=>v+'%'},grid:{drawOnChartArea:false}};
+ if(forecastParam==='rain')scales.y1={type:'linear',position:'right',min:0,max:100,title:{display:true,text:'Πιθανότητα υετού (%)',color:'#ff8a3d'},ticks:{stepSize:20,color:'#ff8a3d',callback:v=>v+'%'},grid:{drawOnChartArea:false}};
  if(forecastParam==='humidity')scales.y.max=100;
  forecastChart=new Chart($('forecastChart'),{type,data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{labels:{color:'#aebed0',usePointStyle:true}}},scales}});
 }
