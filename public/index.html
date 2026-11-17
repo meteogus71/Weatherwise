@@ -2948,7 +2948,7 @@ function renderForecastDetail(){
  const labels=timeSlice.map(t=>dailyMode?new Date(t+'T12:00:00Z').toLocaleDateString('el-GR',{weekday:'short',day:'numeric',month:'short',timeZone:'UTC'}):new Date(t+'Z').toLocaleString('el-GR',{weekday:'short',hour:'2-digit',minute:'2-digit',timeZone:'UTC'}));
  const ds=(label,data,color,fill=false)=>({label,data:data.slice(startIndex,startIndex+n),borderColor:color,backgroundColor:fill?color+'22':'transparent',fill,tension:.28,pointRadius:0,pointHoverRadius:4,borderWidth:2});
  let datasets=[],title='',unit='',note='',type='line';
- if(forecastParam==='temperature'){title=dailyMode?'Θερμοκρασία ελάχιστη / μέγιστη':'Θερμοκρασία αέρα & αισθητή';unit=isF?'°F':'°C';note=dailyMode?'Ημερήσια ελάχιστη και μέγιστη θερμοκρασία για τις επόμενες 7 ημέρες.':'Ωριαία θερμοκρασία αέρα και αισθητή θερμοκρασία.';datasets=dailyMode?[ds('Ελάχιστη θερμοκρασία',a.temperatureMin.map(temp),'#43c7e8',true),ds('Μέγιστη θερμοκρασία',a.temperatureMax.map(temp),'#f4a261')]:[ds('Θερμοκρασία αέρα',a.temperature.map(temp),'#43c7e8',true),ds('Αισθητή θερμοκρασία',a.apparent.map(temp),'#f4a261')];}
+ if(forecastParam==='temperature'){title=dailyMode?'Θερμοκρασία ελάχιστη / μέγιστη':'Θερμοκρασία αέρα & αισθητή';unit=isF?'°F':'°C';note=dailyMode?'Ημερήσια ελάχιστη και μέγιστη θερμοκρασία για τις επόμενες 7 ημέρες.':'Ωριαία θερμοκρασία αέρα και αισθητή θερμοκρασία.';datasets=dailyMode?[ds('Ελάχιστη θερμοκρασία',a.temperatureMin.map(temp),'#43c7e8',true),ds('Μέγιστη θερμοκρασία',a.temperatureMax.map(temp),'#f4a261')]:[ds('Θερμοκρασία αέρα',a.temperature.map(temp),'#43c7e8',true),ds('Αισθητή θερμοκρασία',a.apparent.map(v=>Number.isFinite(v)?temp(v):null),'#f4a261')];}
  else if(forecastParam==='wind'){title='Διεύθυνση, ένταση & ριπές ανέμου';unit=isF?'mph / °':'km/h / °';note=dailyMode?'Ημερήσια μέγιστη ένταση, μέγιστες ριπές και επικρατούσα διεύθυνση ανέμου.':'Ωριαία μέση ένταση, ριπές και διεύθυνση ανέμου.';datasets=[{...ds(dailyMode?'Μέγιστη ένταση':'Μέση ένταση',a.windSpeed.map(v=>+(v*(isF?.621371:1)).toFixed(1)),'#43c7e8',true),yAxisID:'y'},{...ds('Ριπές (gust)',a.windGusts.map(v=>Number.isFinite(v)?+(v*(isF?.621371:1)).toFixed(1):null),'#e76f51'),yAxisID:'y',spanGaps:false},{...ds(dailyMode?'Επικρατούσα διεύθυνση':'Διεύθυνση',a.windDirection,'#f4a261'),yAxisID:'y1'}];}
  else if(forecastParam==='humidity'){title='Υγρασία & νεφοκάλυψη';unit='%';note=dailyMode?'Ημερήσια μέση σχετική υγρασία και μέση νεφοκάλυψη.':'Ωριαία σχετική υγρασία και συνολική νεφοκάλυψη.';datasets=[ds('Σχετική υγρασία',a.humidity,'#62d6a5',true),ds('Νεφοκάλυψη',a.cloudCover,'#9b8af5')];}
  else{
@@ -3317,6 +3317,30 @@ async function loadWeather(){
    }
   }else console.warn('Open-Meteo gust fallback HTTP',gustResponse.status);
  }catch(gustError){console.warn('Wind gust fallback unavailable; keeping provider values',gustError);}
+ // The proxy may return hourly air temperature but omit/partially populate
+ // apparent_temperature. Retrieve the feels-like series directly and merge
+ // it by the exact local forecast timestamp, without shifting the chart axis.
+ try{
+  const apparentParams=new URLSearchParams({
+   latitude:String(lat),longitude:String(lon),
+   hourly:'apparent_temperature',forecast_days:'7',timezone:'auto',temperature_unit:'celsius'
+  });
+  const apparentResponse=await fetch('https://api.open-meteo.com/v1/forecast?'+apparentParams.toString());
+  if(apparentResponse.ok){
+   const apparentData=await apparentResponse.json();
+   const ah=apparentData.hourly;
+   if(ah?.time&&Array.isArray(ah.apparent_temperature)){
+    const apparentByTime=new Map(ah.time.map((t,i)=>[String(t).slice(0,16),ah.apparent_temperature[i]]));
+    const merged=(h.time||[]).map((t,i)=>{
+     const existing=h.apparent_temperature?.[i];
+     if(Number.isFinite(existing))return existing;
+     const fallback=apparentByTime.get(String(t).slice(0,16));
+     return Number.isFinite(fallback)?fallback:null;
+    });
+    h.apparent_temperature=merged;
+   }
+  }else console.warn('Open-Meteo apparent-temperature fallback HTTP',apparentResponse.status);
+ }catch(apparentError){console.warn('Apparent-temperature fallback unavailable; keeping provider values',apparentError);}
 
  $('tempStat').innerHTML=`${temp(c.temperature_2m)}°<span class="unit">${isF?'F':'C'}</span>`;$('windStat').innerHTML=`${Math.round(c.wind_speed_10m*(isF?0.621371:1))} <span class="unit">${isF?'mph':'km/h'}</span>`;
  $('humidityStat').innerHTML=`${c.relative_humidity_2m}<span class="unit">%</span>`;$('rainStat').innerHTML=`${h.precipitation_probability[0]}<span class="unit">%</span>`;
