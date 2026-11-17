@@ -3998,17 +3998,34 @@ body[data-theme] #overview .map-card .forecast-toolbar button.active * {
   .ww-shortcut-arrow{margin-right:-13px;min-width:30px}
 }
 
-/* Live weather map: enforce the same filled inactive-tab colour across all themes/surface styles.
-   This intentionally has higher specificity than the theme and glass-surface rules above. */
-body[data-theme] #overview .map-card #layerBar button:not(.active),
-body[data-theme] #overview .map-card #layerBarLarge button:not(.active),
-body[data-theme][data-surface-style] #overview .map-card .layerbar button:not(.active) {
-  background:#e9e4d8!important;
-  background-color:#e9e4d8!important;
-  border:1px solid #d8d0bf!important;
-  color:#34312b!important;
-  -webkit-backdrop-filter:none!important;
-  backdrop-filter:none!important;
+/* Live weather map: inactive layer tabs follow the selected WeatherWise theme.
+   Use the active theme palette instead of a fixed beige colour; active tabs are unchanged. */
+html body[data-theme] #overview .map-card .layerbar button:not(.active),
+html body[data-theme] #overview .map-card #layerBar button:not(.active),
+html body[data-theme] #overview .map-card #layerBarLarge button:not(.active) {
+  background:color-mix(in srgb,var(--cyan) 12%,var(--panel2))!important;
+  background-color:color-mix(in srgb,var(--cyan) 12%,var(--panel2))!important;
+  border:1px solid var(--line)!important;
+  color:var(--text)!important;
+}
+</style>
+
+
+
+<style id="weatherwise-layer-button-hover-glow">
+/* Hover/focus feedback for selectable live-map layer buttons, using each theme accent. */
+html body[data-theme] #overview .map-card .layerbar button:hover,
+html body[data-theme] #overview .map-card .layerbar button:focus-visible,
+html body[data-theme] #overview .map-card #layerBar button:hover,
+html body[data-theme] #overview .map-card #layerBar button:focus-visible,
+html body[data-theme] #overview .map-card #layerBarLarge button:hover,
+html body[data-theme] #overview .map-card #layerBarLarge button:focus-visible {
+  border-color:var(--cyan)!important;
+  outline:1px solid var(--cyan)!important;
+  outline-offset:1px!important;
+  box-shadow:0 0 0 2px color-mix(in srgb,var(--cyan) 22%,transparent),
+             0 0 12px color-mix(in srgb,var(--cyan) 48%,transparent)!important;
+  transition:border-color .16s ease,outline-color .16s ease,box-shadow .16s ease;
 }
 </style>
 
