@@ -2171,6 +2171,85 @@ body[data-theme="sandstone"] #overview .map-card :is(.dashboard-model-switch but
 }
 </style>
 
+
+<style id="weatherwise-second-menu-brand-left">
+/* Place the WeatherWise mark and title at the left of the retained second menu row. */
+.sidebar{
+  display:flex!important;
+  flex-direction:row!important;
+  align-items:center!important;
+  gap:clamp(10px,1.4vw,22px)!important;
+  padding:7px 22px!important;
+  overflow-x:auto!important;
+}
+.sidebar .brand{
+  display:flex!important;
+  flex:0 0 auto!important;
+  align-items:center!important;
+  gap:10px!important;
+  margin:0 12px 0 0!important;
+  padding:4px 14px 4px 4px!important;
+  color:#171b2c!important;
+  font:800 17px Manrope,sans-serif!important;
+  white-space:nowrap!important;
+  border-right:1px solid #d9dee6!important;
+}
+.sidebar .brandmark{
+  display:grid!important;
+  flex:0 0 34px!important;
+  width:34px!important;height:34px!important;
+  border-radius:50%!important;
+  place-items:center!important;
+  background:linear-gradient(135deg,#48c8e8,#3578df)!important;
+  color:#071525!important;
+  font-size:19px!important;
+}
+.sidebar .group-label,.sidebar .side-bottom{display:none!important}
+.sidebar .nav{flex:0 0 auto!important}
+@media(max-width:700px){
+  .sidebar{padding:7px 12px!important;gap:7px!important}
+  .sidebar .brand{font-size:14px!important;gap:7px!important;margin-right:4px!important;padding-right:9px!important}
+  .sidebar .brandmark{flex-basis:29px!important;width:29px!important;height:29px!important}
+}
+</style>
+
+<style id="weatherwise-editorial-two-row-menu">
+:root{--ww-menu-accent:var(--cyan,#8bdcf0)}
+#ww-editorial-menu{position:relative;z-index:1000;width:100%;background:var(--panel,#1c2737);border-bottom:1px solid var(--line,rgba(160,190,210,.22));box-shadow:0 8px 28px rgba(0,0,0,.18);font-family:inherit}
+#ww-editorial-menu .ww-menu-top{min-height:88px;display:flex;align-items:center;gap:22px;padding:14px clamp(18px,4vw,64px);border-bottom:1px solid var(--line,rgba(160,190,210,.22));box-sizing:border-box}
+#ww-editorial-menu .ww-menu-brand{display:flex;align-items:center;gap:11px;flex:0 0 auto;margin-right:auto;color:var(--text,#edf5fa);font:800 23px Manrope,sans-serif;text-decoration:none;white-space:nowrap}
+#ww-editorial-menu .ww-brand-mark{width:42px;height:42px;display:grid;place-items:center;border-radius:50%;border:1px solid var(--ww-menu-accent);color:var(--ww-menu-accent);font-size:23px}
+#ww-editorial-menu .ww-menu-controls{display:flex;align-items:center;justify-content:flex-end;gap:10px;min-width:0}
+#ww-editorial-menu .ww-menu-controls .city-search-wrap{width:min(26vw,400px);min-width:190px}
+#ww-editorial-menu .ww-menu-controls .btn,#ww-editorial-menu .ww-menu-controls select{min-height:48px}
+#ww-editorial-menu .ww-menu-bottom{padding:10px clamp(18px,4vw,64px) 14px;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px 12px;align-items:center}
+#ww-editorial-menu .ww-menu-bottom .nav{display:flex;align-items:center;justify-content:center;gap:9px;min-height:43px;padding:8px 10px;margin:0;border-radius:9px;color:var(--text,#edf5fa);font-size:15px;white-space:nowrap;cursor:pointer;transition:background .18s,border-color .18s}
+#ww-editorial-menu .ww-menu-bottom .nav:hover{background:var(--panel2,rgba(130,170,200,.12))}
+#ww-editorial-menu .ww-menu-bottom .nav.active{background:var(--cyan, #a7d8ed)!important;color:#102333!important;border:1px solid var(--cyan,#a7d8ed);font-weight:700}
+#ww-editorial-menu .ww-menu-bottom .nav.active *{color:#102333!important}
+#ww-editorial-menu .ww-menu-bottom .nav[data-section="community"]{background:var(--cyan,#a7d8ed);color:#102333;font-weight:700;border-radius:28px;min-height:48px}
+#ww-editorial-menu .ww-menu-bottom .nav[data-section="community"] .ico{color:#102333}
+#ww-editorial-menu .ww-menu-bottom .nav[data-section="community"].active{box-shadow:0 0 0 2px var(--ww-menu-accent)}
+#ww-editorial-menu .ww-menu-bottom .ico{flex:0 0 auto}
+.sidebar{display:none!important}
+#ww-sections-spacer{display:none!important;height:0!important}
+.topbar .top-actions{display:none!important}
+@media(max-width:1100px){
+ #ww-editorial-menu .ww-menu-top{flex-wrap:wrap;gap:12px}
+ #ww-editorial-menu .ww-menu-controls{width:100%;justify-content:stretch;flex-wrap:wrap}
+ #ww-editorial-menu .ww-menu-controls .city-search-wrap{flex:1;min-width:180px;width:auto}
+ #ww-editorial-menu .ww-menu-bottom{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+@media(max-width:650px){
+ #ww-editorial-menu .ww-menu-top{padding:12px 14px}
+ #ww-editorial-menu .ww-menu-brand{font-size:19px}
+ #ww-editorial-menu .ww-menu-controls{gap:6px}
+ #ww-editorial-menu .ww-menu-controls .btn,#ww-editorial-menu .ww-menu-controls select{min-height:40px;padding:7px 9px}
+ #ww-editorial-menu .ww-menu-controls .city-search-wrap{order:5;flex-basis:100%}
+ #ww-editorial-menu .ww-menu-bottom{grid-template-columns:repeat(2,minmax(0,1fr));padding:8px 12px}
+ #ww-editorial-menu .ww-menu-bottom .nav{font-size:13px;white-space:normal}
+}
+</style>
 </head>
 <body>
 <div id="ww-header-spacer" aria-hidden="true"></div>
@@ -2214,14 +2293,6 @@ body[data-theme="sandstone"] #overview .map-card :is(.dashboard-model-switch but
       <div class="wl-intro-kicker">Ζωντανά · Μετεωρολογική ενημέρωση</div>
       <h1>Ο καιρός όπως συμβαίνει, και οι ώρες που έρχονται.</h1>
       <p>Το WeatherWise συνδυάζει ζωντανές μετρήσεις μετεωρολογικών σταθμών, προγνωστικά μοντέλα και αναφορές ανθρώπων που βρίσκονται έξω, στον καιρό. Αναζητήστε οπουδήποτε στον κόσμο, παρακολουθήστε τις επόμενες ώρες και δείτε τι συμβαίνει πραγματικά στην περιοχή σας.</p>
-      <div class="ww-hero-shortcuts" aria-label="Γρήγορες συντομεύσεις">
-        <div class="ww-shortcut ww-shortcut-primary" aria-label="Δες τις συνθήκες τώρα">
-          <span>Δες τις συνθήκες τώρα</span><span class="ww-shortcut-arrow" aria-hidden="true">→</span>
-        </div>
-        <div class="ww-shortcut ww-shortcut-secondary" aria-label="Πες τι βλέπεις">
-          <span>Πες τι βλέπεις</span>
-        </div>
-      </div>
     </div>
   </section>
   <header class="topbar">
@@ -2924,25 +2995,23 @@ function renderForecastDetail(){
    note=dailyMode?'Οι μπάρες δείχνουν το συνολικό ημερήσιο ύψος υετού (mm) και η γραμμή την ημερήσια μέγιστη πιθανότητα (%).':'Οι μπάρες δείχνουν το ωριαίο ύψος υετού (mm) και η γραμμή την πιθανότητα υετού (%).';
    type='bar';
    datasets=[{
-     type:'bar',label:'Ημερήσιο ύψος υετού (mm)',
+     type:'bar',label:'Ύψος υετού (mm)',
      data:a.rain.slice(0,n).map(v=>Math.max(0,Number(v)||0)),
-     backgroundColor:'rgba(48,166,220,.82)',
+     backgroundColor:'rgba(48,166,220,.88)',
      hoverBackgroundColor:'rgba(91,205,245,1)',
      borderColor:'#36b8e8',borderWidth:1,borderRadius:4,borderSkipped:false,
-     categoryPercentage:.88,barPercentage:.92,maxBarThickness:22,minBarLength:2,yAxisID:'y',order:2
+     categoryPercentage:.88,barPercentage:.92,maxBarThickness:22,minBarLength:2,yAxisID:'y'
    },{
      type:'line',label:'Πιθανότητα υετού (%)',
-     data:a.rainChance.slice(0,n).map(v=>v==null?null:Math.max(0,Math.min(100,Number(v)))),
-     borderColor:'#ff9b45',backgroundColor:'#ff9b45',
-     borderWidth:3,tension:.25,pointRadius:3,pointHoverRadius:6,pointBackgroundColor:'#ff9b45',
-     pointBorderColor:'#fff',pointBorderWidth:1,spanGaps:true,yAxisID:'y1',order:1
+     data:a.rainChance.slice(0,n),borderColor:'#f4a261',backgroundColor:'transparent',
+     borderWidth:2,tension:.25,pointRadius:0,pointHoverRadius:4,yAxisID:'y1'
    }];
 }
  $('forecastChartTitle').textContent=title;$('forecastChartUnit').textContent=unit;$('forecastFootnote').textContent=note;
  if(forecastChart)forecastChart.destroy();
  const scales={x:{ticks:{color:'#8298b0',maxTicksLimit:forecastHours===24?12:forecastHours===48?12:14,maxRotation:0},grid:{color:'rgba(120,150,180,.08)'}},y:{beginAtZero:forecastParam==='humidity'||forecastParam==='rain',title:{display:forecastParam==='rain',text:'Ύψος υετού (mm)',color:'#aebed0'},ticks:{color:'#8298b0'},grid:{color:'rgba(120,150,180,.08)'}}};
  if(forecastParam==='wind')scales.y1={position:'right',min:0,max:360,title:{display:true,text:'Διεύθυνση (°)',color:'#f4a261'},ticks:{color:'#f4a261',stepSize:90},grid:{drawOnChartArea:false}};
- if(forecastParam==='rain')scales.y1={position:'right',min:0,max:100,title:{display:true,text:'Πιθανότητα υετού (%)',color:'#ff9b45'},ticks:{color:'#ff9b45',stepSize:20,callback:v=>v+'%'},grid:{drawOnChartArea:false}};
+ if(forecastParam==='rain')scales.y1={position:'right',min:0,max:100,title:{display:true,text:'Πιθανότητα (%)',color:'#f4a261'},ticks:{color:'#f4a261',callback:v=>v+'%'},grid:{drawOnChartArea:false}};
  if(forecastParam==='humidity')scales.y.max=100;
  forecastChart=new Chart($('forecastChart'),{type,data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{labels:{color:'#aebed0',usePointStyle:true}}},scales}});
 }
@@ -3933,35 +4002,91 @@ body[data-theme] #overview .map-card .forecast-toolbar button.active * {
 </style>
 
 
+<script id="weatherwise-editorial-menu-builder">
+(function(){
+ const shell=document.querySelector('.shell'), sidebar=document.getElementById('sidebar');
+ if(!shell||!sidebar||document.getElementById('ww-editorial-menu')) return;
+ const menu=document.createElement('header'); menu.id='ww-editorial-menu'; menu.setAttribute('aria-label','WeatherWise navigation');
+ const top=document.createElement('div'); top.className='ww-menu-top';
+ const brand=document.createElement('a'); brand.className='ww-menu-brand'; brand.href='#'; brand.innerHTML='<span class="ww-brand-mark">✦</span><span>WeatherWise</span>'; brand.addEventListener('click',e=>{e.preventDefault();const item=document.querySelector('.nav[data-section="overview"]');if(item)item.click();});
+ const controls=document.querySelector('.topbar .top-actions');
+ const bottom=document.createElement('nav'); bottom.className='ww-menu-bottom'; bottom.setAttribute('aria-label','Ενότητες WeatherWise');
+ const items=[...sidebar.querySelectorAll('.nav')];
+ top.append(brand); if(controls)top.append(controls);
+ items.forEach((item,i)=>{item.classList.remove('active');bottom.append(item);});
+ menu.append(top,bottom); shell.parentNode.insertBefore(menu,shell);
+ sidebar.remove();
+ const intro=document.querySelector('.wl-intro'); if(intro) intro.style.marginTop='0';
+})();
+</script>
 
-<style id="weatherwise-hero-shortcuts">
-.ww-hero-shortcuts{
-  display:flex;justify-content:center;align-items:center;gap:12px;
-  flex-wrap:wrap;margin:24px auto 0;width:100%;
+<style id="ww-community-nav-highlight-fix">
+/* Αναφορές πολιτών: διαφανές όταν δεν είναι επιλεγμένο, ίδιο active state με τα υπόλοιπα κουμπιά */
+.sidebar .nav[data-section="community"],
+#ww-editorial-menu .ww-menu-bottom .nav[data-section="community"]{
+  background:transparent!important;
+  color:var(--text,#edf5fa)!important;
+  font-weight:400!important;
+  border:1px solid transparent!important;
+  border-radius:9px!important;
+  box-shadow:none!important;
 }
-.ww-shortcut{
-  min-height:44px;display:inline-flex;align-items:center;justify-content:center;
-  gap:14px;padding:0 18px;border-radius:7px;font:700 13px "Manrope",sans-serif;
-  line-height:1.2;white-space:nowrap;box-sizing:border-box;
+.sidebar .nav[data-section="community"]:not(.active),
+#ww-editorial-menu .ww-menu-bottom .nav[data-section="community"]:not(.active){
+  background:transparent!important;
+  color:var(--text,#edf5fa)!important;
 }
-.ww-shortcut-primary{
-  background:#f28c28;color:#172033;border:1px solid #d96f16;
-  box-shadow:0 2px 5px rgba(23,32,51,.12);
+.sidebar .nav[data-section="community"].active,
+#ww-editorial-menu .ww-menu-bottom .nav[data-section="community"].active{
+  background:var(--cyan,#a7d8ed)!important;
+  color:#102333!important;
+  border-color:var(--cyan,#a7d8ed)!important;
+  font-weight:700!important;
+  box-shadow:none!important;
 }
-.ww-shortcut-arrow{
-  display:grid;place-items:center;align-self:stretch;min-width:34px;
-  margin-right:-18px;margin-left:2px;border-left:1px solid rgba(23,32,51,.25);
-  font-size:20px;font-weight:400;
-}
-.ww-shortcut-secondary{
-  background:rgba(255,255,255,.68);color:#252b3a;border:1px solid #d9dee7;
-}
-@media(max-width:520px){
-  .ww-hero-shortcuts{gap:9px;margin-top:19px}
-  .ww-shortcut{min-height:42px;padding:0 13px;font-size:12px}
-  .ww-shortcut-arrow{margin-right:-13px;min-width:30px}
-}
+.sidebar .nav[data-section="community"] .ico,
+#ww-editorial-menu .ww-menu-bottom .nav[data-section="community"] .ico{color:inherit!important}
+.sidebar .nav[data-section="community"].active .ico,
+#ww-editorial-menu .ww-menu-bottom .nav[data-section="community"].active .ico{color:#102333!important}
 </style>
 
 </body>
 </html>
+
+
+/* LIGHTER ACTIVE / HIGHLIGHT STATE — consistent across the WeatherWise interface */
+body[data-theme] #ww-editorial-menu .ww-menu-bottom .nav.active,
+body[data-theme] aside.sidebar .nav.active,
+body[data-theme] .sidebar .nav.active,
+body[data-theme] .wl-mainnav button.active,
+body[data-theme] .wl-mainnav button[aria-current="page"],
+body[data-theme] #overview .map-card .dashboard-model-switch button.active,
+body[data-theme] #overview .map-card .layerbar button.active,
+body[data-theme] #overview .map-card .map-tools button.active,
+body[data-theme] #overview .map-card .forecast-toolbar button.active,
+body[data-theme] :is(.btn.active,.range-btn.active,.forecast-tab.active,.europe-sort-btn.active) {
+  background: color-mix(in srgb, var(--cyan, #a7d8ed) 42%, var(--panel, #263747)) !important;
+  background-color: color-mix(in srgb, var(--cyan, #a7d8ed) 42%, var(--panel, #263747)) !important;
+  border-color: color-mix(in srgb, var(--cyan, #a7d8ed) 72%, var(--line, #71899a)) !important;
+}
+
+body[data-theme] #ww-editorial-menu .ww-menu-bottom .nav.active,
+body[data-theme] aside.sidebar .nav.active,
+body[data-theme] .sidebar .nav.active,
+body[data-theme] .wl-mainnav button.active,
+body[data-theme] .wl-mainnav button[aria-current="page"],
+body[data-theme] #overview .map-card .dashboard-model-switch button.active,
+body[data-theme] #overview .map-card .layerbar button.active,
+body[data-theme] #overview .map-card .map-tools button.active,
+body[data-theme] #overview .map-card .forecast-toolbar button.active,
+body[data-theme] :is(.btn.active,.range-btn.active,.forecast-tab.active,.europe-sort-btn.active) {
+  color: #102333 !important;
+  -webkit-text-fill-color: #102333 !important;
+}
+body[data-theme] #ww-editorial-menu .ww-menu-bottom .nav.active *,
+body[data-theme] aside.sidebar .nav.active *,
+body[data-theme] .sidebar .nav.active *,
+body[data-theme] #overview .map-card :is(.dashboard-model-switch button.active,.layerbar button.active,.map-tools button.active,.forecast-toolbar button.active) * {
+  color: #102333 !important;
+  -webkit-text-fill-color: #102333 !important;
+}
