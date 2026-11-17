@@ -2052,6 +2052,37 @@ body[data-surface-style="solid"] #overview > .weather-layout > .atmospheric-card
   body[data-theme] #overview > .weather-layout > .atmospheric-card > .details > .detail {padding:12px!important;min-height:88px!important}
 }
 
+
+
+/* ACTIVE / HIGHLIGHTED MAP INFORMATION CONTROLS — readable text in every theme */
+body[data-theme] #overview .map-card .dashboard-model-switch button.active,
+body[data-theme] #overview .map-card .layerbar button.active,
+body[data-theme] #overview .map-card .map-tools button.active,
+body[data-theme] #overview .map-card .forecast-toolbar button.active {
+  color:#102333 !important;
+  -webkit-text-fill-color:#102333 !important;
+  font-weight:700 !important;
+  text-shadow:none !important;
+}
+body[data-theme] #overview .map-card .dashboard-model-switch button.active *,
+body[data-theme] #overview .map-card .layerbar button.active *,
+body[data-theme] #overview .map-card .map-tools button.active *,
+body[data-theme] #overview .map-card .forecast-toolbar button.active * {
+  color:#102333 !important;
+  -webkit-text-fill-color:#102333 !important;
+}
+/* Deep teal highlights need light lettering to retain contrast. */
+body[data-theme="arctic"] #overview .map-card :is(.dashboard-model-switch button.active,.layerbar button.active,.map-tools button.active,.forecast-toolbar button.active),
+body[data-theme="sandstone"] #overview .map-card :is(.dashboard-model-switch button.active,.layerbar button.active,.map-tools button.active,.forecast-toolbar button.active) {
+  color:#ffffff !important;
+  -webkit-text-fill-color:#ffffff !important;
+}
+body[data-theme="arctic"] #overview .map-card :is(.dashboard-model-switch button.active,.layerbar button.active,.map-tools button.active,.forecast-toolbar button.active) *,
+body[data-theme="sandstone"] #overview .map-card :is(.dashboard-model-switch button.active,.layerbar button.active,.map-tools button.active,.forecast-toolbar button.active) * {
+  color:#ffffff !important;
+  -webkit-text-fill-color:#ffffff !important;
+}
+
 </style>
 
 <style id="weatherwise-remove-forecast-outer-frame">
