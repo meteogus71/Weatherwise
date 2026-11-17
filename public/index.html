@@ -3998,12 +3998,17 @@ body[data-theme] #overview .map-card .forecast-toolbar button.active * {
   .ww-shortcut-arrow{margin-right:-13px;min-width:30px}
 }
 
-/* Live weather map: keep inactive layer tabs filled, matching the supplied reference */
-#layerBar button:not(.active),
-#layerBarLarge button:not(.active){
+/* Live weather map: enforce the same filled inactive-tab colour across all themes/surface styles.
+   This intentionally has higher specificity than the theme and glass-surface rules above. */
+body[data-theme] #overview .map-card #layerBar button:not(.active),
+body[data-theme] #overview .map-card #layerBarLarge button:not(.active),
+body[data-theme][data-surface-style] #overview .map-card .layerbar button:not(.active) {
   background:#e9e4d8!important;
-  border-color:#d8d0bf!important;
+  background-color:#e9e4d8!important;
+  border:1px solid #d8d0bf!important;
   color:#34312b!important;
+  -webkit-backdrop-filter:none!important;
+  backdrop-filter:none!important;
 }
 </style>
 
