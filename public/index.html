@@ -2948,8 +2948,8 @@ function renderForecastDetail(){
  const labels=timeSlice.map(t=>dailyMode?new Date(t+'T12:00:00Z').toLocaleDateString('el-GR',{weekday:'short',day:'numeric',month:'short',timeZone:'UTC'}):new Date(t+'Z').toLocaleString('el-GR',{weekday:'short',hour:'2-digit',minute:'2-digit',timeZone:'UTC'}));
  const ds=(label,data,color,fill=false)=>({label,data:data.slice(startIndex,startIndex+n),borderColor:color,backgroundColor:fill?color+'22':'transparent',fill,tension:.28,pointRadius:0,pointHoverRadius:4,borderWidth:2});
  let datasets=[],title='',unit='',note='',type='line';
- if(forecastParam==='temperature'){title=dailyMode?'Θερμοκρασία ελάχιστη / μέγιστη':'Θερμοκρασία αέρα & αισθητή';unit=isF?'°F':'°C';note=dailyMode?'Ημερήσια ελάχιστη και μέγιστη θερμοκρασία για τις επόμενες 7 ημέρες.':'Ωριαία θερμοκρασία αέρα και αισθητή θερμοκρασία.';datasets=dailyMode?[ds('Ελάχιστη θερμοκρασία',a.temperatureMin.map(temp),'#43c7e8',true),ds('Μέγιστη θερμοκρασία',a.temperatureMax.map(temp),'#f4a261')]:[ds('Θερμοκρασία αέρα',a.temperature.map(temp),'#43c7e8',true),ds('Αισθητή θερμοκρασία',a.apparent.map(v=>Number.isFinite(v)?temp(v):null),'#f4a261')];}
- else if(forecastParam==='wind'){title='Διεύθυνση, ένταση & ριπές ανέμου';unit=isF?'mph / °':'km/h / °';note=dailyMode?'Ημερήσια μέγιστη ένταση, μέγιστες ριπές και επικρατούσα διεύθυνση ανέμου.':'Ωριαία μέση ένταση, ριπές και διεύθυνση ανέμου.';datasets=[{...ds(dailyMode?'Μέγιστη ένταση':'Μέση ένταση',a.windSpeed.map(v=>+(v*(isF?.621371:1)).toFixed(1)),'#43c7e8',true),yAxisID:'y'},{...ds('Ριπές (gust)',a.windGusts.map(v=>Number.isFinite(v)?+(v*(isF?.621371:1)).toFixed(1):null),'#e76f51'),yAxisID:'y',spanGaps:false},{...ds(dailyMode?'Επικρατούσα διεύθυνση':'Διεύθυνση',a.windDirection,'#f4a261'),yAxisID:'y1'}];}
+ if(forecastParam==='temperature'){title=dailyMode?'Θερμοκρασία ελάχιστη / μέγιστη':'Θερμοκρασία αέρα & αισθητή';unit=isF?'°F':'°C';note=dailyMode?'Ημερήσια ελάχιστη και μέγιστη θερμοκρασία για τις επόμενες 7 ημέρες.':'Ωριαία θερμοκρασία αέρα και αισθητή θερμοκρασία.';datasets=dailyMode?[ds('Ελάχιστη θερμοκρασία',a.temperatureMin.map(temp),'#43c7e8',true),ds('Μέγιστη θερμοκρασία',a.temperatureMax.map(temp),'#f4a261')]:[ds('Θερμοκρασία αέρα',a.temperature.map(v=>v==null?null:temp(Number(v))),'#43c7e8',true),ds('Αισθητή θερμοκρασία',a.apparent.map(v=>v!==null&&v!==undefined&&Number.isFinite(Number(v))?temp(Number(v)):null),'#f4a261')];}
+ else if(forecastParam==='wind'){title='Διεύθυνση, ένταση & ριπές ανέμου';unit=isF?'mph / °':'km/h / °';note=dailyMode?'Ημερήσια μέγιστη ένταση, μέγιστες ριπές και επικρατούσα διεύθυνση ανέμου.':'Ωριαία μέση ένταση, ριπές και διεύθυνση ανέμου.';datasets=[{...ds(dailyMode?'Μέγιστη ένταση':'Μέση ένταση',a.windSpeed.map(v=>+(v*(isF?.621371:1)).toFixed(1)),'#43c7e8',true),yAxisID:'y'},{...ds('Ριπές (gust)',a.windGusts.map(v=>v!==null&&v!==undefined&&Number.isFinite(Number(v))?+(Number(v)*(isF?.621371:1)).toFixed(1):null),'#e76f51'),yAxisID:'y',spanGaps:false},{...ds(dailyMode?'Επικρατούσα διεύθυνση':'Διεύθυνση',a.windDirection,'#f4a261'),yAxisID:'y1'}];}
  else if(forecastParam==='humidity'){title='Υγρασία & νεφοκάλυψη';unit='%';note=dailyMode?'Ημερήσια μέση σχετική υγρασία και μέση νεφοκάλυψη.':'Ωριαία σχετική υγρασία και συνολική νεφοκάλυψη.';datasets=[ds('Σχετική υγρασία',a.humidity,'#62d6a5',true),ds('Νεφοκάλυψη',a.cloudCover,'#9b8af5')];}
  else{
    title=dailyMode?'Ημερήσιο ύψος υετού & πιθανότητα':'Ύψος υετού & πιθανότητα βροχής';unit=dailyMode?'mm/ημέρα · %':'mm/h · %';
@@ -3288,60 +3288,72 @@ async function loadWeather(){
  if(d.error)throw new Error(d.reason||'Open-Meteo returned an error');
  const c=d.current,h=d.hourly,day=d.daily;
  if(!c||!h||!day)throw new Error('Λείπουν current/hourly/daily δεδομένα από την υπηρεσία');
- // MET Norway may omit wind_speed_of_gust for some forecast steps. Fetch gusts
- // separately from Open-Meteo and merge by local timestamp/date so missing
- // values are not silently rendered as 0 km/h in the detailed forecast.
+ // Use one Open-Meteo response for both gusts and feels-like temperature.
+ // Match each provider's local timestamps using its UTC offset; this avoids
+ // shifting either curve when the upstream feeds use different time bases.
  try{
-  const gustParams=new URLSearchParams({
+  const extraParams=new URLSearchParams({
    latitude:String(lat),longitude:String(lon),
-   hourly:'wind_gusts_10m',daily:'wind_gusts_10m_max',
-   forecast_days:'7',timezone:'auto',wind_speed_unit:'kmh'
+   hourly:'apparent_temperature,wind_gusts_10m',
+   daily:'wind_gusts_10m_max',forecast_days:'7',timezone:'auto',
+   temperature_unit:'celsius',wind_speed_unit:'kmh'
   });
-  const gustResponse=await fetch('https://api.open-meteo.com/v1/forecast?'+gustParams.toString());
-  if(gustResponse.ok){
-   const gustData=await gustResponse.json();
-   const gh=gustData.hourly,gd=gustData.daily;
-   if(gh?.time&&gh?.wind_gusts_10m){
-    const gustByTime=new Map(gh.time.map((t,i)=>[String(t).slice(0,16),gh.wind_gusts_10m[i]]));
-    h.wind_gusts_10m=(h.time||[]).map(t=>{
-     const value=gustByTime.get(String(t).slice(0,16));
-     return Number.isFinite(value)?value:null;
-    });
-   }
-   if(gd?.time&&gd?.wind_gusts_10m_max){
-    const gustByDate=new Map(gd.time.map((t,i)=>[String(t).slice(0,10),gd.wind_gusts_10m_max[i]]));
-    day.wind_gusts_10m_max=(day.time||[]).map(t=>{
-     const value=gustByDate.get(String(t).slice(0,10));
-     return Number.isFinite(value)?value:null;
-    });
-   }
-  }else console.warn('Open-Meteo gust fallback HTTP',gustResponse.status);
- }catch(gustError){console.warn('Wind gust fallback unavailable; keeping provider values',gustError);}
- // The proxy may return hourly air temperature but omit/partially populate
- // apparent_temperature. Retrieve the feels-like series directly and merge
- // it by the exact local forecast timestamp, without shifting the chart axis.
- try{
-  const apparentParams=new URLSearchParams({
-   latitude:String(lat),longitude:String(lon),
-   hourly:'apparent_temperature',forecast_days:'7',timezone:'auto',temperature_unit:'celsius'
+  const extraResponse=await fetch('https://api.open-meteo.com/v1/forecast?'+extraParams.toString());
+  if(!extraResponse.ok)throw new Error('Open-Meteo HTTP '+extraResponse.status);
+  const extra=await extraResponse.json();
+  const eh=extra.hourly,ed=extra.daily;
+  const epochForLocal=(stamp,offset)=>{
+   const m=String(stamp||'').match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/);
+   if(!m)return NaN;
+   const wall=Date.UTC(+m[1],+m[2]-1,+m[3],+m[4],+m[5]);
+   return wall-(Number.isFinite(Number(offset))?Number(offset)*1000:0);
+  };
+  const sourceOffset=d.utc_offset_seconds;
+  const extraOffset=extra.utc_offset_seconds;
+  const makeHourlyMap=(times,values,offset)=>{
+   const map=new Map();
+   (times||[]).forEach((stamp,i)=>{
+    const epoch=epochForLocal(stamp,offset),value=values?.[i];
+    if(Number.isFinite(epoch)&&value!==null&&value!==undefined&&Number.isFinite(Number(value)))map.set(epoch,Number(value));
+   });
+   return map;
+  };
+  const matchHourly=(targetTimes,map,offset)=>{
+   const keys=[...map.keys()].sort((a,b)=>a-b);
+   return (targetTimes||[]).map(stamp=>{
+    const target=epochForLocal(stamp,offset);if(!Number.isFinite(target)||!keys.length)return null;
+    let lo=0,hi=keys.length;
+    while(lo<hi){const mid=(lo+hi)>>1;if(keys[mid]<target)lo=mid+1;else hi=mid;}
+    let best=null,bestDelta=Infinity;
+    for(const idx of [lo-1,lo])if(idx>=0&&idx<keys.length){const delta=Math.abs(keys[idx]-target);if(delta<bestDelta){bestDelta=delta;best=keys[idx];}}
+    return best!==null&&bestDelta<=30*60*1000?map.get(best):null;
+   });
+  };
+  if(eh?.time&&Array.isArray(eh.apparent_temperature)){
+   const apparentMap=makeHourlyMap(eh.time,eh.apparent_temperature,extraOffset);
+   const matched=matchHourly(h.time,apparentMap,sourceOffset);
+   h.apparent_temperature=(h.time||[]).map((_,i)=>matched[i]??(Number.isFinite(Number(h.apparent_temperature?.[i]))?Number(h.apparent_temperature[i]):null));
+  }
+  if(eh?.time&&Array.isArray(eh.wind_gusts_10m)){
+   const gustMap=makeHourlyMap(eh.time,eh.wind_gusts_10m,extraOffset);
+   const matched=matchHourly(h.time,gustMap,sourceOffset);
+   h.wind_gusts_10m=(h.time||[]).map((_,i)=>matched[i]??(Number.isFinite(Number(h.wind_gusts_10m?.[i]))?Number(h.wind_gusts_10m[i]):null));
+  }
+  if(ed?.time&&Array.isArray(ed.wind_gusts_10m_max)){
+   const dailyMap=new Map(ed.time.map((date,i)=>[String(date).slice(0,10),ed.wind_gusts_10m_max[i]]));
+   day.wind_gusts_10m_max=(day.time||[]).map(date=>{
+    const value=dailyMap.get(String(date).slice(0,10));return value!==null&&value!==undefined&&Number.isFinite(Number(value))?Number(value):null;
+   });
+  }
+  console.info('WeatherWise forecast series merged',{
+   hourlyPoints:(h.time||[]).length,
+   apparentValid:(h.apparent_temperature||[]).filter(v=>v!==null&&Number.isFinite(Number(v))).length,
+   gustValid:(h.wind_gusts_10m||[]).filter(v=>v!==null&&Number.isFinite(Number(v))).length,
+   sourceOffset,extraOffset
   });
-  const apparentResponse=await fetch('https://api.open-meteo.com/v1/forecast?'+apparentParams.toString());
-  if(apparentResponse.ok){
-   const apparentData=await apparentResponse.json();
-   const ah=apparentData.hourly;
-   if(ah?.time&&Array.isArray(ah.apparent_temperature)){
-    const apparentByTime=new Map(ah.time.map((t,i)=>[String(t).slice(0,16),ah.apparent_temperature[i]]));
-    const merged=(h.time||[]).map((t,i)=>{
-     const existing=h.apparent_temperature?.[i];
-     if(Number.isFinite(existing))return existing;
-     const fallback=apparentByTime.get(String(t).slice(0,16));
-     return Number.isFinite(fallback)?fallback:null;
-    });
-    h.apparent_temperature=merged;
-   }
-  }else console.warn('Open-Meteo apparent-temperature fallback HTTP',apparentResponse.status);
- }catch(apparentError){console.warn('Apparent-temperature fallback unavailable; keeping provider values',apparentError);}
-
+ }catch(extraForecastError){
+  console.warn('Open-Meteo apparent-temperature / gust fallback unavailable; using primary feed',extraForecastError);
+ }
  $('tempStat').innerHTML=`${temp(c.temperature_2m)}°<span class="unit">${isF?'F':'C'}</span>`;$('windStat').innerHTML=`${Math.round(c.wind_speed_10m*(isF?0.621371:1))} <span class="unit">${isF?'mph':'km/h'}</span>`;
  $('humidityStat').innerHTML=`${c.relative_humidity_2m}<span class="unit">%</span>`;$('rainStat').innerHTML=`${h.precipitation_probability[0]}<span class="unit">%</span>`;
  $('feels').textContent=`Αίσθηση: ${temp(c.apparent_temperature)}°`; $('windDir').textContent=`Διεύθυνση: ${dir(c.wind_direction_10m)} (${c.wind_direction_10m}°)`;
