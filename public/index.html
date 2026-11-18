@@ -2468,15 +2468,15 @@ body{font-size:calc(14px * var(--ww-font-scale,1))}
       <p class="small" style="margin-top:9px">Η ρύθμιση εφαρμόζεται στις κάρτες, στα πλαίσια και στα βασικά παράθυρα της εφαρμογής και αποθηκεύεται αυτόματα.</p>
     </div>
     <div class="card" style="margin-bottom:16px" id="fontSizeAppearanceCard">
-      <div class="card-head"><h3>ΜΕΓΕΘΟΣ ΓΡΑΜΜΑΤΟΣΕΙΡΑΣ</h3><span>TEXT SIZE</span></div>
-      <label for="globalFontSizeSelect" class="small" style="display:block;margin-bottom:8px">Επιλέξτε το μέγεθος των γραμμάτων σε όλη την εφαρμογή</label>
-      <select id="globalFontSizeSelect" class="search" style="width:min(100%,360px)" aria-label="Μέγεθος γραμματοσειράς">
+      <div class="card-head"><h3>ΜΕΓΕΘΟΣ ΓΡΑΜΜΑΤΟΣΕΙΡΑΣ ΥΠΟΛΟΙΠΟΥ SITE</h3><span>CONTENT TEXT SIZE</span></div>
+      <label for="globalFontSizeSelect" class="small" style="display:block;margin-bottom:8px">Επιλέξτε το μέγεθος των κειμένων στις υπόλοιπες ενότητες του WeatherWise</label>
+      <select id="globalFontSizeSelect" class="search" style="width:min(100%,360px)" aria-label="Μέγεθος γραμματοσειράς υπόλοιπου site">
         <option value="0.9">Μικρό · 90%</option>
         <option value="1">Κανονικό · 100%</option>
         <option value="1.1">Μεγάλο · 110%</option>
         <option value="1.2">Πολύ μεγάλο · 120%</option>
       </select>
-      <p class="small" style="margin-top:9px">Η επιλογή εφαρμόζεται άμεσα και αποθηκεύεται αυτόματα σε αυτή τη συσκευή.</p>
+      <p class="small" style="margin-top:9px">Η επιλογή εφαρμόζεται άμεσα στα κείμενα του περιεχομένου και αποθηκεύεται αυτόματα. Δεν επηρεάζει το μέγεθος γραμματοσειράς του μενού, το οποίο ρυθμίζεται ξεχωριστά παραπάνω.</p>
     </div>
     <div class="card" style="margin-bottom:16px" id="sidebarAppearanceCard">
       <div class="card-head"><h3>ΠΛΕΥΡΙΚΗ ΜΠΑΡΑ</h3><span>ΖΩΝΤΑΝΗ ΠΡΟΕΠΙΣΚΟΠΗΣΗ</span></div>
@@ -4655,6 +4655,50 @@ html body .city-current .weather-symbol{font-size:clamp(88px,9vw,118px)!importan
 
 </style>
 
+<style id="ww-seven-day-containment-fix">
+
+/* Final containment fix: keep all editorial forecast content inside its card */
+#overview .ww-seven-day-editorial,
+#overview .ww-seven-day-editorial *{box-sizing:border-box!important}
+#overview .ww-seven-day-editorial{width:100%!important;max-width:100%!important;overflow:hidden!important}
+#overview .ww-seven-layout{
+  width:100%!important;max-width:100%!important;min-width:0!important;
+  padding:clamp(20px,2.2vw,36px)!important;
+  grid-template-columns:minmax(0,.72fr) minmax(0,1.55fr)!important;
+  gap:clamp(24px,4vw,64px)!important;
+}
+#overview .ww-seven-intro{width:100%!important;max-width:100%!important;min-width:0!important;overflow-wrap:anywhere!important}
+#overview .ww-seven-intro h2,
+#overview .ww-seven-intro p{max-width:100%!important;overflow-wrap:anywhere!important}
+#overview .ww-seven-list{width:100%!important;max-width:100%!important;min-width:0!important}
+#overview .ww-seven-row{
+  width:100%!important;max-width:100%!important;min-width:0!important;
+  grid-template-columns:minmax(54px,.28fr) minmax(0,.9fr) minmax(70px,1fr) 34px 34px!important;
+  gap:clamp(6px,.7vw,12px)!important;
+  padding:12px 0!important;
+}
+#overview .ww-seven-day,#overview .ww-seven-condition,
+#overview .ww-seven-low,#overview .ww-seven-high{min-width:0!important}
+#overview .ww-seven-condition{overflow:hidden!important}
+#overview .ww-seven-condition>span:last-child{min-width:0!important}
+#overview .ww-seven-bar{min-width:0!important;max-width:100%!important}
+@media(max-width:1050px){
+ #overview .ww-seven-layout{grid-template-columns:minmax(0,1fr)!important;padding:22px!important;gap:24px!important}
+ #overview .ww-seven-intro{max-width:100%!important}
+}
+@media(max-width:650px){
+ #overview .ww-seven-layout{padding:16px 10px!important;gap:18px!important}
+ #overview .ww-seven-row{
+   grid-template-columns:48px minmax(0,1fr) 30px 30px!important;
+   grid-template-areas:"day condition low high" "bar bar bar bar"!important;
+   column-gap:7px!important;row-gap:8px!important;padding:11px 0!important;
+ }
+ #overview .ww-seven-bar{grid-column:1/-1!important}
+ #overview .ww-seven-condition{font-size:12px!important}
+ #overview .ww-seven-low,#overview .ww-seven-high{font-size:12px!important}
+}
+
+</style>
 </body>
 </html>
 
