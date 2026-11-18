@@ -169,6 +169,122 @@ body[data-theme="intelligence"] .btn.primary,body[data-theme="intelligence"] .la
 @media(max-width:760px){.theme-control span{display:none}.theme-control{padding:8px 5px}.theme-control select{max-width:90px}}
 
 
+
+/* Added theme families from the user's reference palette. Only theme tokens and
+   theme-specific surface colours are defined here; existing layout and behaviour stay unchanged. */
+body[data-theme="slate-dark"]{
+ --bg:#343b4c;--panel:#50596d;--panel2:#414a5e;--line:#69738a;--muted:#c0c9dc;--text:#edf1fa;
+ --cyan:#dce4f5;--blue:#b9c8e4;--green:#a9d1c1;--amber:#d9c7a2;
+}
+body[data-theme="slate-light"]{
+ --bg:#f4f5f9;--panel:#dfe4f1;--panel2:#cfd6e7;--line:#c0c9dc;--muted:#626d82;--text:#50596d;
+ --cyan:#50596d;--blue:#64738f;--green:#587b70;--amber:#9a7950;
+}
+body[data-theme="mocha-dark"]{
+ --bg:#4c3735;--panel:#805b56;--panel2:#704d49;--line:#a47b72;--muted:#ead6c9;--text:#fff2e6;
+ --cyan:#ffe8d6;--blue:#e5c5b4;--green:#b9d0b4;--amber:#edc18c;
+}
+body[data-theme="mocha-light"]{
+ --bg:#fbf3eb;--panel:#f8eadc;--panel2:#f0ddcb;--line:#e3cdbb;--muted:#896d64;--text:#805b56;
+ --cyan:#805b56;--blue:#9a7169;--green:#637d65;--amber:#b7834d;
+}
+body[data-theme="navy-gold-dark"]{
+ --bg:#122b4c;--panel:#204779;--panel2:#183b68;--line:#416895;--muted:#d5c49a;--text:#f7e7bd;
+ --cyan:#e5b34f;--blue:#91b4df;--green:#9ec9a7;--amber:#e5b34f;
+}
+body[data-theme="navy-gold-light"]{
+ --bg:#f8e9c9;--panel:#e2ae4c;--panel2:#efc875;--line:#d5a54d;--muted:#514b40;--text:#204779;
+ --cyan:#204779;--blue:#315b8a;--green:#557b58;--amber:#8b5c19;
+}
+body[data-theme="berry-dark"]{
+ --bg:#67132f;--panel:#a71945;--panel2:#89183d;--line:#c34a6c;--muted:#ffe0cf;--text:#fff0e5;
+ --cyan:#ffe0bd;--blue:#f1a8b9;--green:#b9d7b0;--amber:#ffc98e;
+}
+body[data-theme="berry-light"]{
+ --bg:#fff1e2;--panel:#ffe0bd;--panel2:#f8cda7;--line:#e8b994;--muted:#8c5c5c;--text:#8f2347;
+ --cyan:#a71945;--blue:#a84a62;--green:#52765a;--amber:#a66b2d;
+}
+
+/* Additional four colour families from the second supplied reference image.
+   This block only adds theme palettes; all existing WeatherWise structure and behaviour are preserved. */
+body[data-theme="lagoon-dark"]{
+ --bg:#002f35;--panel:#06434a;--panel2:#003940;--line:#28646a;--muted:#d6d9bd;--text:#f0edcf;
+ --cyan:#f0edcf;--blue:#b8c7ad;--green:#d8e6b0;--amber:#d7d89b;
+}
+body[data-theme="cream-light"]{
+ --bg:#f7f5d9;--panel:#f0efc9;--panel2:#e9e8bf;--line:#d7d8ad;--muted:#52645a;--text:#073c42;
+ --cyan:#06434a;--blue:#376b68;--green:#507b5b;--amber:#9a8540;
+}
+body[data-theme="plum-dark"]{
+ --bg:#281432;--panel:#3b2148;--panel2:#321b3d;--line:#64476c;--muted:#c8d9c9;--text:#e5eadb;
+ --cyan:#c9ddc7;--blue:#b9c9d2;--green:#b8d1bc;--amber:#d4c69a;
+}
+body[data-theme="sage-light"]{
+ --bg:#dce9dc;--panel:#b4cdbb;--panel2:#a6c2af;--line:#8fae9b;--muted:#4d5a51;--text:#351c40;
+ --cyan:#3b2148;--blue:#536b79;--green:#356c50;--amber:#8c7040;
+}
+body[data-theme="midnight-yellow-dark"]{
+ --bg:#061344;--panel:#10245e;--panel2:#0b1c50;--line:#33477d;--muted:#f0d86a;--text:#fff0a0;
+ --cyan:#f6d63e;--blue:#91a8df;--green:#a8c58a;--amber:#f6d63e;
+}
+body[data-theme="sunshine-light"]{
+ --bg:#ffdf45;--panel:#f8d63f;--panel2:#f3cf35;--line:#d7b82e;--muted:#4c4529;--text:#10245e;
+ --cyan:#10245e;--blue:#28477e;--green:#4c754b;--amber:#936b13;
+}
+body[data-theme="emerald-dark"]{
+ --bg:#004b36;--panel:#075b43;--panel2:#034f3b;--line:#28765b;--muted:#d8d879;--text:#e7e99a;
+ --cyan:#d9dc70;--blue:#a6c49a;--green:#d9dc70;--amber:#e2cf69;
+}
+body[data-theme="lime-light"]{
+ --bg:#dce278;--panel:#d0d96d;--panel2:#c6d064;--line:#b1bd55;--muted:#45684d;--text:#07583f;
+ --cyan:#07583f;--blue:#39785b;--green:#39785b;--amber:#8b7b2d;
+}
+body[data-theme="lagoon-dark"] .sidebar,
+body[data-theme="plum-dark"] .sidebar,
+body[data-theme="midnight-yellow-dark"] .sidebar,
+body[data-theme="emerald-dark"] .sidebar{background:var(--bg)!important}
+body[data-theme="cream-light"] .sidebar,
+body[data-theme="sage-light"] .sidebar,
+body[data-theme="sunshine-light"] .sidebar,
+body[data-theme="lime-light"] .sidebar{background:var(--panel2)!important}
+body[data-theme="lagoon-dark"] .card,
+body[data-theme="plum-dark"] .card,
+body[data-theme="midnight-yellow-dark"] .card,
+body[data-theme="emerald-dark"] .card{background:linear-gradient(145deg,var(--panel),var(--panel2))!important}
+body[data-theme="cream-light"] .card,
+body[data-theme="sage-light"] .card,
+body[data-theme="sunshine-light"] .card,
+body[data-theme="lime-light"] .card{background:linear-gradient(145deg,var(--panel),var(--bg))!important}
+body[data-theme^="lagoon-"] .wl-intro,
+body[data-theme^="cream-"] .wl-intro,
+body[data-theme^="plum-"] .wl-intro,
+body[data-theme^="sage-"] .wl-intro,
+body[data-theme^="midnight-yellow-"] .wl-intro,
+body[data-theme^="sunshine-"] .wl-intro,
+body[data-theme^="emerald-"] .wl-intro,
+body[data-theme^="lime-"] .wl-intro{background:linear-gradient(180deg,var(--panel2),var(--bg))!important}
+
+body[data-theme="slate-dark"] .sidebar,
+body[data-theme="mocha-dark"] .sidebar,
+body[data-theme="navy-gold-dark"] .sidebar,
+body[data-theme="berry-dark"] .sidebar{background:var(--bg)!important}
+body[data-theme="slate-light"] .sidebar,
+body[data-theme="mocha-light"] .sidebar,
+body[data-theme="navy-gold-light"] .sidebar,
+body[data-theme="berry-light"] .sidebar{background:var(--panel2)!important}
+body[data-theme="slate-dark"] .card,
+body[data-theme="mocha-dark"] .card,
+body[data-theme="navy-gold-dark"] .card,
+body[data-theme="berry-dark"] .card{background:linear-gradient(145deg,var(--panel),var(--panel2))!important}
+body[data-theme="slate-light"] .card,
+body[data-theme="mocha-light"] .card,
+body[data-theme="navy-gold-light"] .card,
+body[data-theme="berry-light"] .card{background:linear-gradient(145deg,var(--panel),var(--bg))!important}
+body[data-theme^="slate-"] .wl-intro,
+body[data-theme^="mocha-"] .wl-intro,
+body[data-theme^="navy-gold-"] .wl-intro,
+body[data-theme^="berry-"] .wl-intro{background:linear-gradient(180deg,var(--panel2),var(--bg))!important}
+
 select.btn{color:var(--text);background:var(--panel2);border:1px solid var(--line);padding:8px 12px;border-radius:8px}
 #layerBarLarge{margin:12px 0}
 #layerBarLarge button{margin:3px}
@@ -2171,6 +2287,26 @@ body[data-theme="sandstone"] #overview .map-card :is(.dashboard-model-switch but
 }
 </style>
 
+
+<style id="weatherwise-menu-always-visible">
+/* Keep the section navigation bar visible: cancel any delayed auto-hide/fade/slide behaviour. */
+@media (min-width:701px){
+  #sidebar.sidebar{
+    opacity:1 !important;
+    visibility:visible !important;
+    transform:none !important;
+    pointer-events:auto !important;
+    transition:none !important;
+  }
+  #sidebar.sidebar.ww-menu-hidden,
+  #sidebar.sidebar.menu-hidden,
+  #sidebar.sidebar.is-hidden,
+  #sidebar.sidebar.hidden{
+    opacity:1 !important; visibility:visible !important; transform:none !important;
+    pointer-events:auto !important; height:auto !important; max-height:none !important;
+  }
+}
+</style>
 </head>
 <body>
 <div id="ww-header-spacer" aria-hidden="true"></div>
@@ -2215,18 +2351,18 @@ body[data-theme="sandstone"] #overview .map-card :is(.dashboard-model-switch but
       <h1>Ο καιρός όπως συμβαίνει, και οι ώρες που έρχονται.</h1>
       <p>Το WeatherWise συνδυάζει ζωντανές μετρήσεις μετεωρολογικών σταθμών, προγνωστικά μοντέλα και αναφορές ανθρώπων που βρίσκονται έξω, στον καιρό. Αναζητήστε οπουδήποτε στον κόσμο, παρακολουθήστε τις επόμενες ώρες και δείτε τι συμβαίνει πραγματικά στην περιοχή σας.</p>
       <div class="ww-hero-shortcuts" aria-label="Γρήγορες συντομεύσεις">
-        <div class="ww-shortcut ww-shortcut-primary" aria-label="Δες τις συνθήκες τώρα">
+        <button type="button" class="ww-shortcut ww-shortcut-primary" id="showLocalConditionsBtn" aria-label="Δες τις τρέχουσες συνθήκες στην τοποθεσία σου">
           <span>Δες τις συνθήκες τώρα</span><span class="ww-shortcut-arrow" aria-hidden="true">→</span>
-        </div>
-        <div class="ww-shortcut ww-shortcut-secondary" aria-label="Πες τι βλέπεις">
+        </button>
+        <button type="button" class="ww-shortcut ww-shortcut-secondary" id="showCommunityReportBtn" aria-label="Πες τι βλέπεις — άνοιγμα αναφοράς καιρού από την κοινότητα" onclick="navigateWeatherWiseSection('community')">
           <span>Πες τι βλέπεις</span>
-        </div>
+        </button>
       </div>
     </div>
   </section>
   <header class="topbar">
     <div><div class="eyebrow">ΚΕΝΤΡΟ ΜΕΤΕΩΡΟΛΟΓΙΚΗΣ ΠΛΗΡΟΦΟΡΗΣΗΣ</div><h1 id="pageTitle">Μετεωρολογική Επισκόπηση</h1></div>
-    <div class="top-actions"><button class="btn" id="geolocateBtn" type="button" title="Εντοπισμός της θέσης μου" aria-label="Εντοπισμός της θέσης μου">⌖ <span>Η τοποθεσία μου</span></button><div class="city-search-wrap"><input class="search" id="citySearch" type="search" placeholder="Αναζήτηση πόλης…" autocomplete="off" aria-autocomplete="list" aria-controls="searchResults" aria-expanded="false"><div class="search-results" id="searchResults" role="listbox" aria-label="Προτεινόμενες πόλεις"></div></div><button class="btn" id="refresh">↻ Ανανέωση</button><button class="btn primary" id="units">°C</button><label class="theme-control" title="Επιλογή εμφάνισης"><span>Θέμα</span><select id="themeSelect" aria-label="Επιλογή θέματος"><option value="midnight">Midnight · Dark</option><option value="ocean">Ocean Blue · Dark</option><option value="aurora">Aurora · Dark</option><option value="forest">Forest · Dark</option><option value="graphite">Graphite · Dark</option><option value="arctic">Arctic · Light</option><option value="sandstone">Sandstone · Light</option></select></label><button class="btn mobile-head" id="menuBtn">☰</button></div>
+    <div class="top-actions"><button class="btn" id="geolocateBtn" type="button" title="Εντοπισμός της θέσης μου" aria-label="Εντοπισμός της θέσης μου">⌖ <span>Η τοποθεσία μου</span></button><div class="city-search-wrap"><input class="search" id="citySearch" type="search" placeholder="Αναζήτηση πόλης…" autocomplete="off" aria-autocomplete="list" aria-controls="searchResults" aria-expanded="false"><div class="search-results" id="searchResults" role="listbox" aria-label="Προτεινόμενες πόλεις"></div></div><button class="btn" id="refresh">↻ Ανανέωση</button><button class="btn primary" id="units">°C</button><label class="theme-control" title="Επιλογή εμφάνισης"><span>Θέμα</span><select id="themeSelect" aria-label="Επιλογή θέματος"><option value="midnight">Midnight · Dark</option><option value="ocean">Ocean Blue · Dark</option><option value="aurora">Aurora · Dark</option><option value="forest">Forest · Dark</option><option value="graphite">Graphite · Dark</option><option value="arctic">Arctic · Light</option><option value="sandstone">Sandstone · Light</option><option value="slate-dark">Slate Night · Dark</option><option value="slate-light">Slate Mist · Light</option><option value="mocha-dark">Mocha Night · Dark</option><option value="mocha-light">Vanilla Cream · Light</option><option value="navy-gold-dark">Navy Gold · Dark</option><option value="navy-gold-light">Golden Day · Light</option><option value="berry-dark">Berry Night · Dark</option><option value="berry-light">Peach Bloom · Light</option><option value="lagoon-dark">Lagoon Night · Dark</option><option value="cream-light">Cream · Light</option><option value="plum-dark">Plum Night · Dark</option><option value="sage-light">Sage · Light</option><option value="midnight-yellow-dark">Midnight Yellow · Dark</option><option value="sunshine-light">Sunshine · Light</option><option value="emerald-dark">Emerald Night · Dark</option><option value="lime-light">Lime · Light</option></select></label><button class="btn mobile-head" id="menuBtn">☰</button></div>
   </header>
 
 
@@ -2268,7 +2404,7 @@ body[data-theme="sandstone"] #overview .map-card :is(.dashboard-model-switch but
     <div class="card" style="margin-bottom:16px">
       <div class="card-head"><h3>THEME / ΘΕΜΑ</h3><span>LIVE PREVIEW</span></div>
       <label for="appearanceTheme" class="small" style="display:block;margin-bottom:8px">Επιλέξτε χρωματικό θέμα</label>
-      <select id="appearanceTheme" class="search" style="width:min(100%,360px)"><option value="midnight">Midnight · Dark</option><option value="ocean">Ocean Blue · Dark</option><option value="aurora">Aurora · Dark</option><option value="forest">Forest · Dark</option><option value="graphite">Graphite · Dark</option><option value="arctic">Arctic · Light</option><option value="sandstone">Sandstone · Light</option></select>
+      <select id="appearanceTheme" class="search" style="width:min(100%,360px)"><option value="midnight">Midnight · Dark</option><option value="ocean">Ocean Blue · Dark</option><option value="aurora">Aurora · Dark</option><option value="forest">Forest · Dark</option><option value="graphite">Graphite · Dark</option><option value="arctic">Arctic · Light</option><option value="sandstone">Sandstone · Light</option><option value="slate-dark">Slate Night · Dark</option><option value="slate-light">Slate Mist · Light</option><option value="mocha-dark">Mocha Night · Dark</option><option value="mocha-light">Vanilla Cream · Light</option><option value="navy-gold-dark">Navy Gold · Dark</option><option value="navy-gold-light">Golden Day · Light</option><option value="berry-dark">Berry Night · Dark</option><option value="berry-light">Peach Bloom · Light</option><option value="lagoon-dark">Lagoon Night · Dark</option><option value="cream-light">Cream · Light</option><option value="plum-dark">Plum Night · Dark</option><option value="sage-light">Sage · Light</option><option value="midnight-yellow-dark">Midnight Yellow · Dark</option><option value="sunshine-light">Sunshine · Light</option><option value="emerald-dark">Emerald Night · Dark</option><option value="lime-light">Lime · Light</option></select>
       <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-top:16px">
         <button class="btn theme-preset" data-theme="midnight" style="background:#101b31;color:#f0f5ff">🌙<br><b>Midnight</b><br><span class="small">Navy / Dark</span></button>
 <button class="btn theme-preset" data-theme="ocean" style="background:#082333;color:#e4f7fb">🌊<br><b>Ocean Blue</b><br><span class="small">Deep Blue / Dark</span></button>
@@ -2276,7 +2412,15 @@ body[data-theme="sandstone"] #overview .map-card :is(.dashboard-model-switch but
 <button class="btn theme-preset" data-theme="forest" style="background:#142923;color:#edf7f0">🌲<br><b>Forest</b><br><span class="small">Emerald / Dark</span></button>
 <button class="btn theme-preset" data-theme="graphite" style="background:#22262c;color:#edf0f4">◼<br><b>Graphite</b><br><span class="small">Charcoal / Dark</span></button>
 <button class="btn theme-preset" data-theme="arctic" style="background:#e2eaf3;color:#172338">❄️<br><b>Arctic</b><br><span class="small" style="color:#53657a">Ice / Light</span></button>
-<button class="btn theme-preset" data-theme="sandstone" style="background:#eee5d7;color:#302a22">☀️<br><b>Sandstone</b><br><span class="small" style="color:#766b5c">Warm / Light</span></button>
+<button class="btn theme-preset" data-theme="sandstone" style="background:#eee5d7;color:#302a22">☀️<br><b>Sandstone</b><br><span class="small" style="color:#766b5c">Warm / Light</span></button><button class="btn theme-preset" data-theme="slate-dark" style="background:#50596d;color:#e3e8f4">◐<br><b>Slate Night</b><br><span class="small" style="color:#aebbd3">Slate / Dark</span></button><button class="btn theme-preset" data-theme="slate-light" style="background:#dfe4f1;color:#50596d">◯<br><b>Slate Mist</b><br><span class="small" style="color:#59647a">Slate / Light</span></button><button class="btn theme-preset" data-theme="mocha-dark" style="background:#805b56;color:#fff0df">◐<br><b>Mocha Night</b><br><span class="small" style="color:#e6cfc1">Mocha / Dark</span></button><button class="btn theme-preset" data-theme="mocha-light" style="background:#f8eadc;color:#805b56">◯<br><b>Vanilla Cream</b><br><span class="small" style="color:#805b56">Cream / Light</span></button><button class="btn theme-preset" data-theme="navy-gold-dark" style="background:#204779;color:#e5b34f">◐<br><b>Navy Gold</b><br><span class="small" style="color:#e5b34f">Navy / Dark</span></button><button class="btn theme-preset" data-theme="navy-gold-light" style="background:#e2ae4c;color:#204779">◯<br><b>Golden Day</b><br><span class="small" style="color:#204779">Gold / Light</span></button><button class="btn theme-preset" data-theme="berry-dark" style="background:#a71945;color:#ffe2c4">◐<br><b>Berry Night</b><br><span class="small" style="color:#ffd9c5">Berry / Dark</span></button><button class="btn theme-preset" data-theme="berry-light" style="background:#ffe0bd;color:#a71945">◯<br><b>Peach Bloom</b><br><span class="small" style="color:#8d3652">Peach / Light</span></button>
+<button class="btn theme-preset" data-theme="lagoon-dark" style="background:#06434a;color:#f0edcf">◐<br><b>Lagoon Night</b><br><span class="small" style="color:#d6d9bd">Teal / Dark</span></button>
+<button class="btn theme-preset" data-theme="cream-light" style="background:#f0efc9;color:#073c42">◯<br><b>Cream</b><br><span class="small" style="color:#52645a">Cream / Light</span></button>
+<button class="btn theme-preset" data-theme="plum-dark" style="background:#3b2148;color:#e5eadb">◐<br><b>Plum Night</b><br><span class="small" style="color:#c8d9c9">Plum / Dark</span></button>
+<button class="btn theme-preset" data-theme="sage-light" style="background:#b4cdbb;color:#351c40">◯<br><b>Sage</b><br><span class="small" style="color:#4d5a51">Mint / Light</span></button>
+<button class="btn theme-preset" data-theme="midnight-yellow-dark" style="background:#10245e;color:#f6d63e">◐<br><b>Midnight Yellow</b><br><span class="small" style="color:#f0d86a">Navy / Dark</span></button>
+<button class="btn theme-preset" data-theme="sunshine-light" style="background:#f8d63f;color:#10245e">◯<br><b>Sunshine</b><br><span class="small" style="color:#4c4529">Yellow / Light</span></button>
+<button class="btn theme-preset" data-theme="emerald-dark" style="background:#075b43;color:#e7e99a">◐<br><b>Emerald Night</b><br><span class="small" style="color:#d8d879">Green / Dark</span></button>
+<button class="btn theme-preset" data-theme="lime-light" style="background:#d0d96d;color:#07583f">◯<br><b>Lime</b><br><span class="small" style="color:#45684d">Lime / Light</span></button>
       </div>
     </div>
     <div class="card" style="margin-bottom:16px" id="surfaceAppearanceCard">
@@ -3464,7 +3608,7 @@ async function loadWeather(){
 $('units').onclick=()=>{isF=!isF;$('units').textContent=isF?'°F':'°C';loadWeather()};
 $('refresh').onclick=loadWeather;
 const themeSelect=$('themeSelect'), appearanceTheme=$('appearanceTheme');
-function applyTheme(theme){const allowed=['midnight','ocean','aurora','forest','graphite','arctic','sandstone'];const chosen=allowed.includes(theme)?theme:'ocean';document.body.dataset.theme=chosen;if(themeSelect)themeSelect.value=chosen;if(appearanceTheme)appearanceTheme.value=chosen;try{localStorage.setItem('weatherwise-theme',chosen)}catch(e){}document.querySelectorAll('.theme-preset').forEach(b=>{b.style.outline=b.dataset.theme===chosen?'2px solid var(--cyan)':'none'});} const surfaceStyleSelect=$('surfaceStyleSelect'); function applySurfaceStyle(style){const mode=style==='solid'?'solid':'glass';document.body.dataset.surfaceStyle=mode;if(surfaceStyleSelect)surfaceStyleSelect.value=mode;try{localStorage.setItem('weatherwise-surface-style',mode)}catch(e){}} let savedSurfaceStyle='glass';try{savedSurfaceStyle=localStorage.getItem('weatherwise-surface-style')||'glass'}catch(e){} applySurfaceStyle(savedSurfaceStyle); if(surfaceStyleSelect)surfaceStyleSelect.addEventListener('change',e=>applySurfaceStyle(e.target.value));
+function applyTheme(theme){const allowed=['midnight','ocean','aurora','forest','graphite','arctic','sandstone','slate-dark','slate-light','mocha-dark','mocha-light','navy-gold-dark','navy-gold-light','berry-dark','berry-light','lagoon-dark','cream-light','plum-dark','sage-light','midnight-yellow-dark','sunshine-light','emerald-dark','lime-light'];const chosen=allowed.includes(theme)?theme:'ocean';document.body.dataset.theme=chosen;if(themeSelect)themeSelect.value=chosen;if(appearanceTheme)appearanceTheme.value=chosen;try{localStorage.setItem('weatherwise-theme',chosen)}catch(e){}document.querySelectorAll('.theme-preset').forEach(b=>{b.style.outline=b.dataset.theme===chosen?'2px solid var(--cyan)':'none'});} const surfaceStyleSelect=$('surfaceStyleSelect'); function applySurfaceStyle(style){const mode=style==='solid'?'solid':'glass';document.body.dataset.surfaceStyle=mode;if(surfaceStyleSelect)surfaceStyleSelect.value=mode;try{localStorage.setItem('weatherwise-surface-style',mode)}catch(e){}} let savedSurfaceStyle='glass';try{savedSurfaceStyle=localStorage.getItem('weatherwise-surface-style')||'glass'}catch(e){} applySurfaceStyle(savedSurfaceStyle); if(surfaceStyleSelect)surfaceStyleSelect.addEventListener('change',e=>applySurfaceStyle(e.target.value));
 const frameShadowSelect=$('frameShadowSelect'); function applyFrameShadow(level){const allowed=['off','soft','medium','strong'];const chosen=allowed.includes(level)?level:'medium';document.body.dataset.frameShadow=chosen;if(frameShadowSelect)frameShadowSelect.value=chosen;try{localStorage.setItem('weatherwise-frame-shadow',chosen)}catch(e){}} let savedFrameShadow='medium';try{savedFrameShadow=localStorage.getItem('weatherwise-frame-shadow')||'medium'}catch(e){} applyFrameShadow(savedFrameShadow); if(frameShadowSelect)frameShadowSelect.addEventListener('change',e=>applyFrameShadow(e.target.value));
 let savedTheme='ocean';try{savedTheme=localStorage.getItem('weatherwise-theme')||'ocean'}catch(e){}
 applyTheme(savedTheme);
@@ -3511,6 +3655,8 @@ document.querySelectorAll('.europe-sort-btn').forEach(b=>b.onclick=()=>{document
 function navigateWeatherWiseSection(sectionName){
  const target=document.getElementById(sectionName);
  if(!target || !target.classList.contains('section')) return;
+ const intro=document.querySelector('.wl-intro');
+ if(intro) intro.classList.toggle('ww-intro-hidden',sectionName!=='overview');
  document.querySelectorAll('.nav').forEach(item=>{
    const active=item.dataset.section===sectionName;
    item.classList.toggle('active',active);
@@ -3573,8 +3719,28 @@ async function reverseGeocodeNearestCity(latitude,longitude){
  const country=data.countryName||'';
  return {name:locality,region,country,label:[locality,region,country].filter(Boolean).join(', ')};
 }
-function requestUserLocation({automatic=false}={}){
+async function requestIpLocation(){
+ setGeolocationStatus('Αναζήτηση πόλης μέσω IP…');
+ try{
+  const response=await fetch('https://ipwho.is/?lang=el',{headers:{'Accept':'application/json'}});
+  if(!response.ok)throw new Error('Η υπηρεσία εντοπισμού IP δεν απάντησε.');
+  const data=await response.json();
+  if(data.success===false || !Number.isFinite(Number(data.latitude)) || !Number.isFinite(Number(data.longitude))) throw new Error(data.message||'Δεν ήταν δυνατός ο εντοπισμός πόλης μέσω IP.');
+  lat=Number(data.latitude);lon=Number(data.longitude);
+  const detectedCity=data.city||data.region||'Κοντινή περιοχή';
+  city=[detectedCity,data.country].filter(Boolean).join(', ');
+  cityInput.value='';closeCityResults();
+  await loadWeather();
+  setGeolocationStatus(`Εμφανίζονται οι τρέχουσες συνθήκες για: ${city} (εντοπισμός μέσω IP).`);
+  return true;
+ }catch(error){
+  setGeolocationStatus((error.message||'Αποτυχία εντοπισμού μέσω IP.')+' Διατηρούνται οι τελευταίες επιλεγμένες συντεταγμένες.',true);
+  return false;
+ }
+}
+function requestUserLocation({automatic=false,fallbackToIp=false}={}){
  if(!navigator.geolocation){
+  if(fallbackToIp){requestIpLocation();return;}
   setGeolocationStatus('Ο φυλλομετρητής δεν υποστηρίζει γεωεντοπισμό.',true);
   return;
  }
@@ -3591,7 +3757,8 @@ function requestUserLocation({automatic=false}={}){
    await loadWeather();
    setGeolocationStatus(`Εμφανίζεται ο καιρός για: ${[nearest.name,nearest.country].filter(Boolean).join(', ')}.`);
   }catch(error){
-   setGeolocationStatus(error.message||'Δεν ήταν δυνατή η αναγνώριση της κοντινότερης πόλης.',true);
+   if(fallbackToIp){await requestIpLocation();}
+   else setGeolocationStatus(error.message||'Δεν ήταν δυνατή η αναγνώριση της κοντινότερης πόλης.',true);
   }finally{
    geolocationRequestInProgress=false;
    if(geolocateBtn){geolocateBtn.disabled=false;geolocateBtn.innerHTML='<span class="geo-symbol">⌖</span><span class="geo-label">Η τοποθεσία μου</span>';}
@@ -3599,11 +3766,21 @@ function requestUserLocation({automatic=false}={}){
  },error=>{
   geolocationRequestInProgress=false;
   if(geolocateBtn){geolocateBtn.disabled=false;geolocateBtn.innerHTML='<span class="geo-symbol">⌖</span><span class="geo-label">Η τοποθεσία μου</span>';}
-  const message=error.code===1?'Δεν δόθηκε άδεια πρόσβασης στην τοποθεσία. Μπορείς να την ενεργοποιήσεις από τις ρυθμίσεις του browser.':error.code===2?'Δεν ήταν δυνατός ο προσδιορισμός της θέσης.':'Η αναζήτηση τοποθεσίας έληξε χωρίς απάντηση.';
-  setGeolocationStatus(message,true);
+  const message=error.code===1?'Δεν δόθηκε άδεια πρόσβασης στην τοποθεσία.':error.code===2?'Δεν ήταν δυνατός ο προσδιορισμός της θέσης.':'Η αναζήτηση τοποθεσίας έληξε χωρίς απάντηση.';
+  if(fallbackToIp){requestIpLocation();return;}
+  setGeolocationStatus(message+' Θα χρησιμοποιηθεί η τοποθεσία μέσω IP.',true);
  },{enableHighAccuracy:false,timeout:12000,maximumAge:300000});
 }
 if(geolocateBtn)geolocateBtn.addEventListener('click',()=>requestUserLocation());
+const showLocalConditionsBtn=$('showLocalConditionsBtn');
+if(showLocalConditionsBtn){
+ showLocalConditionsBtn.addEventListener('click',()=>{
+  navigateWeatherWiseSection('overview');
+  const overview=document.getElementById('overview');
+  if(overview)overview.scrollIntoView({behavior:'smooth',block:'start'});
+  requestUserLocation({automatic:true,fallbackToIp:true});
+ });
+}
 
 
 // Community weather reports (local prototype; connect to a shared API for cross-user publishing)
@@ -3852,7 +4029,7 @@ document.querySelectorAll('.nav[data-section]').forEach(n=>n.addEventListener('c
 let moveDebounce;
 loadWeather();
 // Ask for location on entry; if permission is denied, the default city remains available.
-setTimeout(()=>requestUserLocation({automatic:true}),650);
+setTimeout(()=>requestUserLocation({automatic:true,fallbackToIp:true}),650);
 
 // Interactive point weather map: click any coordinate and load local Open-Meteo data.
 let pointWeatherMap=null, pointWeatherMarker=null, pointHourlyChart=null, pointRequestToken=0;
@@ -3970,6 +4147,14 @@ if (window.Chart && window.Chart.defaults) {
   const headerSpace=document.getElementById('ww-header-spacer');
   const menuSpace=document.getElementById('ww-sections-spacer');
   if(!header||!menu||!headerSpace||!menuSpace)return;
+  // Place the existing live controls beside the WeatherWise brand in the fixed top row.
+  const controls=document.querySelector('main.main .topbar .top-actions');
+  if(controls && !header.contains(controls)){
+   header.querySelector('.wl-sitebar-inner').appendChild(controls);
+  }
+  // The page-specific title bar is replaced by the branded global header; controls remain live.
+  const oldTopbar=document.querySelector('main.main > .topbar');
+  if(oldTopbar) oldTopbar.style.display='none';
   function layout(){
    const hh=Math.ceil(header.getBoundingClientRect().height);
    document.documentElement.style.setProperty('--ww-header-height',hh+'px');
@@ -4071,6 +4256,25 @@ body[data-theme] #overview .map-card .forecast-toolbar button.active * {
 
 
 
+<style id="weatherwise-overview-only-hero-and-shortcut-color">
+/* The editorial introduction belongs only to the initial Overview page. */
+.wl-intro.ww-intro-hidden{display:none!important}
+/* Restore the original WeatherWise warm-gold primary shortcut colour across themes. */
+html body .wl-intro .ww-shortcut-primary,
+html body .wl-intro .ww-shortcut-primary:hover,
+html body .wl-intro .ww-shortcut-primary:focus-visible{
+  background:#d6a52b!important;
+  background-image:none!important;
+  color:#172033!important;
+  border:1px solid #bd8d1c!important;
+  -webkit-text-fill-color:#172033!important;
+  box-shadow:0 2px 5px rgba(23,32,51,.16)!important;
+}
+html body .wl-intro .ww-shortcut-primary .ww-shortcut-arrow{
+  color:#172033!important;border-left-color:rgba(23,32,51,.25)!important;
+}
+</style>
+
 <style id="weatherwise-hero-shortcuts">
 .ww-hero-shortcuts{
   display:flex;justify-content:center;align-items:center;gap:12px;
@@ -4079,7 +4283,7 @@ body[data-theme] #overview .map-card .forecast-toolbar button.active * {
 .ww-shortcut{
   min-height:44px;display:inline-flex;align-items:center;justify-content:center;
   gap:14px;padding:0 18px;border-radius:7px;font:700 13px "Manrope",sans-serif;
-  line-height:1.2;white-space:nowrap;box-sizing:border-box;
+  line-height:1.2;white-space:nowrap;box-sizing:border-box;cursor:pointer;
 }
 .ww-shortcut-primary{
   background:#f28c28;color:#172033;border:1px solid #d96f16;
@@ -4092,6 +4296,7 @@ body[data-theme] #overview .map-card .forecast-toolbar button.active * {
 }
 .ww-shortcut-secondary{
   background:rgba(255,255,255,.68);color:#252b3a;border:1px solid #d9dee7;
+  font-family:"Manrope",sans-serif;
 }
 @media(max-width:520px){
   .ww-hero-shortcuts{gap:9px;margin-top:19px}
@@ -4153,5 +4358,140 @@ body[data-frame-shadow="off"] section#overview > .card.chart-card {
 }
 </style>
 
+
+<script id="weatherwise-disable-menu-autohide">
+(function(){
+  function keepSectionMenuVisible(){
+    var menu=document.getElementById('sidebar');
+    if(!menu) return;
+    menu.classList.remove('ww-menu-hidden','menu-hidden','is-hidden','hidden');
+    menu.style.removeProperty('opacity');
+    menu.style.removeProperty('visibility');
+    menu.style.removeProperty('transform');
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',keepSectionMenuVisible,{once:true});
+  else keepSectionMenuVisible();
+})();
+</script>
+
+
+<style id="weatherwise-reference-fixed-top-row">
+/* Reference layout: fixed brand + controls row, with the section menu directly below it. */
+#ww-header-spacer{display:block!important;width:100%!important;height:var(--ww-header-height,76px)!important}
+.wl-sitebar{
+  display:block!important;visibility:visible!important;opacity:1!important;
+  position:fixed!important;top:0!important;left:0!important;right:0!important;width:100%!important;
+  z-index:30000!important;height:auto!important;min-height:0!important;
+  background:var(--panel)!important;border-bottom:1px solid var(--line)!important;
+  box-shadow:0 6px 20px rgba(0,0,0,.16)!important;
+}
+.wl-sitebar-inner{
+  width:100%!important;max-width:1800px!important;margin:0 auto!important;
+  min-height:76px!important;height:auto!important;padding:12px 24px!important;
+  display:flex!important;flex-direction:row!important;align-items:center!important;
+  justify-content:space-between!important;gap:20px!important;flex-wrap:nowrap!important;
+}
+.wl-sitebar .wl-brand{display:flex!important;flex:0 0 auto!important;align-items:center!important;gap:10px!important;font-size:22px!important;}
+.wl-sitebar .wl-brand-mark{display:none!important}
+.wl-sitebar .wl-mainnav{display:none!important}
+.wl-sitebar .top-actions{
+  display:flex!important;flex:1 1 auto!important;min-width:0!important;
+  align-items:center!important;justify-content:flex-end!important;gap:10px!important;
+}
+.wl-sitebar .top-actions .city-search-wrap{flex:1 1 260px!important;max-width:420px!important;min-width:170px!important}
+.wl-sitebar .top-actions .city-search-wrap .search{width:100%!important}
+.wl-sitebar .top-actions .btn,.wl-sitebar .top-actions .theme-control{flex:0 0 auto!important}
+main.main > .topbar{display:none!important}
+#sidebar.sidebar{
+  position:fixed!important;top:var(--ww-header-height,76px)!important;
+  left:0!important;right:0!important;width:100%!important;
+  z-index:29999!important;opacity:1!important;visibility:visible!important;
+  transform:none!important;pointer-events:auto!important;transition:none!important;
+}
+#sidebar.sidebar.ww-menu-hidden,#sidebar.sidebar.menu-hidden,#sidebar.sidebar.is-hidden,#sidebar.sidebar.hidden{
+  opacity:1!important;visibility:visible!important;transform:none!important;pointer-events:auto!important;
+}
+@media(max-width:900px){
+ .wl-sitebar-inner{padding:10px 14px!important;gap:12px!important}
+ .wl-sitebar .wl-brand{font-size:18px!important}
+ .wl-sitebar .top-actions{gap:6px!important;flex-wrap:wrap!important}
+ .wl-sitebar .top-actions .city-search-wrap{flex:1 1 180px!important;max-width:none!important}
+}
+@media(max-width:700px){
+ .wl-sitebar-inner{align-items:flex-start!important;flex-direction:column!important;gap:8px!important;padding:9px 12px!important}
+ .wl-sitebar .top-actions{width:100%!important;justify-content:flex-start!important;flex-wrap:wrap!important}
+ .wl-sitebar .top-actions .city-search-wrap{order:2!important;flex:1 1 100%!important;max-width:none!important}
+ .wl-sitebar .top-actions #geolocateBtn{order:1!important}
+ .wl-sitebar .top-actions #refresh,.wl-sitebar .top-actions #units,.wl-sitebar .top-actions .theme-control{order:3!important}
+ #sidebar.sidebar{top:var(--ww-header-height,120px)!important}
+}
+</style>
+
+
+
+<style id="weatherwise-section-menu-scrolls-with-page">
+/* Only the top WeatherWise brand/control bar stays fixed. The section menu
+   remains in normal document flow and scrolls away with the page. */
+#ww-header-spacer{display:block!important;height:var(--ww-header-height,76px)!important}
+#ww-sections-spacer{display:none!important;height:0!important;min-height:0!important;margin:0!important;padding:0!important}
+#sidebar.sidebar{
+  position:relative!important;
+  top:auto!important;left:auto!important;right:auto!important;
+  width:100%!important;
+  z-index:1!important;
+  margin:0!important;
+  opacity:1!important;visibility:visible!important;
+  transform:none!important;pointer-events:auto!important;
+  transition:none!important;
+}
+#sidebar.sidebar.ww-menu-hidden,#sidebar.sidebar.menu-hidden,
+#sidebar.sidebar.is-hidden,#sidebar.sidebar.hidden{
+  position:relative!important;top:auto!important;
+  opacity:1!important;visibility:visible!important;transform:none!important;
+  pointer-events:auto!important;height:auto!important;max-height:none!important;
+}
+@media(max-width:700px){
+  #sidebar.sidebar{position:relative!important;top:auto!important;left:auto!important}
+}
+</style>
+
+
+<style id="weatherwise-hero-modern-sans-only">
+/* Modern sans-serif typography only for the green-marked hero text area. */
+html body .wl-intro .wl-intro-kicker,
+html body .wl-intro .wl-intro-copy h1,
+html body .wl-intro .wl-intro-copy p {
+  font-family: "DM Sans", sans-serif !important;
+}
+/* Keep the modern sans-serif look, but avoid bold/heavy lettering. */
+html body .wl-intro .wl-intro-kicker { font-weight: 500 !important; }
+html body .wl-intro .wl-intro-copy h1 { font-weight: 500 !important; }
+html body .wl-intro .wl-intro-copy p { font-weight: 400 !important; }
+</style>
+
+
+<style id="weatherwise-primary-shortcut-orange">
+/* Use orange (not gold) for the primary “Δες τις συνθήκες τώρα” shortcut. */
+html body .wl-intro .ww-shortcut-primary,
+html body .wl-intro .ww-shortcut-primary:visited {
+  background: #f28c28 !important;
+  background-image: none !important;
+  color: #172033 !important;
+  -webkit-text-fill-color: #172033 !important;
+  border: 1px solid #d96f16 !important;
+  box-shadow: 0 2px 5px rgba(23,32,51,.12) !important;
+}
+html body .wl-intro .ww-shortcut-primary:hover,
+html body .wl-intro .ww-shortcut-primary:focus-visible {
+  background: #e97817 !important;
+  border-color: #c85f0c !important;
+  color: #172033 !important;
+  -webkit-text-fill-color: #172033 !important;
+}
+html body .wl-intro .ww-shortcut-primary .ww-shortcut-arrow {
+  color: #172033 !important;
+  border-left-color: rgba(23,32,51,.25) !important;
+}
+</style>
 </body>
 </html>
