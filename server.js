@@ -358,6 +358,41 @@ function buildMetNorwayOpenMeteoShape(raw, requested) {
 }
 
 
+async function getOpenMeteoPressureHistory(lat, lon) {
+  const params = new URLSearchParams({
+    latitude: Number(lat).toFixed(4),
+    longitude: Number(lon).toFixed(4),
+    hourly: 'pressure_msl',
+    past_days: '1',
+    forecast_days: '2',
+    timezone: 'UTC'
+  });
+  const response = await fetch(`https://api.open-meteo.com/v1/forecast?${params}`, {
+    headers: { Accept: 'application/json', 'User-Agent': 'WeatherWise/1.0' },
+    signal: AbortSignal.timeout(12000)
+  });
+  if (!response.ok) throw new Error(`Open-Meteo pressure HTTP ${response.status}`);
+  const payload = await response.json();
+  if (!Array.isArray(payload.hourly?.time) || !Array.isArray(payload.hourly?.pressure_msl)) {
+    throw new Error('Open-Meteo returned no hourly mean sea-level pressure');
+  }
+  const byHour = new Map();
+  payload.hourly.time.forEach((stamp, index) => {
+    const value = payload.hourly.pressure_msl[index];
+    if (Number.isFinite(value)) byHour.set(String(stamp).slice(0, 16), value);
+  });
+  return byHour;
+}
+
+function mergeHourlyPressureHistory(target, pressureByHour) {
+  const times = target?.hourly?.time || [];
+  target.hourly.pressure_msl = times.map(stamp =>
+    pressureByHour.get(String(stamp).slice(0, 16)) ?? null
+  );
+  target._pressure_trend_provider = 'Open-Meteo pressure_msl';
+  return target;
+}
+
 async function getOpenMeteoPrecipitationProbability(lat, lon) {
   const params = new URLSearchParams({
     latitude: Number(lat).toFixed(4),
@@ -429,6 +464,13 @@ async function getMetNorwayPoint(lat, lon) {
     } catch (probabilityError) {
       console.warn('[Precipitation probability] Open-Meteo enrichment unavailable:', probabilityError.message);
       // Keep missing values as null; never report a false 0% probability.
+    }
+    try {
+      const pressureHistory = await getOpenMeteoPressureHistory(lat, lon);
+      mergeHourlyPressureHistory(data, pressureHistory);
+    } catch (pressureError) {
+      console.warn('[Pressure tendency] Open-Meteo history unavailable:', pressureError.message);
+      data.hourly.pressure_msl = (data.hourly.time || []).map(() => null);
     }
     const item = { data, at: Date.now() };
     setBoundedCache(weatherCache, key, item, MAX_WEATHER_CACHE_ENTRIES);

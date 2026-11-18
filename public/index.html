@@ -3561,11 +3561,11 @@ async function loadWeather(){
  $('cityName').textContent=city;const forecastLocationLabel=$('forecastLocationLabel');if(forecastLocationLabel)forecastLocationLabel.textContent='Περιοχή πρόγνωσης: '+city;updateCityLandmark(city);$('condition').textContent=codeText(c.weather_code);$('currentTemp').textContent=temp(c.temperature_2m)+'°';$('weatherIcon').textContent=icon(c.weather_code);
  $('updated').textContent='Ενημέρωση: '+new Date(c.time).toLocaleString('el-GR',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'short'});
  $('feels2').textContent=temp(c.apparent_temperature)+'°'+(isF?'F':'C');$('dew').textContent=temp(h.dew_point_2m?.[0] ?? c.temperature_2m)+'°'+(isF?'F':'C');$('pressure').textContent=Math.round(c.surface_pressure)+' hPa';$('visibility').textContent='—';
- // Pressure tendency: compare the latest hourly surface pressure with the value ~3 hours earlier.
+ // Pressure tendency: compare hourly mean sea-level pressure with the value ~3 hours earlier.
  const pressureTrendEl=$('pressureTrend');
  if(pressureTrendEl){
   const pressureTimes=Array.isArray(h.time)?h.time:[];
-  const pressureValues=Array.isArray(h.surface_pressure)?h.surface_pressure:[];
+  const pressureValues=Array.isArray(h.pressure_msl)?h.pressure_msl:[];
   const nowMs=new Date(c.time).getTime();
   const nearestPressureAt=targetMs=>{
    let bestIndex=-1,bestDelta=Infinity;
