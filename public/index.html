@@ -61,7 +61,7 @@
 .europe-sort-btn{border:0;background:transparent;color:#c0cde0;padding:10px 13px;border-radius:7px;cursor:pointer;font-size:13px}
 .europe-sort-btn.active{background:#e7e8e2;color:#1c2940;box-shadow:0 2px 6px #0003}
 .europe-meta{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:24px 0 8px;color:#9eb1c9;font-size:11px}
-.europe-chart-wrap{height:790px;position:relative}
+.europe-chart-wrap{height:790px;position:relative}.europe-chart-wrap canvas{cursor:pointer}
 .europe-foot{color:#8198b4;font-size:11px;margin-top:8px}
 @media(max-width:700px){.europe-card{padding:16px 12px}.europe-head p{font-size:13px}.europe-sort{width:100%}.europe-sort-btn{flex:1;padding:9px 5px;font-size:11px}.europe-chart-wrap{height:700px}}
 
@@ -2737,7 +2737,7 @@ body{font-size:calc(14px * var(--ww-font-scale,1))}
 const $=id=>document.getElementById(id);
 let lat=37.9838,lon=23.7275,city="Αθήνα, Ελλάδα",isF=false,map,marker,largeMap,chart,forecastChart;
 let forecastSeries=null,forecastDaily=null,forecastParam='temperature',forecastHours=24;
-let europeChart=null,europeRows=[],europeSort='windy';
+let europeChart=null,europeRows=[],europeSort='windy',europeSelectedCityKey=null;
 const codeText=c=>({0:"Αίθριος",1:"Κυρίως αίθριος",2:"Μερική νέφωση",3:"Νεφελώδης",45:"Ομίχλη",48:"Παγωμένη ομίχλη",51:"Ασθενής ψιχάλα",53:"Ψιχάλα",55:"Ισχυρή ψιχάλα",61:"Ασθενής βροχή",63:"Βροχή",65:"Ισχυρή βροχή",71:"Ασθενής χιονόπτωση",73:"Χιονόπτωση",75:"Ισχυρή χιονόπτωση",80:"Μπόρες",81:"Ισχυρές μπόρες",82:"Έντονες μπόρες",95:"Καταιγίδα",96:"Καταιγίδα με χαλάζι",99:"Ισχυρή καταιγίδα"})[c]||"Μεταβλητός καιρός";
 const icon=c=>c===0?"☀️":c<=2?"🌤️":c===3?"☁️":c<=48?"🌫️":c<=67?"🌧️":c<=77?"🌨️":c<=82?"🌦️":"⛈️";
 const dir=d=>["Β","ΒΒΑ","ΒΑ","ΑΒΑ","Α","ΑΝΑ","ΝΑ","ΝΝΑ","Ν","ΝΝΔ","ΝΔ","ΔΝΔ","Δ","ΔΒΔ","ΒΔ","ΒΒΔ"][Math.round(d/22.5)%16];
@@ -2802,8 +2802,8 @@ function renderEuropeChart(){
  };
  const barColors=rows.map(r=>tempColor(r.temp));
  if(europeChart)europeChart.destroy();
- europeChart=new Chart(canvas,{type:'bar',data:{labels:rows.map(r=>r.label),datasets:[{data:values,backgroundColor:barColors,hoverBackgroundColor:barColors.map(c=>c.replace('rgb','rgba').replace(')',',0.78)')),borderRadius:8,borderSkipped:false,barThickness:22}]},
- options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,onClick:(evt,elements)=>{if(!elements.length)return;const city=rows[elements[0].index];lat=city.lat;lon=city.lon;cityNameSet(city);document.querySelector('.nav[data-section="overview"]').click();loadWeather();},
+ europeChart=new Chart(canvas,{type:'bar',data:{labels:rows.map(r=>r.label),datasets:[{data:values,backgroundColor:barColors,hoverBackgroundColor:barColors.map(c=>c.replace('rgb','rgba').replace(')',',0.78)')),borderColor:rows.map(r=>r.label===europeSelectedCityKey?'var(--cyan)':'transparent'),borderWidth:rows.map(r=>r.label===europeSelectedCityKey?3:0),borderRadius:8,borderSkipped:false,barThickness:22}]},
+ options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,onClick:(evt,elements)=>{if(!elements.length)return;const selectedCity=rows[elements[0].index];europeSelectedCityKey=selectedCity.label;lat=selectedCity.lat;lon=selectedCity.lon;city=selectedCity.name;const cityLabel=$('cityName');if(cityLabel)cityLabel.textContent=city;const forecastLocationLabel=$('forecastLocationLabel');if(forecastLocationLabel)forecastLocationLabel.textContent='Περιοχή πρόγνωσης: '+city;navigateWeatherWiseSection('overview');loadWeather();},
  plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.parsed.x} ${unit} · ${c.label===' ' ? '' : 'Θερμοκρασία '+rows[c.dataIndex].temp+'°C'}`}}},
  scales:{x:{beginAtZero:key==='wind',grid:{color:'rgba(150,175,200,.15)',borderDash:[4,5]},ticks:{color:'#9eb1c9',callback:v=>v+' '+unit}},y:{grid:{display:false},ticks:{color:'#c4d2e5',font:{size:12}}}}
  }});
