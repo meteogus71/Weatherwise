@@ -2667,9 +2667,18 @@ body{font-size:calc(14px * var(--ww-font-scale,1))}
 </section>
   <section class="section" id="forecast">
 <div class="card">
- <div class="forecast-toolbar"><div><h3>ΑΝΑΛΥΤΙΚΗ ΠΡΟΓΝΩΣΗ</h3><p class="small">Ωριαία διαγράμματα · πρόγνωση για το επιλεγμένο σημείο</p></div>
- <div class="range-tabs"><button class="range-btn active" data-hours="24">24h</button><button class="range-btn" data-hours="48">48h</button><button class="range-btn" data-hours="72">72h</button><button class="range-btn" data-hours="168">7 ημέρες</button></div></div>
- <div class="forecast-tabs"><button class="forecast-tab active" data-param="temperature">Θερμοκρασία</button><button class="forecast-tab" data-param="wind">Άνεμος</button><button class="forecast-tab" data-param="humidity">Υγρασία</button><button class="forecast-tab" data-param="rain">Ύψος υετού</button></div>
+ <div class="forecast-toolbar">
+  <div class="forecast-toolbar-copy">
+   <div class="forecast-kicker">ΧΡΟΝΙΚΗ ΚΥΛΙΣΗ</div>
+   <h3>Πρόγνωση ώρα προς ώρα</h3>
+   <p class="small">Περάστε τον δείκτη ή πατήστε πάνω στο διάγραμμα για ακριβείς τιμές κάθε ώρας.</p>
+   <div class="forecast-location" id="forecastLocationLabel" aria-live="polite">Περιοχή πρόγνωσης: Αθήνα, Ελλάδα</div>
+  </div>
+  <div class="forecast-controls">
+   <div class="forecast-tabs" role="group" aria-label="Μετεωρολογική παράμετρος"><button class="forecast-tab active" data-param="temperature">Θερμοκρασία</button><button class="forecast-tab" data-param="rain">Βροχή</button><button class="forecast-tab" data-param="wind">Άνεμος</button><button class="forecast-tab" data-param="humidity">Υγρασία</button></div>
+   <div class="range-tabs" role="group" aria-label="Χρονικό διάστημα"><button class="range-btn active" data-hours="24">24h</button><button class="range-btn" data-hours="48">48h</button><button class="range-btn" data-hours="72">72h</button><button class="range-btn" data-hours="168">7 ημέρες</button></div>
+  </div>
+ </div>
  <div id="forecastChartPanel">
   <div class="forecast-chart-heading"><strong id="forecastChartTitle">Θερμοκρασία αέρα & αισθητή</strong><span id="forecastChartUnit">°C</span></div>
   <div class="chart-wrap forecast-large-chart"><canvas id="forecastChart"></canvas></div><div class="forecast-footnote" id="forecastFootnote">Θερμοκρασία αέρα και αισθητή θερμοκρασία ανά ώρα.</div>
@@ -3549,7 +3558,7 @@ async function loadWeather(){
  $('tempStat').innerHTML=`${temp(c.temperature_2m)}°<span class="unit">${isF?'F':'C'}</span>`;$('windStat').innerHTML=`${Math.round(c.wind_speed_10m*0.5399568)} <span class="unit">kt</span>`;
  $('humidityStat').innerHTML=`${c.relative_humidity_2m}<span class="unit">%</span>`;$('rainStat').innerHTML=`${h.precipitation_probability[0]}<span class="unit">%</span>`;
  $('feels').textContent=`Αίσθηση: ${temp(c.apparent_temperature)}°`; $('windDir').textContent=`Διεύθυνση: ${dir(c.wind_direction_10m)} (${c.wind_direction_10m}°)`;
- $('cityName').textContent=city;updateCityLandmark(city);$('condition').textContent=codeText(c.weather_code);$('currentTemp').textContent=temp(c.temperature_2m)+'°';$('weatherIcon').textContent=icon(c.weather_code);
+ $('cityName').textContent=city;const forecastLocationLabel=$('forecastLocationLabel');if(forecastLocationLabel)forecastLocationLabel.textContent='Περιοχή πρόγνωσης: '+city;updateCityLandmark(city);$('condition').textContent=codeText(c.weather_code);$('currentTemp').textContent=temp(c.temperature_2m)+'°';$('weatherIcon').textContent=icon(c.weather_code);
  $('updated').textContent='Ενημέρωση: '+new Date(c.time).toLocaleString('el-GR',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'short'});
  $('feels2').textContent=temp(c.apparent_temperature)+'°'+(isF?'F':'C');$('dew').textContent=temp(h.dew_point_2m?.[0] ?? c.temperature_2m)+'°'+(isF?'F':'C');$('pressure').textContent=Math.round(c.surface_pressure)+' hPa';$('visibility').textContent='—';
  // Pressure tendency: compare the latest hourly surface pressure with the value ~3 hours earlier.
@@ -4717,7 +4726,53 @@ html body .city-current .weather-symbol{font-size:clamp(88px,9vw,118px)!importan
   overflow:visible!important;flex:0 0 42px!important
 }
 .wl-brand .wl-brand-mark img{display:block!important;width:100%!important;height:100%!important;object-fit:contain!important}
-</style>\n</body>
+</style>\n<style id="ww-forecast-controls-reference">
+/* Detailed forecast controls: right-aligned segmented capsules matching reference */
+#forecast .forecast-toolbar{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;flex-wrap:wrap}
+#forecast .forecast-toolbar-copy{flex:1 1 360px;min-width:240px}
+#forecast .forecast-controls{display:flex;align-items:center;justify-content:flex-end;gap:12px;flex:0 1 auto;max-width:100%;margin-left:auto}
+#forecast .forecast-tabs,#forecast .range-tabs{display:inline-flex;align-items:center;gap:2px;flex-wrap:nowrap;margin:0;padding:3px;border:1px solid var(--line);border-radius:999px;background:transparent;white-space:nowrap}
+#forecast .forecast-tab,#forecast .range-btn{border:0!important;border-radius:999px!important;background:transparent!important;color:var(--muted)!important;padding:9px 15px!important;font-family:inherit!important;font-size:14px!important;font-weight:500!important;line-height:1.25;white-space:nowrap;transition:background .18s ease,color .18s ease}
+#forecast .forecast-tab.active,#forecast .range-btn.active{
+ background:var(--cyan)!important;
+ background-color:var(--cyan)!important;
+ color:var(--bg)!important;
+ border-color:var(--cyan)!important;
+ box-shadow:0 1px 3px #0002
+}
+/* Keep the selected segmented-control highlight tied to the active theme palette */
+body[data-theme] #forecast .forecast-tab.active,
+body[data-theme] #forecast .range-btn.active{
+ background:var(--cyan)!important;
+ background-color:var(--cyan)!important;
+ color:var(--bg)!important;
+ border-color:var(--cyan)!important
+}
+#forecast .forecast-tab:hover:not(.active),#forecast .range-btn:hover:not(.active){color:var(--text)!important;background:color-mix(in srgb,var(--muted) 10%,transparent)!important}
+@media(max-width:1050px){
+ #forecast .forecast-toolbar{align-items:flex-start}
+ #forecast .forecast-controls{width:100%;justify-content:flex-end;flex-wrap:wrap}
+}
+@media(max-width:650px){
+ #forecast .forecast-controls{justify-content:flex-start;gap:8px;width:100%}
+ #forecast .forecast-tabs,#forecast .range-tabs{max-width:100%;overflow-x:auto}
+ #forecast .forecast-tab,#forecast .range-btn{padding:8px 10px!important;font-size:12px!important}
+}
+</style>\n<style id="ww-hourly-forecast-editorial-heading">
+/* Hourly forecast editorial heading and selected forecast location */
+#forecast .forecast-toolbar{align-items:flex-start!important;gap:28px!important}
+#forecast .forecast-toolbar-copy{flex:1 1 420px;min-width:0;max-width:760px}
+#forecast .forecast-kicker{font-family:inherit;font-size:12px;letter-spacing:.24em;font-weight:600;color:var(--muted);margin:0 0 22px}
+#forecast .forecast-toolbar h3{font-size:clamp(26px,2.6vw,38px)!important;line-height:1.16!important;letter-spacing:-.025em!important;font-weight:600!important;margin:0 0 16px!important;color:var(--text)!important}
+#forecast .forecast-toolbar .small{font-size:clamp(14px,1.05vw,17px)!important;line-height:1.6!important;color:var(--muted)!important;max-width:680px;margin:0 0 13px!important}
+#forecast .forecast-location{display:inline-flex;align-items:center;max-width:100%;padding:7px 12px;border:1px solid var(--line);border-radius:999px;color:var(--text);font-size:13px;line-height:1.4;overflow-wrap:anywhere;background:color-mix(in srgb,var(--muted) 7%,transparent)}
+#forecast .forecast-controls{align-self:flex-start}
+@media(max-width:850px){
+ #forecast .forecast-toolbar-copy{flex-basis:100%;max-width:none}
+ #forecast .forecast-controls{width:100%;justify-content:flex-start}
+}
+</style>
+</body>
 </html>
 
 <style id="weatherwise-menu-font-size-control">
@@ -4744,5 +4799,25 @@ html body[data-theme] #overview > .weather-layout > .city-current .city-current-
 }
 html body[data-theme] #overview > .weather-layout > .city-current[data-landmark-state="fallback"] {
   background:linear-gradient(135deg,#263445,#111c2b)!important;
+}
+</style>
+
+<style id="weatherwise-hourly-forecast-manrope">
+/* Manrope typography only for the hourly forecast heading area */
+#forecast .forecast-kicker{
+  font-family:"Manrope",sans-serif!important;
+  font-weight:500!important;
+}
+#forecast .forecast-toolbar h3{
+  font-family:"Manrope",sans-serif!important;
+  font-weight:600!important;
+}
+#forecast .forecast-toolbar-copy > .small{
+  font-family:"Manrope",sans-serif!important;
+  font-weight:400!important;
+}
+#forecast .forecast-location{
+  font-family:"Manrope",sans-serif!important;
+  font-weight:500!important;
 }
 </style>
