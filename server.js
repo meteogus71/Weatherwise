@@ -224,54 +224,71 @@ function send(res, status, body, headers = {}) {
 
 function runEcmwfWorker(payload) {
   return new Promise((resolve, reject) => {
+    const startedAt = Date.now();
+    const timeoutMs = Math.max(10000, Number(process.env.ECMWF_WORKER_TIMEOUT_MS || 25000));
+    console.info('[ECMWF] Starting worker', {
+      points: payload.latitudes?.length || 0,
+      fields: payload.fields,
+      step: payload.step,
+      timeoutMs
+    });
+
     const worker = spawn(
       process.env.PYTHON_BIN || 'python3',
-      [
-        path.join(__dirname, 'ecmwf_worker.py')
-      ],
-      {
-        stdio: ['pipe', 'pipe', 'pipe'],
-        env: process.env
-      }
+      [path.join(__dirname, 'ecmwf_worker.py')],
+      { stdio: ['pipe', 'pipe', 'pipe'], env: process.env }
     );
 
     let stdout = '';
     let stderr = '';
+    let settled = false;
+    const finish = (fn, value) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      fn(value);
+    };
 
     worker.stdout.setEncoding('utf8');
     worker.stderr.setEncoding('utf8');
-
-    worker.stdout.on('data', chunk => {
-      stdout += chunk;
-    });
-
+    worker.stdout.on('data', chunk => { stdout += chunk; });
     worker.stderr.on('data', chunk => {
       stderr += chunk;
+      // Keep logs bounded while exposing progress from the Python worker.
+      const lines = stderr.split(/\r?\n/).filter(Boolean);
+      if (lines.length) console.info('[ECMWF worker]', lines.slice(-3).join(' | '));
+      if (stderr.length > 12000) stderr = stderr.slice(-8000);
     });
 
-    worker.on('error', reject);
+    const timer = setTimeout(() => {
+      console.error(`[ECMWF] Worker timed out after ${timeoutMs}ms; terminating process`);
+      worker.kill('SIGTERM');
+      setTimeout(() => {
+        if (!settled) worker.kill('SIGKILL');
+      }, 1500).unref();
+      finish(reject, new Error(`ECMWF worker timeout after ${timeoutMs}ms${stderr ? ': ' + stderr.slice(-1200) : ''}`));
+    }, timeoutMs);
+    timer.unref();
 
-    worker.on('close', code => {
+    worker.on('error', err => {
+      console.error('[ECMWF] Worker spawn error:', err);
+      finish(reject, err);
+    });
+    worker.on('close', (code, signal) => {
+      console.info(`[ECMWF] Worker closed code=${code} signal=${signal || 'none'} duration=${Date.now() - startedAt}ms`);
       if (code !== 0) {
-        return reject(
-          new Error(
-            stderr.slice(-1800) ||
-            `ECMWF worker exited ${code}`
-          )
-        );
+        return finish(reject, new Error(stderr.slice(-1800) || `ECMWF worker exited ${code}`));
       }
-
       try {
-        resolve(JSON.parse(stdout));
+        finish(resolve, JSON.parse(stdout));
       } catch (err) {
-        reject(
-          new Error(
-            `Invalid ECMWF worker response: ${err.message}; ${stderr.slice(-500)}`
-          )
-        );
+        finish(reject, new Error(`Invalid ECMWF worker response: ${err.message}; ${stderr.slice(-500)}`));
       }
     });
 
+    worker.stdin.on('error', err => {
+      console.error('[ECMWF] Worker stdin error:', err.message);
+    });
     worker.stdin.end(JSON.stringify(payload));
   });
 }

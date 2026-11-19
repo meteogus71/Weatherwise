@@ -47,6 +47,8 @@ def main():
             return False
 
     def download_grib(path, **kwargs):
+        # Progress is written to stderr; stdout remains reserved for response JSON.
+        print(f"[ECMWF worker] Download starting: step={step}, request={kwargs}", file=sys.stderr, flush=True)
         # Unique temp path prevents concurrent workers colliding on .part files.
         tmp_path = path.with_name(f"{path.name}.{os.getpid()}.{uuid.uuid4().hex}.part")
         client = Client(
@@ -62,6 +64,7 @@ def main():
                 )
             if not tmp_path.exists() or tmp_path.stat().st_size < 1000:
                 raise RuntimeError("ECMWF Open Data returned an empty GRIB file")
+            print(f"[ECMWF worker] Download complete: {tmp_path.stat().st_size} bytes", file=sys.stderr, flush=True)
             os.replace(tmp_path, path)
         finally:
             try:
@@ -149,6 +152,7 @@ def main():
             datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=step)
         ).isoformat().replace("+00:00", "Z")
 
+    print(f"[ECMWF worker] Sampling complete; building response for {len(lats)} points", file=sys.stderr, flush=True)
     out = []
     for i, (lat, lon) in enumerate(zip(lats, lons)):
         raw = {name: values[i] for name, values in surface.items()}
