@@ -232,7 +232,7 @@ const METNORWAY_CACHE_MS = 3 * 60 * 60 * 1000;
 
 function metCacheKey(lat, lon) {
   // MET Norway recommends no more than four decimal places for coordinates.
-  return `metno:${Number(lat).toFixed(4)},${Number(lon).toFixed(4)}`;
+  return `metno:v4:${Number(lat).toFixed(4)},${Number(lon).toFixed(4)}`;
 }
 
 function metSymbolToWmo(symbol = '') {
@@ -260,6 +260,14 @@ function metDetails(entry) {
 }
 function metPeriod(entry) {
   return entry?.data?.next_1_hours || entry?.data?.next_6_hours || entry?.data?.next_12_hours || null;
+}
+
+// Probability is a period variable. Prefer the shortest available period that
+// actually contains a numeric probability; a present next_1_hours object can
+// lack probability while next_6_hours or next_12_hours contains it.
+function metProbabilityPeriod(entry) {
+  const periods = [entry?.data?.next_1_hours, entry?.data?.next_6_hours, entry?.data?.next_12_hours];
+  return periods.find(period => Number.isFinite(period?.details?.probability_of_precipitation)) || null;
 }
 
 function buildMetNorwayOpenMeteoShape(raw, requested) {
@@ -301,7 +309,8 @@ function buildMetNorwayOpenMeteoShape(raw, requested) {
     hourly.dew_point_2m.push(d.dew_point_temperature ?? null);
     hourly.cloud_cover.push(d.cloud_area_fraction ?? null);
     hourly.precipitation.push(period?.details?.precipitation_amount ?? 0);
-    hourly.precipitation_probability.push(Number.isFinite(period?.details?.probability_of_precipitation) ? period.details.probability_of_precipitation : null);
+    const probabilityPeriod = metProbabilityPeriod(entry);
+    hourly.precipitation_probability.push(probabilityPeriod ? probabilityPeriod.details.probability_of_precipitation : null);
     hourly.wind_speed_10m.push(d.wind_speed != null ? d.wind_speed * 3.6 : null);
     hourly.wind_direction_10m.push(d.wind_from_direction ?? null);
     hourly.wind_gusts_10m.push(d.wind_speed_of_gust != null ? d.wind_speed_of_gust * 3.6 : null);
@@ -322,7 +331,8 @@ function buildMetNorwayOpenMeteoShape(raw, requested) {
     const day = dayMap.get(date);
     if (Number.isFinite(d.air_temperature)) day.temps.push(d.air_temperature);
     if (Number.isFinite(period?.details?.precipitation_amount)) day.rain += period.details.precipitation_amount;
-    if (Number.isFinite(period?.details?.probability_of_precipitation)) day.rainProb.push(period.details.probability_of_precipitation);
+    const probabilityPeriod = metProbabilityPeriod(entry);
+    if (probabilityPeriod) day.rainProb.push(probabilityPeriod.details.probability_of_precipitation);
     if (Number.isFinite(d.wind_speed)) day.winds.push(d.wind_speed * 3.6);
     if (Number.isFinite(d.wind_speed_of_gust)) day.gusts.push(d.wind_speed_of_gust * 3.6);
     if (Number.isFinite(d.wind_from_direction)) day.directions.push(d.wind_from_direction);
@@ -358,47 +368,38 @@ function buildMetNorwayOpenMeteoShape(raw, requested) {
 }
 
 
-async function getOpenMeteoPrecipitationProbability(lat, lon) {
+async function getOpenMeteoPressureHistory(lat, lon) {
   const params = new URLSearchParams({
     latitude: Number(lat).toFixed(4),
     longitude: Number(lon).toFixed(4),
-    hourly: 'precipitation_probability',
-    daily: 'precipitation_probability_max',
-    forecast_days: '7',
+    hourly: 'pressure_msl',
+    past_days: '1',
+    forecast_days: '2',
     timezone: 'UTC'
   });
   const response = await fetch(`https://api.open-meteo.com/v1/forecast?${params}`, {
     headers: { Accept: 'application/json', 'User-Agent': 'WeatherWise/1.0' },
-    signal: AbortSignal.timeout(15000)
+    signal: AbortSignal.timeout(12000)
   });
-  if (!response.ok) throw new Error(`Open-Meteo precipitation probability HTTP ${response.status}`);
+  if (!response.ok) throw new Error(`Open-Meteo pressure HTTP ${response.status}`);
   const payload = await response.json();
-  if (payload?.error) throw new Error(payload.reason || 'Open-Meteo precipitation probability error');
-  return payload;
+  if (!Array.isArray(payload.hourly?.time) || !Array.isArray(payload.hourly?.pressure_msl)) {
+    throw new Error('Open-Meteo returned no hourly mean sea-level pressure');
+  }
+  const byHour = new Map();
+  payload.hourly.time.forEach((stamp, index) => {
+    const value = payload.hourly.pressure_msl[index];
+    if (Number.isFinite(value)) byHour.set(String(stamp).slice(0, 16), value);
+  });
+  return byHour;
 }
 
-function mergePrecipitationProbability(target, probability) {
-  if (!target?.hourly || !target?.daily || !probability?.hourly || !probability?.daily) return target;
-  const hourlyByTime = new Map();
-  (probability.hourly.time || []).forEach((time, i) => {
-    const value = probability.hourly.precipitation_probability?.[i];
-    if (Number.isFinite(value)) hourlyByTime.set(Date.parse(`${time}:00Z`), value);
-  });
-  target.hourly.precipitation_probability = (target.hourly.time || []).map(time => {
-    const value = hourlyByTime.get(Date.parse(time));
-    return Number.isFinite(value) ? value : null;
-  });
-
-  const dailyByDate = new Map();
-  (probability.daily.time || []).forEach((date, i) => {
-    const value = probability.daily.precipitation_probability_max?.[i];
-    if (Number.isFinite(value)) dailyByDate.set(String(date).slice(0, 10), value);
-  });
-  target.daily.precipitation_probability_max = (target.daily.time || []).map(date => {
-    const value = dailyByDate.get(String(date).slice(0, 10));
-    return Number.isFinite(value) ? value : null;
-  });
-  target._precipitation_probability_provider = 'Open-Meteo';
+function mergeHourlyPressureHistory(target, pressureByHour) {
+  const times = target?.hourly?.time || [];
+  target.hourly.pressure_msl = times.map(stamp =>
+    pressureByHour.get(String(stamp).slice(0, 16)) ?? null
+  );
+  target._pressure_trend_provider = 'Open-Meteo pressure_msl';
   return target;
 }
 
@@ -406,7 +407,10 @@ async function getMetNorwayPoint(lat, lon) {
   const key = metCacheKey(lat, lon);
   let hit = weatherCache.get(key);
   if (!hit) hit = await readWeatherDiskCache(key);
-  if (hit && Date.now() - hit.at < METNORWAY_CACHE_MS) return hit.data;
+  if (hit && Date.now() - hit.at < METNORWAY_CACHE_MS) {
+    const cachedData = hit.data;
+    return cachedData;
+  }
   if (weatherInflight.has(key)) return weatherInflight.get(key);
 
   const task = (async () => {
@@ -423,12 +427,13 @@ async function getMetNorwayPoint(lat, lon) {
     }
     const raw = await response.json();
     const data = buildMetNorwayOpenMeteoShape(raw);
+    data._precipitation_probability_provider = 'MET Norway Locationforecast';
     try {
-      const probability = await getOpenMeteoPrecipitationProbability(lat, lon);
-      mergePrecipitationProbability(data, probability);
-    } catch (probabilityError) {
-      console.warn('[Precipitation probability] Open-Meteo enrichment unavailable:', probabilityError.message);
-      // Keep missing values as null; never report a false 0% probability.
+      const pressureHistory = await getOpenMeteoPressureHistory(lat, lon);
+      mergeHourlyPressureHistory(data, pressureHistory);
+    } catch (pressureError) {
+      console.warn('[Pressure tendency] Open-Meteo history unavailable:', pressureError.message);
+      data.hourly.pressure_msl = (data.hourly.time || []).map(() => null);
     }
     const item = { data, at: Date.now() };
     setBoundedCache(weatherCache, key, item, MAX_WEATHER_CACHE_ENTRIES);
@@ -495,7 +500,7 @@ const server = http.createServer(async (req, res) => {
       const data = await getMetNorwayWeather(url);
       return send(res, 200, JSON.stringify(data), {
         'Content-Type': 'application/json; charset=utf-8',
-        'Cache-Control': 'public, max-age=300',
+        'Cache-Control': 'no-store',
         'X-WeatherWise-Provider': 'MET Norway Locationforecast',
         'Access-Control-Allow-Origin': '*'
       });
