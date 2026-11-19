@@ -2227,7 +2227,9 @@ body{font-size:calc(14px * var(--ww-font-scale,1))}
 .ww-day-detail-head h2{font-family:var(--editorial-font,Georgia,serif);font-size:clamp(25px,3vw,36px);font-weight:400;margin:4px 0;color:var(--text)}
 .ww-day-detail-head .small{margin:0;color:var(--muted)}
 .ww-day-detail-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
-.ww-day-chart{min-width:0;border:1px solid var(--line);background:var(--panel2);border-radius:16px;padding:16px}
+.ww-day-chart{min-width:0;border:1px solid var(--line);background:var(--panel2);border-radius:16px;padding:16px;box-shadow:var(--ww-frame-shadow,0 8px 22px rgba(0,0,0,.18));transition:box-shadow .22s ease,transform .22s ease,filter .22s ease}
+.ww-day-chart:hover{transform:translateY(-2px);box-shadow:var(--ww-frame-shadow,0 8px 22px rgba(0,0,0,.18))}
+body[data-frame-shadow="off"] .ww-day-chart,body[data-frame-shadow="off"] .ww-day-chart:hover{box-shadow:none!important;filter:none!important;transform:none!important}
 .ww-day-chart h3{font-size:17px;margin:0 0 10px;color:var(--text)}
 .ww-day-chart-wrap{height:245px;position:relative}
 .ww-day-detail-note{color:var(--muted);font-size:12px;margin:16px 2px 0}
@@ -3758,7 +3760,7 @@ async function loadWeather(){
      const code=forecastDaily.weatherCode?.[dayIndex]??-1;
      const max=forecastDaily.temperatureMax?.[dayIndex],min=forecastDaily.temperatureMin?.[dayIndex];
      const rain=forecastDaily.rain?.[dayIndex],chance=forecastDaily.rainChance?.[dayIndex],wind=forecastDaily.windSpeed?.[dayIndex];
-     const title=['ΑΥΡΙΟ','ΜΕΘΑΥΡΙΟ','ΠΑΡΑΜΕΘΑΥΡΙΟ'][i];
+     const title=i===2?new Date(String(date)+'T12:00:00').toLocaleDateString('el-GR',{weekday:'long'}).toLocaleUpperCase('el-GR'):['ΑΥΡΙΟ','ΜΕΘΑΥΡΙΟ'][i];
      return `<article class="ww-three-day-card" role="button" tabindex="0" data-forecast-date="${date}" aria-label="Άνοιγμα αναλυτικής πρόγνωσης για ${title}">
        <div class="ww-three-day-top"><span class="ww-three-day-name">${title}</span><span class="ww-three-day-icon" aria-hidden="true">${icon(code)}</span></div>
        <div class="ww-three-day-condition">${codeText(code)}</div>
