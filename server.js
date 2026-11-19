@@ -402,7 +402,7 @@ async function getMeteoAlarmFeed() {
 // --------------------------------------------------
 
 const METNORWAY_URL =
-  'https://api.met.no/weatherapi/locationforecast/2.0/compact';
+  'https://api.met.no/weatherapi/locationforecast/2.0/complete';
 
 const METNORWAY_USER_AGENT =
   'WeatherWise/1.0 (https://weatherwise-mkfx.onrender.com)';
@@ -778,7 +778,12 @@ async function getMetNorwayPoint(lat, lon) {
           next_6_hours:
             entry.data?.next_6_hours?.details || null,
           next_12_hours:
-            entry.data?.next_12_hours?.details || null
+            entry.data?.next_12_hours?.details || null,
+          probability_of_precipitation: {
+            next_1_hours: entry.data?.next_1_hours?.details?.probability_of_precipitation ?? null,
+            next_6_hours: entry.data?.next_6_hours?.details?.probability_of_precipitation ?? null,
+            next_12_hours: entry.data?.next_12_hours?.details?.probability_of_precipitation ?? null
+          }
         }))
       )
     );
