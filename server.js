@@ -222,6 +222,35 @@ function send(res, status, body, headers = {}) {
   res.end(body);
 }
 
+function runAifsProbabilityWorker(payload) {
+  return new Promise((resolve, reject) => {
+    const worker = spawn(
+      process.env.PYTHON_BIN || 'python3',
+      [path.join(__dirname, 'aifs_probability_worker.py')],
+      { stdio: ['pipe', 'pipe', 'pipe'], env: process.env }
+    );
+
+    let stdout = '';
+    let stderr = '';
+    worker.stdout.setEncoding('utf8');
+    worker.stderr.setEncoding('utf8');
+    worker.stdout.on('data', chunk => { stdout += chunk; });
+    worker.stderr.on('data', chunk => { stderr += chunk; });
+    worker.on('error', reject);
+    worker.on('close', code => {
+      if (code !== 0) {
+        return reject(new Error(stderr.slice(-1800) || `AIFS worker exited ${code}`));
+      }
+      try {
+        resolve(JSON.parse(stdout));
+      } catch (err) {
+        reject(new Error(`Invalid AIFS worker response: ${err.message}; ${stderr.slice(-500)}`));
+      }
+    });
+    worker.stdin.end(JSON.stringify(payload));
+  });
+}
+
 function runEcmwfWorker(payload) {
   return new Promise((resolve, reject) => {
     const worker = spawn(
@@ -1265,6 +1294,65 @@ const server = http.createServer(async (req, res) => {
           'Cache-Control': 'no-store'
         }
       );
+    }
+  }
+
+  // Diagnostic endpoint for ECMWF AIFS ENS daily precipitation probabilities.
+  // This is intentionally separate from the live forecast chart until the
+  // returned 24-hour probability periods have been validated in production.
+  if (
+    req.method === 'GET' &&
+    url.pathname === '/api/ecmwf/probability'
+  ) {
+    try {
+      const lat = Number(url.searchParams.get('latitude'));
+      const lon = Number(url.searchParams.get('longitude'));
+      if (!Number.isFinite(lat) || Math.abs(lat) > 90 ||
+          !Number.isFinite(lon) || Math.abs(lon) > 180) {
+        throw new Error('Valid latitude and longitude are required');
+      }
+
+      const cacheKey = `aifs-ens-tpg1:${lat.toFixed(2)},${lon.toFixed(2)}`;
+      const cached = weatherCache.get(cacheKey) || await readWeatherDiskCache(cacheKey);
+      let result;
+      let cacheStatus = 'MISS';
+      if (cached?.data && Date.now() - cached.at < 6 * 60 * 60 * 1000) {
+        result = cached.data;
+        cacheStatus = 'HIT';
+      } else if (weatherInflight.has(cacheKey)) {
+        result = await weatherInflight.get(cacheKey);
+        cacheStatus = 'COALESCED';
+      } else {
+        const task = runAifsProbabilityWorker({ latitude: lat, longitude: lon });
+        weatherInflight.set(cacheKey, task);
+        try {
+          result = await task;
+          const item = { data: result, at: Date.now() };
+          weatherCache.set(cacheKey, item);
+          await writeWeatherDiskCache(cacheKey, item);
+          cacheStatus = 'REFRESHED';
+        } finally {
+          weatherInflight.delete(cacheKey);
+        }
+      }
+
+      console.log(`[ECMWF AIFS ENS probability] ${cacheStatus} for ${lat.toFixed(2)},${lon.toFixed(2)}; periods=${result?.periods?.length || 0}`);
+      return send(res, 200, JSON.stringify({ ...result, cache: cacheStatus }), {
+        'Content-Type': 'application/json; charset=utf-8',
+        'Cache-Control': 'public, max-age=300',
+        'Access-Control-Allow-Origin': '*',
+        'X-WeatherWise-Provider': 'ECMWF AIFS ENS'
+      });
+    } catch (err) {
+      console.error('[ECMWF AIFS ENS probability]', err?.stack || err);
+      return send(res, 502, JSON.stringify({
+        error: 'ECMWF AIFS ENS probability temporarily unavailable',
+        detail: String(err?.message || err)
+      }), {
+        'Content-Type': 'application/json; charset=utf-8',
+        'Cache-Control': 'no-store',
+        'Access-Control-Allow-Origin': '*'
+      });
     }
   }
 
