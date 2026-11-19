@@ -109,7 +109,7 @@ body[data-frame-shadow="off"]{--ww-frame-shadow:none}
 body[data-frame-shadow="soft"]{--ww-frame-shadow:0 3px 10px rgba(0,0,0,.10)}
 body[data-frame-shadow="medium"]{--ww-frame-shadow:0 8px 22px rgba(0,0,0,.18)}
 body[data-frame-shadow="strong"]{--ww-frame-shadow:0 12px 32px rgba(0,0,0,.30)}
-.card,.detail,.city-current,.outlook-shell,.meteoalarm-alert-card,.settings-panel,.report-card,.community-card,.camera-card,.map-card{
+.card,.detail,.city-current,.outlook-shell,.meteoalarm-alert-card,.settings-panel,.report-card,.community-card,.camera-card,.map-card,.ww-three-day-card{
   box-shadow:var(--ww-frame-shadow,0 8px 22px rgba(0,0,0,.18))!important;
 }
 
@@ -2232,7 +2232,7 @@ body{font-size:calc(14px * var(--ww-font-scale,1))}
 .ww-day-chart-wrap{height:245px;position:relative}
 .ww-day-detail-note{color:var(--muted);font-size:12px;margin:16px 2px 0}
 .ww-three-day-card{cursor:pointer;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}
-.ww-three-day-card:hover,.ww-three-day-card:focus-visible{transform:translateY(-3px);border-color:var(--cyan);box-shadow:0 8px 24px rgba(35,160,210,.16);outline:none}
+.ww-three-day-card:hover,.ww-three-day-card:focus-visible{transform:translateY(-3px);border-color:var(--cyan);box-shadow:var(--ww-frame-shadow,0 8px 22px rgba(0,0,0,.18))!important;outline:none}
 @media(max-width:760px){.ww-day-detail-grid{grid-template-columns:1fr}.ww-day-chart-wrap{height:220px}.ww-day-detail-head{flex-direction:column;gap:12px}}
 </style>
 
