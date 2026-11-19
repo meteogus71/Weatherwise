@@ -482,6 +482,30 @@ function metPeriod(entry) {
   );
 }
 
+// Read precipitation probability independently from the selected
+// precipitation/symbol period. A period may exist without this field.
+function metPrecipitationProbability(entry) {
+  const periods = [
+    entry?.data?.next_1_hours,
+    entry?.data?.next_6_hours,
+    entry?.data?.next_12_hours
+  ];
+
+  for (const period of periods) {
+    const value = period?.details?.probability_of_precipitation;
+
+    if (
+      value !== null &&
+      value !== undefined &&
+      Number.isFinite(Number(value))
+    ) {
+      return Math.max(0, Math.min(100, Number(value)));
+    }
+  }
+
+  return null;
+}
+
 function buildMetNorwayOpenMeteoShape(raw, requested) {
   const series = raw?.properties?.timeseries || [];
 
@@ -556,7 +580,7 @@ function buildMetNorwayOpenMeteoShape(raw, requested) {
       period?.details?.precipitation_amount ?? 0
     );
     hourly.precipitation_probability.push(
-      period?.details?.probability_of_precipitation ?? 0
+      metPrecipitationProbability(entry)
     );
     hourly.wind_speed_10m.push(
       d.wind_speed != null ? d.wind_speed * 3.6 : null
@@ -607,14 +631,11 @@ function buildMetNorwayOpenMeteoShape(raw, requested) {
       day.rain += period.details.precipitation_amount;
     }
 
-    if (
-      Number.isFinite(
-        period?.details?.probability_of_precipitation
-      )
-    ) {
-      day.rainProb.push(
-        period.details.probability_of_precipitation
-      );
+    const precipitationProbability =
+      metPrecipitationProbability(entry);
+
+    if (precipitationProbability !== null) {
+      day.rainProb.push(precipitationProbability);
     }
 
     if (Number.isFinite(d.wind_speed)) {
@@ -658,7 +679,7 @@ function buildMetNorwayOpenMeteoShape(raw, requested) {
     );
 
     daily.precipitation_probability_max.push(
-      day.rainProb.length ? Math.max(...day.rainProb) : 0
+      day.rainProb.length ? Math.max(...day.rainProb) : null
     );
 
     daily.precipitation_sum.push(
