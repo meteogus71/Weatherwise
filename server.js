@@ -714,6 +714,90 @@ function buildMetNorwayOpenMeteoShape(raw, requested) {
     _updated_at: raw.properties?.meta?.updated_at || null
   };
 }
+// --------------------------------------------------
+// WEATHERAPI.COM PRECIPITATION PROBABILITY ENRICHMENT
+// Uses WeatherAPI only for precipitation probability;
+// all other forecast fields continue to come from MET Norway.
+// --------------------------------------------------
+async function enrichWithWeatherApiPrecipitation(data, lat, lon) {
+  const apiKey = process.env.WEATHERAPI_KEY;
+
+  if (!apiKey) {
+    console.warn('[WeatherAPI] WEATHERAPI_KEY is not configured; precipitation probabilities remain null.');
+    return data;
+  }
+
+  const params = new URLSearchParams({
+    key: apiKey,
+    q: `${Number(lat)},${Number(lon)}`,
+    days: '3',
+    aqi: 'no',
+    alerts: 'no'
+  });
+
+  try {
+    const response = await fetch(
+      `https://api.weatherapi.com/v1/forecast.json?${params}`,
+      {
+        headers: { Accept: 'application/json' },
+        signal: AbortSignal.timeout(15000)
+      }
+    );
+
+    if (!response.ok) {
+      const detail = (await response.text()).slice(0, 300);
+      throw new Error(`WeatherAPI HTTP ${response.status}: ${detail}`);
+    }
+
+    const forecast = await response.json();
+    const forecastDays = forecast?.forecast?.forecastday || [];
+    const hourlyProbability = new Map();
+    const dailyProbability = new Map();
+
+    for (const forecastDay of forecastDays) {
+      const date = forecastDay?.date;
+      const dayChance = forecastDay?.day?.daily_chance_of_rain;
+
+      if (date && Number.isFinite(Number(dayChance))) {
+        dailyProbability.set(date, Number(dayChance));
+      }
+
+      for (const hour of forecastDay?.hour || []) {
+        const epoch = Number(hour?.time_epoch);
+        const chance = hour?.chance_of_rain;
+        if (Number.isFinite(epoch) && Number.isFinite(Number(chance))) {
+          hourlyProbability.set(Math.floor(epoch / 3600), Number(chance));
+        }
+      }
+    }
+
+    if (Array.isArray(data.hourly?.time)) {
+      data.hourly.precipitation_probability = data.hourly.time.map(time => {
+        const epoch = Math.floor(new Date(time).getTime() / 3600000);
+        return Number.isFinite(epoch) && hourlyProbability.has(epoch)
+          ? hourlyProbability.get(epoch)
+          : null;
+      });
+    }
+
+    if (Array.isArray(data.daily?.time)) {
+      data.daily.precipitation_probability_max = data.daily.time.map(date =>
+        dailyProbability.has(date) ? dailyProbability.get(date) : null
+      );
+    }
+
+    data._precipitation_probability_provider = 'WeatherAPI.com';
+    data._precipitation_probability_updated_at = new Date().toISOString();
+    console.log(
+      `[WeatherAPI] Probability enrichment successful: ${hourlyProbability.size} hourly values, ${dailyProbability.size} daily values for ${lat},${lon}`
+    );
+    return data;
+  } catch (err) {
+    console.warn(`[WeatherAPI] Probability enrichment failed; keeping null values: ${err.message}`);
+    return data;
+  }
+}
+
 async function getMetNorwayPoint(lat, lon) {
   const key = metCacheKey(lat, lon);
 
@@ -788,7 +872,8 @@ async function getMetNorwayPoint(lat, lon) {
       )
     );
 
-    const data = buildMetNorwayOpenMeteoShape(raw);
+    let data = buildMetNorwayOpenMeteoShape(raw);
+    data = await enrichWithWeatherApiPrecipitation(data, lat, lon);
 
     const item = {
       data,
