@@ -3040,8 +3040,8 @@ const cityLocalLandmarkFiles={
  "rio de janeiro":"riodejaneiro.jpg",
  "riodejaneiro":"riodejaneiro.jpg",
  "ριο ντε τζανέιρο":"riodejaneiro.jpg",
- "riyadh":"riant.jpg",
- "riyad":"riant.jpg",
+ "riyadh":"riyadh.jpeg",
+ "riyad":"riyadh.jpeg",
  "ριάντ":"riant.jpg",
  "ριαντ":"riant.jpg",
  "rhodes":"rodos.jpg",
@@ -3098,16 +3098,6 @@ const cityLocalLandmarkFiles={
  "wien":"wien.jpg",
  "βιέννη":"wien.jpg",
  "βιεννη":"wien.jpg",
- "arachova":"arachova.jpg",
- "αράχωβα":"arachova.jpg",
- "αραχωβα":"arachova.jpg",
- "nafplio":"nafplio.jpg",
- "ναύπλιο":"nafplio.jpg",
- "ναυπλιο":"nafplio.jpg",
- "zakynthos":"zakynthos.jpg",
- "zante":"zakynthos.jpg",
- "ζάκυνθος":"zakynthos.jpg",
- "ζακυνθος":"zakynthos.jpg",
 };
 const cityLandmarkCache=new Map();
 let cityLandmarkRequest=0;
@@ -3264,27 +3254,25 @@ function renderForecastDetail(){
    note=dailyMode?'Οι μπάρες δείχνουν το συνολικό ημερήσιο ύψος υετού (mm) και η γραμμή την ημερήσια μέγιστη πιθανότητα (%).':'Οι μπάρες δείχνουν το ωριαίο ύψος υετού (mm) και η γραμμή την πιθανότητα υετού (%).';
    type='bar';
    datasets=[{
-     type:'bar',label:'Ύψος υετού (mm)',
-     data:a.rain.slice(startIndex,startIndex+n).map(v=>{const x=Number(v);return Number.isFinite(x)?Math.max(0,x):0;}),
+     type:'bar',label:'Ημερήσιο ύψος υετού (mm)',
+     data:a.rain.slice(startIndex,startIndex+n).map(v=>Math.max(0,Number(v)||0)),
      backgroundColor:'rgba(48,166,220,.82)',
      hoverBackgroundColor:'rgba(91,205,245,1)',
      borderColor:'#36b8e8',borderWidth:1,borderRadius:4,borderSkipped:false,
      categoryPercentage:.88,barPercentage:.92,maxBarThickness:22,minBarLength:2,yAxisID:'y',order:2
    },{
      type:'line',label:'Πιθανότητα υετού (%)',
-     data:a.rainChance.slice(startIndex,startIndex+n).map(v=>{if(v===null||v===undefined||v==='')return null;const x=Number(v);return Number.isFinite(x)?Math.max(0,Math.min(100,x)):null;}),
+     data:a.rainChance.slice(startIndex,startIndex+n).map(v=>v==null?null:Math.max(0,Math.min(100,Number(v)))),
      borderColor:'#ff9b45',backgroundColor:'#ff9b45',
-     borderWidth:3,tension:.3,fill:false,showLine:true,
-     pointRadius:4,pointHoverRadius:7,pointBackgroundColor:'#ff9b45',
-     pointBorderColor:'#fff',pointBorderWidth:1,spanGaps:true,
-     yAxisID:'y1',order:0,clip:false
+     borderWidth:3,tension:.25,pointRadius:3,pointHoverRadius:6,pointBackgroundColor:'#ff9b45',
+     pointBorderColor:'#fff',pointBorderWidth:1,spanGaps:true,yAxisID:'y1',order:1
    }];
 }
  $('forecastChartTitle').textContent=title;$('forecastChartUnit').textContent=unit;$('forecastFootnote').textContent=note;
  if(forecastChart)forecastChart.destroy();
  const scales={x:{ticks:{color:'#8298b0',maxTicksLimit:forecastHours===24?12:forecastHours===48?12:14,maxRotation:0},grid:{color:'rgba(120,150,180,.08)'}},y:{beginAtZero:forecastParam==='humidity'||forecastParam==='rain',title:{display:forecastParam==='rain',text:'Ύψος υετού (mm)',color:'#aebed0'},ticks:{color:'#8298b0'},grid:{color:'rgba(120,150,180,.08)'}}};
  if(forecastParam==='wind')scales.y1={position:'right',min:0,max:360,title:{display:true,text:'Διεύθυνση (°)',color:'#f4a261'},ticks:{color:'#f4a261',stepSize:90},grid:{drawOnChartArea:false}};
- if(forecastParam==='rain')scales.y1={type:'linear',position:'right',min:0,max:100,display:true,title:{display:true,text:'Πιθανότητα υετού (%)',color:'#ff9b45'},ticks:{display:true,color:'#ff9b45',stepSize:20,callback:v=>v+'%'},grid:{display:false,drawOnChartArea:false}};
+ if(forecastParam==='rain')scales.y1={position:'right',min:0,max:100,title:{display:true,text:'Πιθανότητα υετού (%)',color:'#ff9b45'},ticks:{color:'#ff9b45',stepSize:20,callback:v=>v+'%'},grid:{drawOnChartArea:false}};
  if(forecastParam==='humidity')scales.y.max=100;
  forecastChart=new Chart($('forecastChart'),{type,data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{labels:{color:'#aebed0',usePointStyle:true}}},scales}});
 }
@@ -3936,31 +3924,7 @@ function openThreeDayDetail(dateValue){
  const makeLine=(id,datasets,unit)=>{const canvas=document.getElementById(id);if(!canvas)return;const options=structuredClone(common);options.scales.y.title={display:true,text:unit,color:'#9eb1c9'};threeDayCharts.push(new Chart(canvas,{type:'line',data:{labels,datasets:datasets.map(x=>({ ...x, tension:.28,pointRadius:2,pointHoverRadius:6,borderWidth:2,spanGaps:true }))},options}));};
  makeLine('dayTempChart',[{label:'Θερμοκρασία αέρα',data:pick(forecastSeries.temperature,v=>temp(v)),borderColor:'#43c7e8',backgroundColor:'#43c7e822',fill:true},{label:'Αισθητή θερμοκρασία',data:pick(forecastSeries.apparent,v=>temp(v)),borderColor:'#f4a261',backgroundColor:'transparent'}],isF?'°F':'°C');
  makeLine('dayWindChart',[{label:'Μέση ένταση ανέμου',data:pick(forecastSeries.windSpeed,v=>+(v*.5399568).toFixed(1)),borderColor:'#43c7e8',backgroundColor:'#43c7e822',fill:true},{label:'Ριπές',data:pick(forecastSeries.windGusts,v=>+(v*.5399568).toFixed(1)),borderColor:'#e76f51',backgroundColor:'transparent'}],'kt');
- const rainCanvas=document.getElementById('dayRainChart');
- if(rainCanvas){
-  const options=structuredClone(common);
-  options.scales.y.beginAtZero=true;
-  options.scales.y.title={display:true,text:'Υετός (mm)',color:'#9eb1c9'};
-  options.scales.y1={
-   type:'linear',position:'right',display:true,min:0,max:100,
-   grid:{display:false,drawOnChartArea:false},
-   ticks:{display:true,color:'#ffad65',stepSize:20,callback:value=>value+'%'},
-   title:{display:true,text:'Πιθανότητα βροχής (%)',color:'#ffad65'}
-  };
-  const rainData=pick(forecastSeries.rain,value=>Number(value));
-  const probabilityData=pick(forecastSeries.rainChance,value=>{
-   const number=Number(value);
-   return Number.isFinite(number)?Math.max(0,Math.min(100,number)):null;
-  });
-  threeDayCharts.push(new Chart(rainCanvas,{
-   type:'bar',
-   data:{labels,datasets:[
-    {type:'bar',label:'Ωριαίος υετός',data:rainData,backgroundColor:'rgba(48,166,220,.78)',borderColor:'#36b8e8',borderWidth:1,borderRadius:4,borderSkipped:false,yAxisID:'y',order:2},
-    {type:'line',label:'Πιθανότητα βροχής (%)',data:probabilityData,yAxisID:'y1',borderColor:'#ff9b45',backgroundColor:'#ff9b45',borderWidth:4,borderJoinStyle:'round',borderCapStyle:'round',pointRadius:4,pointHoverRadius:7,pointBackgroundColor:'#ff9b45',pointBorderColor:'#fff',pointBorderWidth:1,tension:.3,fill:false,showLine:true,spanGaps:true,clip:false,order:0}
-   ]},
-   options
-  }));
- }
+ const rainCanvas=document.getElementById('dayRainChart');if(rainCanvas){const options=structuredClone(common);options.scales.y1={position:'right',min:0,max:100,grid:{drawOnChartArea:false},ticks:{color:'#ffad65'},title:{display:true,text:'Πιθανότητα (%)',color:'#ffad65'}};options.scales.y.title={display:true,text:'Υετός (mm)',color:'#9eb1c9'};threeDayCharts.push(new Chart(rainCanvas,{type:'bar',data:{labels,datasets:[{type:'bar',label:'Ωριαίος υετός',data:pick(forecastSeries.rain),backgroundColor:'rgba(48,166,220,.78)',borderColor:'#36b8e8',borderWidth:1,borderRadius:4,yAxisID:'y'},{type:'line',label:'Πιθανότητα βροχής',data:pick(forecastSeries.rainChance),borderColor:'#ff9b45',backgroundColor:'#ff9b45',pointRadius:2,tension:.25,yAxisID:'y1'}]},options}));}
  makeLine('dayCloudChart',[{label:'Νεφοκάλυψη',data:pick(forecastSeries.cloudCover),borderColor:'#9b8af5',backgroundColor:'#9b8af522',fill:true}],'percent');
  makeLine('dayHumidityChart',[{label:'Σχετική υγρασία',data:pick(forecastSeries.humidity),borderColor:'#62d6a5',backgroundColor:'#62d6a522',fill:true}],'percent');
  navigateWeatherWiseSection('threeDayDetail');
@@ -3984,10 +3948,6 @@ function navigateWeatherWiseSection(sectionName){
  if(title && activeNav) title.textContent=activeNav.textContent.trim();
  const sidebar=document.getElementById('sidebar');
  if(sidebar) sidebar.classList.remove('open');
- // The detailed hourly forecast is a separate page: always start it at the top.
- if(sectionName==='threeDayDetail'){
-   requestAnimationFrame(()=>window.scrollTo({top:0,left:0,behavior:'smooth'}));
- }
  if(sectionName==='europe' && typeof loadEuropeWeather==='function') loadEuropeWeather();
  // Recalculate map/chart dimensions after the destination panel becomes visible.
  setTimeout(()=>{
