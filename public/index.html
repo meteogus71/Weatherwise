@@ -3264,25 +3264,27 @@ function renderForecastDetail(){
    note=dailyMode?'Οι μπάρες δείχνουν το συνολικό ημερήσιο ύψος υετού (mm) και η γραμμή την ημερήσια μέγιστη πιθανότητα (%).':'Οι μπάρες δείχνουν το ωριαίο ύψος υετού (mm) και η γραμμή την πιθανότητα υετού (%).';
    type='bar';
    datasets=[{
-     type:'bar',label:'Ημερήσιο ύψος υετού (mm)',
-     data:a.rain.slice(startIndex,startIndex+n).map(v=>Math.max(0,Number(v)||0)),
+     type:'bar',label:'Ύψος υετού (mm)',
+     data:a.rain.slice(startIndex,startIndex+n).map(v=>{const x=Number(v);return Number.isFinite(x)?Math.max(0,x):0;}),
      backgroundColor:'rgba(48,166,220,.82)',
      hoverBackgroundColor:'rgba(91,205,245,1)',
      borderColor:'#36b8e8',borderWidth:1,borderRadius:4,borderSkipped:false,
      categoryPercentage:.88,barPercentage:.92,maxBarThickness:22,minBarLength:2,yAxisID:'y',order:2
    },{
      type:'line',label:'Πιθανότητα υετού (%)',
-     data:a.rainChance.slice(startIndex,startIndex+n).map(v=>v==null?null:Math.max(0,Math.min(100,Number(v)))),
+     data:a.rainChance.slice(startIndex,startIndex+n).map(v=>{if(v===null||v===undefined||v==='')return null;const x=Number(v);return Number.isFinite(x)?Math.max(0,Math.min(100,x)):null;}),
      borderColor:'#ff9b45',backgroundColor:'#ff9b45',
-     borderWidth:3,tension:.25,pointRadius:3,pointHoverRadius:6,pointBackgroundColor:'#ff9b45',
-     pointBorderColor:'#fff',pointBorderWidth:1,spanGaps:true,yAxisID:'y1',order:1
+     borderWidth:3,tension:.3,fill:false,showLine:true,
+     pointRadius:4,pointHoverRadius:7,pointBackgroundColor:'#ff9b45',
+     pointBorderColor:'#fff',pointBorderWidth:1,spanGaps:true,
+     yAxisID:'y1',order:0,clip:false
    }];
 }
  $('forecastChartTitle').textContent=title;$('forecastChartUnit').textContent=unit;$('forecastFootnote').textContent=note;
  if(forecastChart)forecastChart.destroy();
  const scales={x:{ticks:{color:'#8298b0',maxTicksLimit:forecastHours===24?12:forecastHours===48?12:14,maxRotation:0},grid:{color:'rgba(120,150,180,.08)'}},y:{beginAtZero:forecastParam==='humidity'||forecastParam==='rain',title:{display:forecastParam==='rain',text:'Ύψος υετού (mm)',color:'#aebed0'},ticks:{color:'#8298b0'},grid:{color:'rgba(120,150,180,.08)'}}};
  if(forecastParam==='wind')scales.y1={position:'right',min:0,max:360,title:{display:true,text:'Διεύθυνση (°)',color:'#f4a261'},ticks:{color:'#f4a261',stepSize:90},grid:{drawOnChartArea:false}};
- if(forecastParam==='rain')scales.y1={position:'right',min:0,max:100,title:{display:true,text:'Πιθανότητα υετού (%)',color:'#ff9b45'},ticks:{color:'#ff9b45',stepSize:20,callback:v=>v+'%'},grid:{drawOnChartArea:false}};
+ if(forecastParam==='rain')scales.y1={type:'linear',position:'right',min:0,max:100,display:true,title:{display:true,text:'Πιθανότητα υετού (%)',color:'#ff9b45'},ticks:{display:true,color:'#ff9b45',stepSize:20,callback:v=>v+'%'},grid:{display:false,drawOnChartArea:false}};
  if(forecastParam==='humidity')scales.y.max=100;
  forecastChart=new Chart($('forecastChart'),{type,data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{labels:{color:'#aebed0',usePointStyle:true}}},scales}});
 }
