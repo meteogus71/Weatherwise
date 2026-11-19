@@ -3040,8 +3040,8 @@ const cityLocalLandmarkFiles={
  "rio de janeiro":"riodejaneiro.jpg",
  "riodejaneiro":"riodejaneiro.jpg",
  "ριο ντε τζανέιρο":"riodejaneiro.jpg",
- "riyadh":"riyadh.jpeg",
- "riyad":"riyadh.jpeg",
+ "riyadh":"riant.jpg",
+ "riyad":"riant.jpg",
  "ριάντ":"riant.jpg",
  "ριαντ":"riant.jpg",
  "rhodes":"rodos.jpg",
@@ -3098,6 +3098,16 @@ const cityLocalLandmarkFiles={
  "wien":"wien.jpg",
  "βιέννη":"wien.jpg",
  "βιεννη":"wien.jpg",
+ "arachova":"arachova.jpg",
+ "αράχωβα":"arachova.jpg",
+ "αραχωβα":"arachova.jpg",
+ "nafplio":"nafplio.jpg",
+ "ναύπλιο":"nafplio.jpg",
+ "ναυπλιο":"nafplio.jpg",
+ "zakynthos":"zakynthos.jpg",
+ "zante":"zakynthos.jpg",
+ "ζάκυνθος":"zakynthos.jpg",
+ "ζακυνθος":"zakynthos.jpg",
 };
 const cityLandmarkCache=new Map();
 let cityLandmarkRequest=0;
@@ -3948,6 +3958,10 @@ function navigateWeatherWiseSection(sectionName){
  if(title && activeNav) title.textContent=activeNav.textContent.trim();
  const sidebar=document.getElementById('sidebar');
  if(sidebar) sidebar.classList.remove('open');
+ // The detailed hourly forecast is a separate page: always start it at the top.
+ if(sectionName==='threeDayDetail'){
+   requestAnimationFrame(()=>window.scrollTo({top:0,left:0,behavior:'smooth'}));
+ }
  if(sectionName==='europe' && typeof loadEuropeWeather==='function') loadEuropeWeather();
  // Recalculate map/chart dimensions after the destination panel becomes visible.
  setTimeout(()=>{
