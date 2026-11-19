@@ -3815,11 +3815,30 @@ async function loadWeather(){
    (dates||[]).forEach((stamp,i)=>{const key=String(stamp).slice(0,10),v=values?.[i];if(Number.isFinite(v)){sums[key]=(sums[key]||0)+v;counts[key]=(counts[key]||0)+1;}});
    return (targetDates||[]).map(date=>counts[date]?+(sums[date]/counts[date]).toFixed(1):null);
  };
+ // Daily precipitation probability: prefer the provider's daily maximum.
+ // If it is absent/null, derive the maximum from the hourly probabilities
+ // for the same calendar date. This keeps the daily curve populated when the
+ // upstream daily field is temporarily unavailable but hourly values exist.
+ const hourlyRainMaxByDate=new Map();
+ (h.time||[]).forEach((stamp,i)=>{
+   const value=h.precipitation_probability?.[i];
+   if(value===null||value===undefined||!Number.isFinite(Number(value)))return;
+   const date=String(stamp).slice(0,10);
+   const numeric=Math.max(0,Math.min(100,Number(value)));
+   const previous=hourlyRainMaxByDate.get(date);
+   if(previous===undefined||numeric>previous)hourlyRainMaxByDate.set(date,numeric);
+ });
+ const dailyRainChance=(day.time||[]).map((date,i)=>{
+   const supplied=day.precipitation_probability_max?.[i];
+   if(supplied!==null&&supplied!==undefined&&Number.isFinite(Number(supplied)))
+     return Math.max(0,Math.min(100,Number(supplied)));
+   return hourlyRainMaxByDate.get(String(date).slice(0,10))??null;
+ });
  forecastDaily=day?{
    time:day.time,temperatureMin:day.temperature_2m_min,temperatureMax:day.temperature_2m_max,
    humidity:dailyMean(h.relative_humidity_2m,h.time,day.time),
    cloudCover:dailyMean(h.cloud_cover,h.time,day.time),
-   rain:day.precipitation_sum,rainChance:day.precipitation_probability_max,
+   rain:day.precipitation_sum,rainChance:dailyRainChance,
    windSpeed:day.wind_speed_10m_max,windGusts:day.wind_gusts_10m_max,
    windDirection:day.wind_direction_10m_dominant,uv:day.uv_index_max,
    weatherCode:day.weather_code

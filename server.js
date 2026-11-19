@@ -232,7 +232,7 @@ const METNORWAY_CACHE_MS = 3 * 60 * 60 * 1000;
 
 function metCacheKey(lat, lon) {
   // MET Norway recommends no more than four decimal places for coordinates.
-  return `metno:${Number(lat).toFixed(4)},${Number(lon).toFixed(4)}`;
+  return `metno-probability-v2:${Number(lat).toFixed(4)},${Number(lon).toFixed(4)}`;
 }
 
 function metSymbolToWmo(symbol = '') {
