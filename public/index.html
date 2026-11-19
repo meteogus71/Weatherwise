@@ -3610,7 +3610,26 @@ async function loadWeather(){
   console.warn('Open-Meteo apparent-temperature / gust fallback unavailable; using primary feed',extraForecastError);
  }
  $('tempStat').innerHTML=`${temp(c.temperature_2m)}°<span class="unit">${isF?'F':'C'}</span>`;$('windStat').innerHTML=`${Math.round(c.wind_speed_10m*0.5399568)} <span class="unit">kt</span>`;
- $('humidityStat').innerHTML=`${c.relative_humidity_2m}<span class="unit">%</span>`;$('rainStat').innerHTML=`${h.precipitation_probability[0]}<span class="unit">%</span>`;
+ $('humidityStat').innerHTML=`${c.relative_humidity_2m}<span class="unit">%</span>`;
+ // Show a numeric precipitation probability for the coming hours. The first
+ // hourly slot may be historical or null, so find the current hour and use
+ // the highest valid probability over the next six hours; fall back to the
+ // current day's daily maximum, then to 0 rather than ever displaying null.
+ const rainTimes=Array.isArray(h.time)?h.time:[];
+ const rainValues=Array.isArray(h.precipitation_probability)?h.precipitation_probability:[];
+ const currentStamp=Date.parse(c.time);
+ let rainStart=rainTimes.findIndex(t=>Date.parse(t)>=currentStamp);
+ if(rainStart<0)rainStart=Math.max(0,rainTimes.length-1);
+ const upcomingRain=rainValues.slice(rainStart,rainStart+6).map(Number).filter(v=>Number.isFinite(v)&&v>=0);
+ let rainProbability=upcomingRain.length?Math.round(Math.max(...upcomingRain)):null;
+ if(rainProbability===null&&Array.isArray(day.time)&&Array.isArray(day.precipitation_probability_max)){
+  const todayKey=String(c.time||'').slice(0,10);
+  const todayIndex=day.time.findIndex(t=>String(t).slice(0,10)===todayKey);
+  const dailyRain=Number(day.precipitation_probability_max[todayIndex]);
+  if(todayIndex>=0&&Number.isFinite(dailyRain))rainProbability=Math.round(dailyRain);
+ }
+ if(rainProbability===null)rainProbability=0;
+ $('rainStat').innerHTML=`${rainProbability}<span class="unit">%</span>`;
  $('feels').textContent=`Αίσθηση: ${temp(c.apparent_temperature)}°`; $('windDir').textContent=`Διεύθυνση: ${dir(c.wind_direction_10m)} (${c.wind_direction_10m}°)`;
  $('cityName').textContent=city;const forecastLocationLabel=$('forecastLocationLabel');if(forecastLocationLabel)forecastLocationLabel.textContent='Περιοχή πρόγνωσης: '+city;updateCityLandmark(city);$('condition').textContent=codeText(c.weather_code);$('currentTemp').textContent=temp(c.temperature_2m)+'°';$('weatherIcon').textContent=icon(c.weather_code);
  $('updated').textContent='Ενημέρωση: '+new Date(c.time).toLocaleString('el-GR',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'short'});
