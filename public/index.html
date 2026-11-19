@@ -3936,7 +3936,31 @@ function openThreeDayDetail(dateValue){
  const makeLine=(id,datasets,unit)=>{const canvas=document.getElementById(id);if(!canvas)return;const options=structuredClone(common);options.scales.y.title={display:true,text:unit,color:'#9eb1c9'};threeDayCharts.push(new Chart(canvas,{type:'line',data:{labels,datasets:datasets.map(x=>({ ...x, tension:.28,pointRadius:2,pointHoverRadius:6,borderWidth:2,spanGaps:true }))},options}));};
  makeLine('dayTempChart',[{label:'Θερμοκρασία αέρα',data:pick(forecastSeries.temperature,v=>temp(v)),borderColor:'#43c7e8',backgroundColor:'#43c7e822',fill:true},{label:'Αισθητή θερμοκρασία',data:pick(forecastSeries.apparent,v=>temp(v)),borderColor:'#f4a261',backgroundColor:'transparent'}],isF?'°F':'°C');
  makeLine('dayWindChart',[{label:'Μέση ένταση ανέμου',data:pick(forecastSeries.windSpeed,v=>+(v*.5399568).toFixed(1)),borderColor:'#43c7e8',backgroundColor:'#43c7e822',fill:true},{label:'Ριπές',data:pick(forecastSeries.windGusts,v=>+(v*.5399568).toFixed(1)),borderColor:'#e76f51',backgroundColor:'transparent'}],'kt');
- const rainCanvas=document.getElementById('dayRainChart');if(rainCanvas){const options=structuredClone(common);options.scales.y1={position:'right',min:0,max:100,grid:{drawOnChartArea:false},ticks:{color:'#ffad65'},title:{display:true,text:'Πιθανότητα (%)',color:'#ffad65'}};options.scales.y.title={display:true,text:'Υετός (mm)',color:'#9eb1c9'};threeDayCharts.push(new Chart(rainCanvas,{type:'bar',data:{labels,datasets:[{type:'bar',label:'Ωριαίος υετός',data:pick(forecastSeries.rain),backgroundColor:'rgba(48,166,220,.78)',borderColor:'#36b8e8',borderWidth:1,borderRadius:4,yAxisID:'y'},{type:'line',label:'Πιθανότητα βροχής',data:pick(forecastSeries.rainChance),borderColor:'#ff9b45',backgroundColor:'#ff9b45',pointRadius:2,tension:.25,yAxisID:'y1'}]},options}));}
+ const rainCanvas=document.getElementById('dayRainChart');
+ if(rainCanvas){
+  const options=structuredClone(common);
+  options.scales.y.beginAtZero=true;
+  options.scales.y.title={display:true,text:'Υετός (mm)',color:'#9eb1c9'};
+  options.scales.y1={
+   type:'linear',position:'right',display:true,min:0,max:100,
+   grid:{display:false,drawOnChartArea:false},
+   ticks:{display:true,color:'#ffad65',stepSize:20,callback:value=>value+'%'},
+   title:{display:true,text:'Πιθανότητα βροχής (%)',color:'#ffad65'}
+  };
+  const rainData=pick(forecastSeries.rain,value=>Number(value));
+  const probabilityData=pick(forecastSeries.rainChance,value=>{
+   const number=Number(value);
+   return Number.isFinite(number)?Math.max(0,Math.min(100,number)):null;
+  });
+  threeDayCharts.push(new Chart(rainCanvas,{
+   type:'bar',
+   data:{labels,datasets:[
+    {type:'bar',label:'Ωριαίος υετός',data:rainData,backgroundColor:'rgba(48,166,220,.78)',borderColor:'#36b8e8',borderWidth:1,borderRadius:4,borderSkipped:false,yAxisID:'y',order:2},
+    {type:'line',label:'Πιθανότητα βροχής (%)',data:probabilityData,yAxisID:'y1',borderColor:'#ff9b45',backgroundColor:'#ff9b45',borderWidth:4,borderJoinStyle:'round',borderCapStyle:'round',pointRadius:4,pointHoverRadius:7,pointBackgroundColor:'#ff9b45',pointBorderColor:'#fff',pointBorderWidth:1,tension:.3,fill:false,showLine:true,spanGaps:true,clip:false,order:0}
+   ]},
+   options
+  }));
+ }
  makeLine('dayCloudChart',[{label:'Νεφοκάλυψη',data:pick(forecastSeries.cloudCover),borderColor:'#9b8af5',backgroundColor:'#9b8af522',fill:true}],'percent');
  makeLine('dayHumidityChart',[{label:'Σχετική υγρασία',data:pick(forecastSeries.humidity),borderColor:'#62d6a5',backgroundColor:'#62d6a522',fill:true}],'percent');
  navigateWeatherWiseSection('threeDayDetail');
