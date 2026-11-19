@@ -806,6 +806,9 @@ async function enrichWithWeatherApiPrecipitation(data, lat, lon) {
 const OPEN_METEO_PROBABILITY_CACHE_MS = 12 * 60 * 60 * 1000;
 const OPEN_METEO_PROBABILITY_RETRY_MS = 24 * 60 * 60 * 1000;
 const openMeteoProbabilityRetryAfter = new Map();
+// Open-Meteo's daily quota is account-wide, not per coordinate. Once any
+// location receives HTTP 429, pause all locations for this process.
+let openMeteoGlobalRetryAfter = 0;
 
 async function enrichWithOpenMeteoPrecipitation(data, lat, lon) {
   if (!Array.isArray(data.daily?.time) || data.daily.time.length === 0) {
@@ -824,18 +827,27 @@ async function enrichWithOpenMeteoPrecipitation(data, lat, lon) {
   let forecast = null;
   let cacheStatus = 'MISS';
   const retryAfter = openMeteoProbabilityRetryAfter.get(cacheKey) || 0;
+  const globalRetryActive = openMeteoGlobalRetryAfter > now;
 
   // Use the dedicated cache for 12 hours. This cache survives ordinary page
   // refreshes and is separate from the 30-minute MET Norway forecast cache.
   if (cached?.data && now - cached.at < OPEN_METEO_PROBABILITY_CACHE_MS) {
     forecast = cached.data;
     cacheStatus = 'HIT';
+  } else if (globalRetryActive && cached?.data) {
+    // The provider's daily quota is shared across all requested coordinates.
+    forecast = cached.data;
+    cacheStatus = 'STALE-GLOBAL-429-COOLDOWN';
+    console.warn('[Open-Meteo probability] Global 429 cooldown active; using cached data for this location.');
+  } else if (globalRetryActive && !cached?.data) {
+    console.warn('[Open-Meteo probability] Skipping all-location request during global 429 cooldown; no cached probability data for this location.');
+    return data;
   } else if (retryAfter > now && cached?.data) {
-    // A previous 429 means do not hit the provider again during its cooldown.
+    // Per-location cooldown is retained as an additional safeguard.
     forecast = cached.data;
     cacheStatus = 'STALE-429-COOLDOWN';
   } else if (retryAfter > now && !cached?.data) {
-    console.warn('[Open-Meteo probability] Skipping request during 429 cooldown; no cached probability data available.');
+    console.warn('[Open-Meteo probability] Skipping request during location 429 cooldown; no cached probability data available.');
     return data;
   } else {
     const params = new URLSearchParams({
@@ -875,11 +887,13 @@ async function enrichWithOpenMeteoPrecipitation(data, lat, lon) {
       cacheStatus = 'REFRESHED';
     } catch (err) {
       if (err.status === 429) {
+        // A 429 indicates the shared daily quota may be exhausted for all cities.
+        openMeteoGlobalRetryAfter = Date.now() + OPEN_METEO_PROBABILITY_RETRY_MS;
         openMeteoProbabilityRetryAfter.set(
           cacheKey,
           Date.now() + OPEN_METEO_PROBABILITY_RETRY_MS
         );
-        console.warn('[Open-Meteo probability] HTTP 429; pausing requests for this location for 24 hours.');
+        console.warn('[Open-Meteo probability] HTTP 429; pausing requests for ALL locations for 24 hours.');
       }
 
       if (cached?.data) {
