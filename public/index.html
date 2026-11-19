@@ -2221,6 +2221,19 @@ body{font-size:calc(14px * var(--ww-font-scale,1))}
 @media(max-width:700px){.ww-three-day-summary{gap:8px}.ww-three-day-card{padding:13px 11px}.ww-three-day-icon{font-size:25px}.ww-three-day-condition{font-size:12px;min-height:42px}.ww-three-day-max{font-size:22px}.ww-three-day-min{font-size:15px}.ww-three-day-metric{font-size:10px}.ww-three-day-metric strong{font-size:11px}}
 @media(max-width:430px){.ww-three-day-summary{grid-template-columns:1fr}.ww-three-day-card{padding:15px}.ww-three-day-top{margin-bottom:8px}.ww-three-day-condition{min-height:0}}
 
+
+/* Interactive hourly detail page for the three daily summary cards */
+.ww-day-detail-head{display:flex;align-items:flex-start;gap:18px;margin-bottom:20px}
+.ww-day-detail-head h2{font-family:var(--editorial-font,Georgia,serif);font-size:clamp(25px,3vw,36px);font-weight:400;margin:4px 0;color:var(--text)}
+.ww-day-detail-head .small{margin:0;color:var(--muted)}
+.ww-day-detail-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.ww-day-chart{min-width:0;border:1px solid var(--line);background:var(--panel2);border-radius:16px;padding:16px}
+.ww-day-chart h3{font-size:17px;margin:0 0 10px;color:var(--text)}
+.ww-day-chart-wrap{height:245px;position:relative}
+.ww-day-detail-note{color:var(--muted);font-size:12px;margin:16px 2px 0}
+.ww-three-day-card{cursor:pointer;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}
+.ww-three-day-card:hover,.ww-three-day-card:focus-visible{transform:translateY(-3px);border-color:var(--cyan);box-shadow:0 8px 24px rgba(35,160,210,.16);outline:none}
+@media(max-width:760px){.ww-day-detail-grid{grid-template-columns:1fr}.ww-day-chart-wrap{height:220px}.ww-day-detail-head{flex-direction:column;gap:12px}}
 </style>
 
 <style id="weatherwise-remove-forecast-outer-frame">
@@ -2687,7 +2700,23 @@ body{font-size:calc(14px * var(--ww-font-scale,1))}
   <div class="notice" style="margin-top:12px">Τα πεδία είναι αριθμητικά προγνωστικά δεδομένα μοντέλων και όχι παρατηρήσεις ή επίσημες προειδοποιήσεις. Το ECMWF IFS εμφανίζεται στην εγγενή χρονική ανάλυση που επιστρέφει το Open-Meteo.</div>
  </div>
 </section>
-  <section class="section" id="forecast">
+  <section class="section" id="threeDayDetail">
+ <div class="card ww-day-detail-card">
+  <div class="ww-day-detail-head">
+   <button type="button" class="btn" id="threeDayBack">← Επιστροφή</button>
+   <div><div class="forecast-kicker">ΑΝΑΛΥΤΙΚΗ ΩΡΙΑΙΑ ΠΡΟΓΝΩΣΗ</div><h2 id="threeDayDetailTitle">Πρόγνωση ημέρας</h2><p id="threeDayDetailSubtitle" class="small">Αναλυτική εξέλιξη ανά ώρα για την επιλεγμένη πόλη.</p></div>
+  </div>
+  <div class="ww-day-detail-grid">
+   <article class="ww-day-chart"><h3>Θερμοκρασία</h3><div class="ww-day-chart-wrap"><canvas id="dayTempChart"></canvas></div></article>
+   <article class="ww-day-chart"><h3>Άνεμος (kt)</h3><div class="ww-day-chart-wrap"><canvas id="dayWindChart"></canvas></div></article>
+   <article class="ww-day-chart"><h3>Πιθανότητα βροχής (%) & υετός (mm)</h3><div class="ww-day-chart-wrap"><canvas id="dayRainChart"></canvas></div></article>
+   <article class="ww-day-chart"><h3>Νεφοκάλυψη (%)</h3><div class="ww-day-chart-wrap"><canvas id="dayCloudChart"></canvas></div></article>
+   <article class="ww-day-chart"><h3>Σχετική υγρασία (%)</h3><div class="ww-day-chart-wrap"><canvas id="dayHumidityChart"></canvas></div></article>
+  </div>
+  <p class="ww-day-detail-note">Οι τιμές παρουσιάζονται ανά ώρα στην τοπική ώρα της επιλεγμένης πόλης. Περάστε τον δείκτη πάνω από τα διαγράμματα για ακριβείς τιμές.</p>
+ </div>
+</section>
+<section class="section" id="forecast">
 <div class="card">
  <div class="forecast-toolbar">
   <div class="forecast-toolbar-copy">
@@ -2759,6 +2788,7 @@ body{font-size:calc(14px * var(--ww-font-scale,1))}
 const $=id=>document.getElementById(id);
 let lat=37.9838,lon=23.7275,city="Αθήνα, Ελλάδα",isF=false,map,marker,largeMap,chart,forecastChart;
 let forecastSeries=null,forecastDaily=null,forecastParam='temperature',forecastHours=24;
+let selectedThreeDayDate=null,threeDayCharts=[];
 let europeChart=null,europeRows=[],europeSort='windy',europeSelectedCityKey=null;
 const codeText=c=>({0:"Αίθριος",1:"Κυρίως αίθριος",2:"Μερική νέφωση",3:"Νεφελώδης",45:"Ομίχλη",48:"Παγωμένη ομίχλη",51:"Ασθενής ψιχάλα",53:"Ψιχάλα",55:"Ισχυρή ψιχάλα",61:"Ασθενής βροχή",63:"Βροχή",65:"Ισχυρή βροχή",71:"Ασθενής χιονόπτωση",73:"Χιονόπτωση",75:"Ισχυρή χιονόπτωση",80:"Μπόρες",81:"Ισχυρές μπόρες",82:"Έντονες μπόρες",95:"Καταιγίδα",96:"Καταιγίδα με χαλάζι",99:"Ισχυρή καταιγίδα"})[c]||"Μεταβλητός καιρός";
 const icon=c=>c===0?"☀️":c<=2?"🌤️":c===3?"☁️":c<=48?"🌫️":c<=67?"🌧️":c<=77?"🌨️":c<=82?"🌦️":"⛈️";
@@ -3729,7 +3759,7 @@ async function loadWeather(){
      const max=forecastDaily.temperatureMax?.[dayIndex],min=forecastDaily.temperatureMin?.[dayIndex];
      const rain=forecastDaily.rain?.[dayIndex],chance=forecastDaily.rainChance?.[dayIndex],wind=forecastDaily.windSpeed?.[dayIndex];
      const title=['ΑΥΡΙΟ','ΜΕΘΑΥΡΙΟ','ΠΑΡΑΜΕΘΑΥΡΙΟ'][i];
-     return `<article class="ww-three-day-card">
+     return `<article class="ww-three-day-card" role="button" tabindex="0" data-forecast-date="${date}" aria-label="Άνοιγμα αναλυτικής πρόγνωσης για ${title}">
        <div class="ww-three-day-top"><span class="ww-three-day-name">${title}</span><span class="ww-three-day-icon" aria-hidden="true">${icon(code)}</span></div>
        <div class="ww-three-day-condition">${codeText(code)}</div>
        <div class="ww-three-day-temps"><span class="ww-three-day-max">${max==null?'—':temp(max)+'°'}</span><span class="ww-three-day-min">${min==null?'—':temp(min)+'°'}</span></div>
@@ -3812,6 +3842,32 @@ document.querySelectorAll('.europe-sort-btn').forEach(b=>b.onclick=()=>{document
  const reset=document.getElementById('sidebarReset');
  if(reset)reset.addEventListener('click',()=>{apply(defaults.width,defaults.font);if(status)status.textContent='Επαναφέρθηκαν οι αρχικές ρυθμίσεις.';});
 })();
+function openThreeDayDetail(dateValue){
+ if(!forecastSeries?.time?.length){return;}
+ selectedThreeDayDate=String(dateValue).slice(0,10);
+ const parseStamp=value=>{const m=String(value||'').match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/);return m?new Date(Date.UTC(+m[1],+m[2]-1,+m[3],+m[4],+m[5])):null;};
+ const indices=[];
+ forecastSeries.time.forEach((stamp,index)=>{if(String(stamp).slice(0,10)===selectedThreeDayDate)indices.push(index);});
+ if(!indices.length){const title=document.getElementById('threeDayDetailTitle');if(title)title.textContent='Δεν υπάρχουν ωριαία δεδομένα';navigateWeatherWiseSection('threeDayDetail');return;}
+ const d=new Date(selectedThreeDayDate+'T12:00:00');
+ const label=d.toLocaleDateString('el-GR',{weekday:'long',day:'numeric',month:'long'});
+ const title=document.getElementById('threeDayDetailTitle');if(title)title.textContent=label.charAt(0).toUpperCase()+label.slice(1);
+ const subtitle=document.getElementById('threeDayDetailSubtitle');if(subtitle)subtitle.textContent='Ωριαία πρόγνωση για '+city+' · '+indices.length+' χρονικά σημεία';
+ const labels=indices.map(i=>{const parsed=parseStamp(forecastSeries.time[i]);return parsed?parsed.toLocaleTimeString('el-GR',{hour:'2-digit',minute:'2-digit',timeZone:'UTC'}):'—';});
+ const pick=(arr,convert=x=>x)=>indices.map(i=>arr?.[i]==null?null:convert(Number(arr[i])));
+ const common={responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{labels:{color:'#aebed0',usePointStyle:true}},tooltip:{enabled:true}},scales:{x:{ticks:{color:'#8298b0',maxTicksLimit:12,maxRotation:0},grid:{color:'rgba(130,155,180,.12)'}},y:{ticks:{color:'#aebed0'},grid:{color:'rgba(130,155,180,.14)'}}}};
+ threeDayCharts.forEach(c=>{try{c.destroy()}catch{}});threeDayCharts=[];
+ const makeLine=(id,datasets,unit)=>{const canvas=document.getElementById(id);if(!canvas)return;const options=structuredClone(common);options.scales.y.title={display:true,text:unit,color:'#9eb1c9'};threeDayCharts.push(new Chart(canvas,{type:'line',data:{labels,datasets:datasets.map(x=>({ ...x, tension:.28,pointRadius:2,pointHoverRadius:6,borderWidth:2,spanGaps:true }))},options}));};
+ makeLine('dayTempChart',[{label:'Θερμοκρασία αέρα',data:pick(forecastSeries.temperature,v=>temp(v)),borderColor:'#43c7e8',backgroundColor:'#43c7e822',fill:true},{label:'Αισθητή θερμοκρασία',data:pick(forecastSeries.apparent,v=>temp(v)),borderColor:'#f4a261',backgroundColor:'transparent'}],isF?'°F':'°C');
+ makeLine('dayWindChart',[{label:'Μέση ένταση ανέμου',data:pick(forecastSeries.windSpeed,v=>+(v*.5399568).toFixed(1)),borderColor:'#43c7e8',backgroundColor:'#43c7e822',fill:true},{label:'Ριπές',data:pick(forecastSeries.windGusts,v=>+(v*.5399568).toFixed(1)),borderColor:'#e76f51',backgroundColor:'transparent'}],'kt');
+ const rainCanvas=document.getElementById('dayRainChart');if(rainCanvas){const options=structuredClone(common);options.scales.y1={position:'right',min:0,max:100,grid:{drawOnChartArea:false},ticks:{color:'#ffad65'},title:{display:true,text:'Πιθανότητα (%)',color:'#ffad65'}};options.scales.y.title={display:true,text:'Υετός (mm)',color:'#9eb1c9'};threeDayCharts.push(new Chart(rainCanvas,{type:'bar',data:{labels,datasets:[{type:'bar',label:'Ωριαίος υετός',data:pick(forecastSeries.rain),backgroundColor:'rgba(48,166,220,.78)',borderColor:'#36b8e8',borderWidth:1,borderRadius:4,yAxisID:'y'},{type:'line',label:'Πιθανότητα βροχής',data:pick(forecastSeries.rainChance),borderColor:'#ff9b45',backgroundColor:'#ff9b45',pointRadius:2,tension:.25,yAxisID:'y1'}]},options}));}
+ makeLine('dayCloudChart',[{label:'Νεφοκάλυψη',data:pick(forecastSeries.cloudCover),borderColor:'#9b8af5',backgroundColor:'#9b8af522',fill:true}],'percent');
+ makeLine('dayHumidityChart',[{label:'Σχετική υγρασία',data:pick(forecastSeries.humidity),borderColor:'#62d6a5',backgroundColor:'#62d6a522',fill:true}],'percent');
+ navigateWeatherWiseSection('threeDayDetail');
+}
+const threeDayRootForClicks=document.getElementById('threeDaySummary');
+if(threeDayRootForClicks){threeDayRootForClicks.addEventListener('click',event=>{const card=event.target.closest('.ww-three-day-card[data-forecast-date]');if(card)openThreeDayDetail(card.dataset.forecastDate);});threeDayRootForClicks.addEventListener('keydown',event=>{if(event.key!=='Enter'&&event.key!==' ')return;const card=event.target.closest('.ww-three-day-card[data-forecast-date]');if(card){event.preventDefault();openThreeDayDetail(card.dataset.forecastDate);}});}
+const threeDayBackButton=document.getElementById('threeDayBack');if(threeDayBackButton)threeDayBackButton.addEventListener('click',()=>navigateWeatherWiseSection('overview'));
 function navigateWeatherWiseSection(sectionName){
  const target=document.getElementById(sectionName);
  if(!target || !target.classList.contains('section')) return;
