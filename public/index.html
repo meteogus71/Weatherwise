@@ -2210,7 +2210,7 @@ body{font-size:calc(14px * var(--ww-font-scale,1))}
 .ww-three-day-card{min-width:0;padding:18px 19px;border:1px solid var(--line);border-radius:15px;background:linear-gradient(145deg,var(--panel),var(--panel2));color:var(--text);box-shadow:var(--ww-frame-shadow,0 6px 18px rgba(0,0,0,.12));}
 .ww-three-day-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:13px}
 .ww-three-day-name{font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-.ww-three-day-icon{font-size:30px;line-height:1}
+.ww-three-day-icon{font-size:50px;line-height:1;min-width:58px;text-align:center}
 .ww-three-day-condition{font-size:15px;font-weight:600;line-height:1.3;min-height:38px;margin-bottom:12px}
 .ww-three-day-temps{display:flex;align-items:baseline;gap:10px;margin-bottom:13px}
 .ww-three-day-max{font:700 27px Manrope,sans-serif;color:var(--text)}
@@ -3723,11 +3723,12 @@ async function loadWeather(){
  const threeDayRoot=$('threeDaySummary');
  if(threeDayRoot){
    const dateLabel=value=>{const d=new Date(String(value)+'T12:00:00');return Number.isNaN(d.getTime())?'—':d.toLocaleDateString('el-GR',{weekday:'long',day:'numeric',month:'short'});};
-   threeDayRoot.innerHTML=(forecastDaily?.time||[]).slice(0,3).map((date,i)=>{
-     const code=forecastDaily.weatherCode?.[i]??-1;
-     const max=forecastDaily.temperatureMax?.[i],min=forecastDaily.temperatureMin?.[i];
-     const rain=forecastDaily.rain?.[i],chance=forecastDaily.rainChance?.[i],wind=forecastDaily.windSpeed?.[i];
-     const title=i===0?'ΣΗΜΕΡΑ':i===1?'ΑΥΡΙΟ':dateLabel(date);
+   threeDayRoot.innerHTML=(forecastDaily?.time||[]).slice(1,4).map((date,i)=>{
+     const dayIndex=i+1;
+     const code=forecastDaily.weatherCode?.[dayIndex]??-1;
+     const max=forecastDaily.temperatureMax?.[dayIndex],min=forecastDaily.temperatureMin?.[dayIndex];
+     const rain=forecastDaily.rain?.[dayIndex],chance=forecastDaily.rainChance?.[dayIndex],wind=forecastDaily.windSpeed?.[dayIndex];
+     const title=['ΑΥΡΙΟ','ΜΕΘΑΥΡΙΟ','ΠΑΡΑΜΕΘΑΥΡΙΟ'][i];
      return `<article class="ww-three-day-card">
        <div class="ww-three-day-top"><span class="ww-three-day-name">${title}</span><span class="ww-three-day-icon" aria-hidden="true">${icon(code)}</span></div>
        <div class="ww-three-day-condition">${codeText(code)}</div>
