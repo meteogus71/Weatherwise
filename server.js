@@ -232,7 +232,7 @@ const METNORWAY_CACHE_MS = 3 * 60 * 60 * 1000;
 
 function metCacheKey(lat, lon) {
   // MET Norway recommends no more than four decimal places for coordinates.
-  return `metno:v2:${Number(lat).toFixed(4)},${Number(lon).toFixed(4)}`;
+  return `metno:v3:${Number(lat).toFixed(4)},${Number(lon).toFixed(4)}`;
 }
 
 function metSymbolToWmo(symbol = '') {
@@ -413,27 +413,53 @@ async function getOpenMeteoPrecipitationProbability(lat, lon) {
 }
 
 function mergePrecipitationProbability(target, probability) {
-  if (!target?.hourly || !target?.daily || !probability?.hourly || !probability?.daily) return target;
-  const hourlyByTime = new Map();
+  if (!target?.hourly || !target?.daily || !probability?.hourly) return target;
+
+  // Match hourly values by absolute instant. MET Norway supplies offset-aware
+  // timestamps, while Open-Meteo is requested in UTC.
+  const hourlyByInstant = new Map();
   (probability.hourly.time || []).forEach((time, i) => {
-    const value = probability.hourly.precipitation_probability?.[i];
-    if (Number.isFinite(value)) hourlyByTime.set(Date.parse(`${time}:00Z`), value);
+    const raw = probability.hourly.precipitation_probability?.[i];
+    const value = raw === null || raw === undefined ? NaN : Number(raw);
+    const instant = Date.parse(`${String(time).slice(0, 16)}:00Z`);
+    if (Number.isFinite(instant) && Number.isFinite(value)) {
+      hourlyByInstant.set(instant, Math.max(0, Math.min(100, value)));
+    }
   });
+
   target.hourly.precipitation_probability = (target.hourly.time || []).map(time => {
-    const value = hourlyByTime.get(Date.parse(time));
+    const instant = Date.parse(time);
+    const value = hourlyByInstant.get(instant);
     return Number.isFinite(value) ? value : null;
   });
 
-  const dailyByDate = new Map();
-  (probability.daily.time || []).forEach((date, i) => {
-    const value = probability.daily.precipitation_probability_max?.[i];
-    if (Number.isFinite(value)) dailyByDate.set(String(date).slice(0, 10), value);
+  // Build daily maxima using the target forecast's own local calendar dates.
+  // This avoids UTC/local date-boundary mismatches that previously produced
+  // all-null daily probability arrays (and therefore no orange chart curve).
+  const hourlyMaxByLocalDate = new Map();
+  (target.hourly.time || []).forEach((time, i) => {
+    const date = String(time).slice(0, 10);
+    const value = target.hourly.precipitation_probability[i];
+    if (date.length === 10 && Number.isFinite(value)) {
+      hourlyMaxByLocalDate.set(date, Math.max(hourlyMaxByLocalDate.get(date) ?? -Infinity, value));
+    }
   });
+
+  const providerDailyByDate = new Map();
+  (probability.daily?.time || []).forEach((date, i) => {
+    const raw = probability.daily.precipitation_probability_max?.[i];
+    const value = raw === null || raw === undefined ? NaN : Number(raw);
+    if (Number.isFinite(value)) providerDailyByDate.set(String(date).slice(0, 10), Math.max(0, Math.min(100, value)));
+  });
+
   target.daily.precipitation_probability_max = (target.daily.time || []).map(date => {
-    const value = dailyByDate.get(String(date).slice(0, 10));
-    return Number.isFinite(value) ? value : null;
+    const key = String(date).slice(0, 10);
+    const localHourlyMax = hourlyMaxByLocalDate.get(key);
+    if (Number.isFinite(localHourlyMax)) return localHourlyMax;
+    const directDaily = providerDailyByDate.get(key);
+    return Number.isFinite(directDaily) ? directDaily : null;
   });
-  target._precipitation_probability_provider = 'Open-Meteo';
+  target._precipitation_probability_provider = 'Open-Meteo hourly (daily max by local date)';
   return target;
 }
 
