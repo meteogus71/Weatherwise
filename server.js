@@ -800,119 +800,180 @@ async function enrichWithWeatherApiPrecipitation(data, lat, lon) {
   return data;
 }
 
+// Open-Meteo probability enrichment with a dedicated long-lived cache.
+// The probability feed is independent from the main MET Norway cache so page
+// refreshes do not trigger another Open-Meteo request.
+const OPEN_METEO_PROBABILITY_CACHE_MS = 12 * 60 * 60 * 1000;
+const OPEN_METEO_PROBABILITY_RETRY_MS = 24 * 60 * 60 * 1000;
+const openMeteoProbabilityRetryAfter = new Map();
+
 async function enrichWithOpenMeteoPrecipitation(data, lat, lon) {
   if (!Array.isArray(data.daily?.time) || data.daily.time.length === 0) {
     console.warn('[Open-Meteo probability] No daily forecast timeline; skipping.');
     return data;
   }
 
-  const params = new URLSearchParams({
-    latitude: String(Number(lat)),
-    longitude: String(Number(lon)),
-    daily: 'precipitation_probability_max',
-    hourly: 'precipitation_probability',
-    forecast_days: '7',
-    timezone: 'auto'
-  });
+  const latKey = Number(lat).toFixed(3);
+  const lonKey = Number(lon).toFixed(3);
+  const cacheKey = `openmeteo-probability:${latKey},${lonKey}`;
+  const now = Date.now();
 
-  try {
-    const response = await fetch(
-      `https://api.open-meteo.com/v1/forecast?${params}`,
-      {
-        headers: { Accept: 'application/json' },
-        signal: AbortSignal.timeout(15000)
+  let cached = weatherCache.get(cacheKey);
+  if (!cached) cached = await readWeatherDiskCache(cacheKey);
+
+  let forecast = null;
+  let cacheStatus = 'MISS';
+  const retryAfter = openMeteoProbabilityRetryAfter.get(cacheKey) || 0;
+
+  // Use the dedicated cache for 12 hours. This cache survives ordinary page
+  // refreshes and is separate from the 30-minute MET Norway forecast cache.
+  if (cached?.data && now - cached.at < OPEN_METEO_PROBABILITY_CACHE_MS) {
+    forecast = cached.data;
+    cacheStatus = 'HIT';
+  } else if (retryAfter > now && cached?.data) {
+    // A previous 429 means do not hit the provider again during its cooldown.
+    forecast = cached.data;
+    cacheStatus = 'STALE-429-COOLDOWN';
+  } else if (retryAfter > now && !cached?.data) {
+    console.warn('[Open-Meteo probability] Skipping request during 429 cooldown; no cached probability data available.');
+    return data;
+  } else {
+    const params = new URLSearchParams({
+      latitude: latKey,
+      longitude: lonKey,
+      daily: 'precipitation_probability_max',
+      hourly: 'precipitation_probability',
+      forecast_days: '7',
+      timezone: 'auto'
+    });
+
+    try {
+      const response = await fetch(
+        `https://api.open-meteo.com/v1/forecast?${params}`,
+        {
+          headers: { Accept: 'application/json' },
+          signal: AbortSignal.timeout(15000)
+        }
+      );
+
+      if (!response.ok) {
+        const detail = (await response.text()).slice(0, 300);
+        const err = new Error(`Open-Meteo HTTP ${response.status}: ${detail}`);
+        err.status = response.status;
+        throw err;
       }
-    );
 
-    if (!response.ok) {
-      const detail = (await response.text()).slice(0, 300);
-      throw new Error(`Open-Meteo HTTP ${response.status}: ${detail}`);
-    }
+      forecast = await response.json();
+      if (forecast?.error) {
+        throw new Error(forecast.reason || 'Open-Meteo API error');
+      }
 
-    const forecast = await response.json();
-    const dailyTimes = forecast?.daily?.time || [];
-    const dailyValues = forecast?.daily?.precipitation_probability_max || [];
-    const dailyMap = new Map();
+      const item = { data: forecast, at: Date.now() };
+      weatherCache.set(cacheKey, item);
+      await writeWeatherDiskCache(cacheKey, item);
+      openMeteoProbabilityRetryAfter.delete(cacheKey);
+      cacheStatus = 'REFRESHED';
+    } catch (err) {
+      if (err.status === 429) {
+        openMeteoProbabilityRetryAfter.set(
+          cacheKey,
+          Date.now() + OPEN_METEO_PROBABILITY_RETRY_MS
+        );
+        console.warn('[Open-Meteo probability] HTTP 429; pausing requests for this location for 24 hours.');
+      }
 
-    for (let i = 0; i < dailyTimes.length; i++) {
-      const value = dailyValues[i];
-      if (value !== null && value !== undefined && Number.isFinite(Number(value))) {
-        dailyMap.set(dailyTimes[i], Number(value));
+      if (cached?.data) {
+        forecast = cached.data;
+        cacheStatus = 'STALE-FALLBACK';
+        console.warn(`[Open-Meteo probability] Using cached forecast after request failure: ${err.message}`);
+      } else {
+        console.warn(`[Open-Meteo probability] Enrichment failed; preserving existing values: ${err.message}`);
+        return data;
       }
     }
-
-    // Keep WeatherAPI as the source for the first three days.
-    // Fill only missing days 4-7 with Open-Meteo values.
-    let dailyFilled = 0;
-    if (Array.isArray(data.daily?.time)) {
-      data.daily.precipitation_probability_max =
-        data.daily.time.map((date, index) => {
-          const existing = data.daily.precipitation_probability_max?.[index];
-          if (index < 3 && existing !== null && existing !== undefined &&
-              Number.isFinite(Number(existing))) {
-            return Number(existing);
-          }
-
-          if (index >= 3 && dailyMap.has(date)) {
-            dailyFilled++;
-            return dailyMap.get(date);
-          }
-
-          return existing ?? null;
-        });
-    }
-
-    // Merge hourly values only where WeatherAPI did not provide a value,
-    // and only for dates from day 4 onward.
-    const hourlyTimes = forecast?.hourly?.time || [];
-    const hourlyValues = forecast?.hourly?.precipitation_probability || [];
-    const hourlyMap = new Map();
-
-    for (let i = 0; i < hourlyTimes.length; i++) {
-      const value = hourlyValues[i];
-      if (value !== null && value !== undefined && Number.isFinite(Number(value))) {
-        const epoch = Math.floor(new Date(hourlyTimes[i]).getTime() / 3600000);
-        if (Number.isFinite(epoch)) hourlyMap.set(epoch, Number(value));
-      }
-    }
-
-    let hourlyFilled = 0;
-    if (Array.isArray(data.hourly?.time)) {
-      data.hourly.precipitation_probability =
-        data.hourly.time.map((time, index) => {
-          const existing = data.hourly.precipitation_probability?.[index];
-          const date = String(time).slice(0, 10);
-          const forecastDateIndex = data.daily?.time?.indexOf(date) ?? -1;
-
-          if (existing !== null && existing !== undefined &&
-              Number.isFinite(Number(existing))) {
-            return Number(existing);
-          }
-
-          if (forecastDateIndex >= 3) {
-            const epoch = Math.floor(new Date(time).getTime() / 3600000);
-            if (hourlyMap.has(epoch)) {
-              hourlyFilled++;
-              return hourlyMap.get(epoch);
-            }
-          }
-
-          return existing ?? null;
-        });
-    }
-
-    data._precipitation_probability_provider =
-      'WeatherAPI.com (days 1-3) + Open-Meteo (days 4-7)';
-    data._precipitation_probability_updated_at = new Date().toISOString();
-
-    console.log(
-      `[Open-Meteo probability] Filled ${dailyFilled} daily and ${hourlyFilled} hourly values for days 4-7 at ${lat},${lon}`
-    );
-  } catch (err) {
-    console.warn(
-      `[Open-Meteo probability] Enrichment failed; preserving existing values: ${err.message}`
-    );
   }
+
+  const dailyTimes = forecast?.daily?.time || [];
+  const dailyValues = forecast?.daily?.precipitation_probability_max || [];
+  const dailyMap = new Map();
+
+  for (let i = 0; i < dailyTimes.length; i++) {
+    const value = dailyValues[i];
+    if (value !== null && value !== undefined && Number.isFinite(Number(value))) {
+      dailyMap.set(dailyTimes[i], Number(value));
+    }
+  }
+
+  // Keep WeatherAPI as the source for the first three days.
+  // Fill only missing days 4-7 with Open-Meteo values.
+  let dailyFilled = 0;
+  if (Array.isArray(data.daily?.time)) {
+    data.daily.precipitation_probability_max =
+      data.daily.time.map((date, index) => {
+        const existing = data.daily.precipitation_probability_max?.[index];
+        if (index < 3 && existing !== null && existing !== undefined &&
+            Number.isFinite(Number(existing))) {
+          return Number(existing);
+        }
+
+        if (index >= 3 && dailyMap.has(date)) {
+          dailyFilled++;
+          return dailyMap.get(date);
+        }
+
+        return existing ?? null;
+      });
+  }
+
+  // Merge hourly values only where WeatherAPI did not provide a value,
+  // and only for dates from day 4 onward.
+  const hourlyTimes = forecast?.hourly?.time || [];
+  const hourlyValues = forecast?.hourly?.precipitation_probability || [];
+  const hourlyMap = new Map();
+
+  for (let i = 0; i < hourlyTimes.length; i++) {
+    const value = hourlyValues[i];
+    if (value !== null && value !== undefined && Number.isFinite(Number(value))) {
+      const epoch = Math.floor(new Date(hourlyTimes[i]).getTime() / 3600000);
+      if (Number.isFinite(epoch)) hourlyMap.set(epoch, Number(value));
+    }
+  }
+
+  let hourlyFilled = 0;
+  if (Array.isArray(data.hourly?.time)) {
+    data.hourly.precipitation_probability =
+      data.hourly.time.map((time, index) => {
+        const existing = data.hourly.precipitation_probability?.[index];
+        const date = String(time).slice(0, 10);
+        const forecastDateIndex = data.daily?.time?.indexOf(date) ?? -1;
+
+        if (existing !== null && existing !== undefined &&
+            Number.isFinite(Number(existing))) {
+          return Number(existing);
+        }
+
+        if (forecastDateIndex >= 3) {
+          const epoch = Math.floor(new Date(time).getTime() / 3600000);
+          if (hourlyMap.has(epoch)) {
+            hourlyFilled++;
+            return hourlyMap.get(epoch);
+          }
+        }
+
+        return existing ?? null;
+      });
+  }
+
+  data._precipitation_probability_provider =
+    'WeatherAPI.com (days 1-3) + Open-Meteo (days 4-7)';
+  data._precipitation_probability_updated_at =
+    cached?.at && cacheStatus !== 'REFRESHED'
+      ? new Date(cached.at).toISOString()
+      : new Date().toISOString();
+
+  console.log(
+    `[Open-Meteo probability] ${cacheStatus}; filled ${dailyFilled} daily and ${hourlyFilled} hourly values for days 4-7 at ${lat},${lon}`
+  );
 
   return data;
 }
