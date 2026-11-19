@@ -3274,7 +3274,7 @@ function renderForecastDetail(){
      type:'line',label:'Πιθανότητα υετού (%)',
      data:a.rainChance.slice(startIndex,startIndex+n).map(v=>v==null?null:Math.max(0,Math.min(100,Number(v)))),
      borderColor:'#ff9b45',backgroundColor:'#ff9b45',
-     borderWidth:3,tension:.25,pointRadius:3,pointHoverRadius:6,pointBackgroundColor:'#ff9b45',
+     borderWidth:3,tension:.25,pointRadius:4,pointHoverRadius:7,pointBackgroundColor:'#ff9b45',
      pointBorderColor:'#fff',pointBorderWidth:1,spanGaps:true,yAxisID:'y1',order:1
    }];
 }
@@ -3590,8 +3590,8 @@ async function loadWeather(){
  $('condition').textContent='Φόρτωση…';
  try{
  const url=`/api/weather?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,wind_speed_10m,wind_direction_10m,surface_pressure&hourly=temperature_2m,apparent_temperature,relative_humidity_2m,dew_point_2m,cloud_cover,precipitation,precipitation_probability,wind_speed_10m,wind_direction_10m,wind_gusts_10m,surface_pressure&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant,uv_index_max,sunrise,sunset&past_days=1&forecast_days=7&timezone=auto`;
- const response=await fetch(url);
- if(!response.ok)throw new Error('Open-Meteo HTTP '+response.status);
+ const response=await fetch(url,{cache:'no-store'});
+ if(!response.ok)throw new Error('Weather API HTTP '+response.status);
  const d=await response.json();
  if(d.error)throw new Error(d.reason||'Open-Meteo returned an error');
  const c=d.current,h=d.hourly,day=d.daily;
@@ -3815,30 +3815,26 @@ async function loadWeather(){
    (dates||[]).forEach((stamp,i)=>{const key=String(stamp).slice(0,10),v=values?.[i];if(Number.isFinite(v)){sums[key]=(sums[key]||0)+v;counts[key]=(counts[key]||0)+1;}});
    return (targetDates||[]).map(date=>counts[date]?+(sums[date]/counts[date]).toFixed(1):null);
  };
- // Daily precipitation probability: prefer the provider's daily maximum.
- // If it is absent/null, derive the maximum from the hourly probabilities
- // for the same calendar date. This keeps the daily curve populated when the
- // upstream daily field is temporarily unavailable but hourly values exist.
- const hourlyRainMaxByDate=new Map();
- (h.time||[]).forEach((stamp,i)=>{
-   const value=h.precipitation_probability?.[i];
-   if(value===null||value===undefined||!Number.isFinite(Number(value)))return;
-   const date=String(stamp).slice(0,10);
-   const numeric=Math.max(0,Math.min(100,Number(value)));
-   const previous=hourlyRainMaxByDate.get(date);
-   if(previous===undefined||numeric>previous)hourlyRainMaxByDate.set(date,numeric);
- });
- const dailyRainChance=(day.time||[]).map((date,i)=>{
-   const supplied=day.precipitation_probability_max?.[i];
-   if(supplied!==null&&supplied!==undefined&&Number.isFinite(Number(supplied)))
-     return Math.max(0,Math.min(100,Number(supplied)));
-   return hourlyRainMaxByDate.get(String(date).slice(0,10))??null;
- });
+ const dailyRainProbability=(dailyValues,dailyDates,hourlyValues,hourlyTimes)=>{
+   const hourlyMaxByDate=new Map();
+   (hourlyTimes||[]).forEach((stamp,index)=>{
+     const date=String(stamp||'').slice(0,10),raw=hourlyValues?.[index];
+     const value=raw===null||raw===undefined?NaN:Number(raw);
+     if(date.length===10&&Number.isFinite(value))hourlyMaxByDate.set(date,Math.max(hourlyMaxByDate.get(date)??-Infinity,value));
+   });
+   return (dailyDates||[]).map((date,index)=>{
+     const raw=dailyValues?.[index],dailyValue=raw===null||raw===undefined?NaN:Number(raw);
+     if(Number.isFinite(dailyValue))return Math.max(0,Math.min(100,dailyValue));
+     const fallback=hourlyMaxByDate.get(String(date).slice(0,10));
+     return Number.isFinite(fallback)?Math.max(0,Math.min(100,fallback)):null;
+   });
+ };
  forecastDaily=day?{
    time:day.time,temperatureMin:day.temperature_2m_min,temperatureMax:day.temperature_2m_max,
    humidity:dailyMean(h.relative_humidity_2m,h.time,day.time),
    cloudCover:dailyMean(h.cloud_cover,h.time,day.time),
-   rain:day.precipitation_sum,rainChance:dailyRainChance,
+   rain:day.precipitation_sum,
+   rainChance:dailyRainProbability(day.precipitation_probability_max,day.time,h.precipitation_probability,h.time),
    windSpeed:day.wind_speed_10m_max,windGusts:day.wind_gusts_10m_max,
    windDirection:day.wind_direction_10m_dominant,uv:day.uv_index_max,
    weatherCode:day.weather_code

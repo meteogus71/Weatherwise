@@ -232,7 +232,7 @@ const METNORWAY_CACHE_MS = 3 * 60 * 60 * 1000;
 
 function metCacheKey(lat, lon) {
   // MET Norway recommends no more than four decimal places for coordinates.
-  return `metno-probability-v2:${Number(lat).toFixed(4)},${Number(lon).toFixed(4)}`;
+  return `metno:v2:${Number(lat).toFixed(4)},${Number(lon).toFixed(4)}`;
 }
 
 function metSymbolToWmo(symbol = '') {
@@ -441,7 +441,27 @@ async function getMetNorwayPoint(lat, lon) {
   const key = metCacheKey(lat, lon);
   let hit = weatherCache.get(key);
   if (!hit) hit = await readWeatherDiskCache(key);
-  if (hit && Date.now() - hit.at < METNORWAY_CACHE_MS) return hit.data;
+  if (hit && Date.now() - hit.at < METNORWAY_CACHE_MS) {
+    const cachedData = hit.data;
+    const cachedDaily = cachedData?.daily?.precipitation_probability_max || [];
+    const cachedHourly = cachedData?.hourly?.precipitation_probability || [];
+    const hasDailyProbability = cachedDaily.some(value => value !== null && value !== undefined && Number.isFinite(Number(value)));
+    const hasHourlyProbability = cachedHourly.some(value => value !== null && value !== undefined && Number.isFinite(Number(value)));
+    // Older disk-cache entries may predate probability enrichment. Refresh the
+    // probability fields before serving them instead of returning an empty curve.
+    if (!hasDailyProbability || !hasHourlyProbability) {
+      try {
+        const probability = await getOpenMeteoPrecipitationProbability(lat, lon);
+        mergePrecipitationProbability(cachedData, probability);
+        const refreshed = { data: cachedData, at: Date.now() };
+        setBoundedCache(weatherCache, key, refreshed, MAX_WEATHER_CACHE_ENTRIES);
+        await writeWeatherDiskCache(key, refreshed);
+      } catch (probabilityError) {
+        console.warn('[Precipitation probability] Cached forecast enrichment unavailable:', probabilityError.message);
+      }
+    }
+    return cachedData;
+  }
   if (weatherInflight.has(key)) return weatherInflight.get(key);
 
   const task = (async () => {
@@ -537,7 +557,7 @@ const server = http.createServer(async (req, res) => {
       const data = await getMetNorwayWeather(url);
       return send(res, 200, JSON.stringify(data), {
         'Content-Type': 'application/json; charset=utf-8',
-        'Cache-Control': 'public, max-age=300',
+        'Cache-Control': 'no-store',
         'X-WeatherWise-Provider': 'MET Norway Locationforecast',
         'Access-Control-Allow-Origin': '*'
       });
