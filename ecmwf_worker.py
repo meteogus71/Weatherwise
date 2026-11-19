@@ -36,7 +36,7 @@ def main():
     cache_dir.mkdir(parents=True, exist_ok=True)
     # Use the supported ECMWF Open Data resolution (0p25); 0p4 is invalid.
     cache_key = hashlib.sha1(f"ifs-oper-fc-{step}-0p25".encode()).hexdigest()
-    cache_seconds = int(os.environ.get("ECMWF_CACHE_HOURS", "6")) * 3600
+    cache_seconds = int(os.environ.get("ECMWF_CACHE_HOURS", "3")) * 3600
 
     def cache_is_valid(path):
         try:
@@ -119,6 +119,10 @@ def main():
         surface_wanted.add("msl")
     if "cloud_cover" in fields:
         surface_wanted.add("tcc")
+    if "wind_gusts_10m" in fields:
+        surface_wanted.add("10fg")
+    if "cape" in fields:
+        surface_wanted.add("cape")
     if "wind_speed_10m" in fields or "wind_direction_10m" in fields:
         surface_wanted.update(("10u", "10v"))
 
@@ -162,8 +166,8 @@ def main():
             "cloud_cover": raw["tcc"] * 100 if raw.get("tcc") is not None else None,
             "wind_speed_10m": speed_ms * 1.943844 if speed_ms is not None else None,
             "wind_direction_10m": direction,
-            "wind_gusts_10m": None,
-            "cape": None,
+            "wind_gusts_10m": (raw["10fg"] * 1.943844 if raw.get("10fg") is not None else None),
+            "cape": raw.get("cape"),
             "temperature_850hPa": (
                 pressure[850][i] - 273.15 if 850 in pressure and pressure[850][i] is not None else None
             ),
