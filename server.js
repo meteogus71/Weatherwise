@@ -723,7 +723,7 @@ async function enrichWithWeatherApiPrecipitation(data, lat, lon) {
   const apiKey = process.env.WEATHERAPI_KEY;
 
   if (!apiKey) {
-    console.warn('[WeatherAPI] WEATHERAPI_KEY is not configured; precipitation probabilities remain null.');
+    console.warn('[WeatherAPI] WEATHERAPI_KEY is not configured; days 1-3 probability remain null.');
     return data;
   }
 
@@ -758,14 +758,16 @@ async function enrichWithWeatherApiPrecipitation(data, lat, lon) {
       const date = forecastDay?.date;
       const dayChance = forecastDay?.day?.daily_chance_of_rain;
 
-      if (date && Number.isFinite(Number(dayChance))) {
+      if (date && dayChance !== null && dayChance !== undefined &&
+          Number.isFinite(Number(dayChance))) {
         dailyProbability.set(date, Number(dayChance));
       }
 
       for (const hour of forecastDay?.hour || []) {
         const epoch = Number(hour?.time_epoch);
         const chance = hour?.chance_of_rain;
-        if (Number.isFinite(epoch) && Number.isFinite(Number(chance))) {
+        if (Number.isFinite(epoch) && chance !== null && chance !== undefined &&
+            Number.isFinite(Number(chance))) {
           hourlyProbability.set(Math.floor(epoch / 3600), Number(chance));
         }
       }
@@ -786,16 +788,133 @@ async function enrichWithWeatherApiPrecipitation(data, lat, lon) {
       );
     }
 
-    data._precipitation_probability_provider = 'WeatherAPI.com';
+    data._precipitation_probability_provider = 'WeatherAPI.com (days 1-3)';
     data._precipitation_probability_updated_at = new Date().toISOString();
     console.log(
-      `[WeatherAPI] Probability enrichment successful: ${hourlyProbability.size} hourly values, ${dailyProbability.size} daily values for ${lat},${lon}`
+      `[WeatherAPI] Probability enrichment: ${hourlyProbability.size} hourly values, ${dailyProbability.size} daily values for ${lat},${lon}`
     );
-    return data;
   } catch (err) {
-    console.warn(`[WeatherAPI] Probability enrichment failed; keeping null values: ${err.message}`);
+    console.warn(`[WeatherAPI] Probability enrichment failed: ${err.message}`);
+  }
+
+  return data;
+}
+
+async function enrichWithOpenMeteoPrecipitation(data, lat, lon) {
+  if (!Array.isArray(data.daily?.time) || data.daily.time.length === 0) {
+    console.warn('[Open-Meteo probability] No daily forecast timeline; skipping.');
     return data;
   }
+
+  const params = new URLSearchParams({
+    latitude: String(Number(lat)),
+    longitude: String(Number(lon)),
+    daily: 'precipitation_probability_max',
+    hourly: 'precipitation_probability',
+    forecast_days: '7',
+    timezone: 'auto'
+  });
+
+  try {
+    const response = await fetch(
+      `https://api.open-meteo.com/v1/forecast?${params}`,
+      {
+        headers: { Accept: 'application/json' },
+        signal: AbortSignal.timeout(15000)
+      }
+    );
+
+    if (!response.ok) {
+      const detail = (await response.text()).slice(0, 300);
+      throw new Error(`Open-Meteo HTTP ${response.status}: ${detail}`);
+    }
+
+    const forecast = await response.json();
+    const dailyTimes = forecast?.daily?.time || [];
+    const dailyValues = forecast?.daily?.precipitation_probability_max || [];
+    const dailyMap = new Map();
+
+    for (let i = 0; i < dailyTimes.length; i++) {
+      const value = dailyValues[i];
+      if (value !== null && value !== undefined && Number.isFinite(Number(value))) {
+        dailyMap.set(dailyTimes[i], Number(value));
+      }
+    }
+
+    // Keep WeatherAPI as the source for the first three days.
+    // Fill only missing days 4-7 with Open-Meteo values.
+    let dailyFilled = 0;
+    if (Array.isArray(data.daily?.time)) {
+      data.daily.precipitation_probability_max =
+        data.daily.time.map((date, index) => {
+          const existing = data.daily.precipitation_probability_max?.[index];
+          if (index < 3 && existing !== null && existing !== undefined &&
+              Number.isFinite(Number(existing))) {
+            return Number(existing);
+          }
+
+          if (index >= 3 && dailyMap.has(date)) {
+            dailyFilled++;
+            return dailyMap.get(date);
+          }
+
+          return existing ?? null;
+        });
+    }
+
+    // Merge hourly values only where WeatherAPI did not provide a value,
+    // and only for dates from day 4 onward.
+    const hourlyTimes = forecast?.hourly?.time || [];
+    const hourlyValues = forecast?.hourly?.precipitation_probability || [];
+    const hourlyMap = new Map();
+
+    for (let i = 0; i < hourlyTimes.length; i++) {
+      const value = hourlyValues[i];
+      if (value !== null && value !== undefined && Number.isFinite(Number(value))) {
+        const epoch = Math.floor(new Date(hourlyTimes[i]).getTime() / 3600000);
+        if (Number.isFinite(epoch)) hourlyMap.set(epoch, Number(value));
+      }
+    }
+
+    let hourlyFilled = 0;
+    if (Array.isArray(data.hourly?.time)) {
+      data.hourly.precipitation_probability =
+        data.hourly.time.map((time, index) => {
+          const existing = data.hourly.precipitation_probability?.[index];
+          const date = String(time).slice(0, 10);
+          const forecastDateIndex = data.daily?.time?.indexOf(date) ?? -1;
+
+          if (existing !== null && existing !== undefined &&
+              Number.isFinite(Number(existing))) {
+            return Number(existing);
+          }
+
+          if (forecastDateIndex >= 3) {
+            const epoch = Math.floor(new Date(time).getTime() / 3600000);
+            if (hourlyMap.has(epoch)) {
+              hourlyFilled++;
+              return hourlyMap.get(epoch);
+            }
+          }
+
+          return existing ?? null;
+        });
+    }
+
+    data._precipitation_probability_provider =
+      'WeatherAPI.com (days 1-3) + Open-Meteo (days 4-7)';
+    data._precipitation_probability_updated_at = new Date().toISOString();
+
+    console.log(
+      `[Open-Meteo probability] Filled ${dailyFilled} daily and ${hourlyFilled} hourly values for days 4-7 at ${lat},${lon}`
+    );
+  } catch (err) {
+    console.warn(
+      `[Open-Meteo probability] Enrichment failed; preserving existing values: ${err.message}`
+    );
+  }
+
+  return data;
 }
 
 async function getMetNorwayPoint(lat, lon) {
@@ -874,6 +993,7 @@ async function getMetNorwayPoint(lat, lon) {
 
     let data = buildMetNorwayOpenMeteoShape(raw);
     data = await enrichWithWeatherApiPrecipitation(data, lat, lon);
+    data = await enrichWithOpenMeteoPrecipitation(data, lat, lon);
 
     const item = {
       data,
