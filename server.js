@@ -15,6 +15,24 @@ let lastGoodFeed = null;
 
 const weatherCache = new Map();
 const weatherInflight = new Map();
+// Keep ECMWF output separate and small: GRIB-derived grids can be large.
+const ecmwfCache = new Map();
+const ecmwfInflight = new Map();
+let ecmwfQueue = Promise.resolve();
+const MAX_WEATHER_CACHE_ENTRIES = 60;
+const MAX_ECMWF_CACHE_ENTRIES = 2;
+
+function setBoundedCache(map, key, value, maxEntries) {
+  if (map.has(key)) map.delete(key);
+  map.set(key, value);
+  while (map.size > maxEntries) map.delete(map.keys().next().value);
+}
+
+function runEcmwfWorkerSerialized(payload) {
+  const task = ecmwfQueue.then(() => runEcmwfWorker(payload));
+  ecmwfQueue = task.catch(() => undefined);
+  return task;
+}
 const WEATHER_CACHE_MS = 30 * 60 * 1000;
 const WEATHER_STALE_MAX_MS = 24 * 60 * 60 * 1000;
 const WEATHER_DISK_CACHE_DIR = '/tmp/weatherwise-api-cache';
@@ -30,7 +48,7 @@ async function readWeatherDiskCache(cacheKey) {
     const raw = await fs.promises.readFile(weatherDiskPath(cacheKey), 'utf8');
     const item = JSON.parse(raw);
     if (item && item.data && Number.isFinite(item.at)) {
-      weatherCache.set(cacheKey, item);
+      setBoundedCache(weatherCache, cacheKey, item, MAX_WEATHER_CACHE_ENTRIES);
       return item;
     }
   } catch {}
@@ -71,7 +89,7 @@ async function cachedOpenMeteoJson(cacheKey, url, ttl = WEATHER_CACHE_MS) {
       const data = await upstream.json();
       if (data && data.error) throw new Error(data.reason || 'Open-Meteo API error');
       const item = { data, at: Date.now() };
-      weatherCache.set(cacheKey, item);
+      setBoundedCache(weatherCache, cacheKey, item, MAX_WEATHER_CACHE_ENTRIES);
       await writeWeatherDiskCache(cacheKey, item);
       return { data, cache: 'MISS' };
     } catch (err) {
@@ -177,7 +195,7 @@ async function getEcmwfGrid(url) {
   if (!fields.length || fields.some(f => !allowed.has(f))) throw new Error('Unsupported ECMWF variable');
   const step = Math.max(0, Math.min(240, Number(url.searchParams.get('step') || 24)));
   if (!Number.isFinite(step)) throw new Error('Invalid forecast step');
-  return runEcmwfWorker({ latitudes, longitudes, fields, step });
+  return runEcmwfWorkerSerialized({ latitudes, longitudes, fields, step });
 }
 
 async function getMeteoAlarmFeed() {
@@ -244,23 +262,6 @@ function metPeriod(entry) {
   return entry?.data?.next_1_hours || entry?.data?.next_6_hours || entry?.data?.next_12_hours || null;
 }
 
-// Probability can be present in a different forecast interval than the first
-// available precipitation/symbol period. Search all supported intervals.
-function metPrecipitationProbability(entry) {
-  const periods = [
-    entry?.data?.next_1_hours,
-    entry?.data?.next_6_hours,
-    entry?.data?.next_12_hours
-  ];
-  for (const period of periods) {
-    const value = period?.details?.probability_of_precipitation;
-    if (value !== null && value !== undefined && Number.isFinite(Number(value))) {
-      return Number(value);
-    }
-  }
-  return null;
-}
-
 function buildMetNorwayOpenMeteoShape(raw, requested) {
   const series = raw?.properties?.timeseries || [];
   if (!series.length) throw new Error('MET Norway returned an empty forecast');
@@ -300,7 +301,7 @@ function buildMetNorwayOpenMeteoShape(raw, requested) {
     hourly.dew_point_2m.push(d.dew_point_temperature ?? null);
     hourly.cloud_cover.push(d.cloud_area_fraction ?? null);
     hourly.precipitation.push(period?.details?.precipitation_amount ?? 0);
-    hourly.precipitation_probability.push(metPrecipitationProbability(entry));
+    hourly.precipitation_probability.push(Number.isFinite(period?.details?.probability_of_precipitation) ? period.details.probability_of_precipitation : null);
     hourly.wind_speed_10m.push(d.wind_speed != null ? d.wind_speed * 3.6 : null);
     hourly.wind_direction_10m.push(d.wind_from_direction ?? null);
     hourly.wind_gusts_10m.push(d.wind_speed_of_gust != null ? d.wind_speed_of_gust * 3.6 : null);
@@ -321,8 +322,7 @@ function buildMetNorwayOpenMeteoShape(raw, requested) {
     const day = dayMap.get(date);
     if (Number.isFinite(d.air_temperature)) day.temps.push(d.air_temperature);
     if (Number.isFinite(period?.details?.precipitation_amount)) day.rain += period.details.precipitation_amount;
-    const rainProbability = metPrecipitationProbability(entry);
-    if (rainProbability !== null) day.rainProb.push(rainProbability);
+    if (Number.isFinite(period?.details?.probability_of_precipitation)) day.rainProb.push(period.details.probability_of_precipitation);
     if (Number.isFinite(d.wind_speed)) day.winds.push(d.wind_speed * 3.6);
     if (Number.isFinite(d.wind_speed_of_gust)) day.gusts.push(d.wind_speed_of_gust * 3.6);
     if (Number.isFinite(d.wind_from_direction)) day.directions.push(d.wind_from_direction);
@@ -357,6 +357,51 @@ function buildMetNorwayOpenMeteoShape(raw, requested) {
   };
 }
 
+
+async function getOpenMeteoPrecipitationProbability(lat, lon) {
+  const params = new URLSearchParams({
+    latitude: Number(lat).toFixed(4),
+    longitude: Number(lon).toFixed(4),
+    hourly: 'precipitation_probability',
+    daily: 'precipitation_probability_max',
+    forecast_days: '7',
+    timezone: 'UTC'
+  });
+  const response = await fetch(`https://api.open-meteo.com/v1/forecast?${params}`, {
+    headers: { Accept: 'application/json', 'User-Agent': 'WeatherWise/1.0' },
+    signal: AbortSignal.timeout(15000)
+  });
+  if (!response.ok) throw new Error(`Open-Meteo precipitation probability HTTP ${response.status}`);
+  const payload = await response.json();
+  if (payload?.error) throw new Error(payload.reason || 'Open-Meteo precipitation probability error');
+  return payload;
+}
+
+function mergePrecipitationProbability(target, probability) {
+  if (!target?.hourly || !target?.daily || !probability?.hourly || !probability?.daily) return target;
+  const hourlyByTime = new Map();
+  (probability.hourly.time || []).forEach((time, i) => {
+    const value = probability.hourly.precipitation_probability?.[i];
+    if (Number.isFinite(value)) hourlyByTime.set(Date.parse(`${time}:00Z`), value);
+  });
+  target.hourly.precipitation_probability = (target.hourly.time || []).map(time => {
+    const value = hourlyByTime.get(Date.parse(time));
+    return Number.isFinite(value) ? value : null;
+  });
+
+  const dailyByDate = new Map();
+  (probability.daily.time || []).forEach((date, i) => {
+    const value = probability.daily.precipitation_probability_max?.[i];
+    if (Number.isFinite(value)) dailyByDate.set(String(date).slice(0, 10), value);
+  });
+  target.daily.precipitation_probability_max = (target.daily.time || []).map(date => {
+    const value = dailyByDate.get(String(date).slice(0, 10));
+    return Number.isFinite(value) ? value : null;
+  });
+  target._precipitation_probability_provider = 'Open-Meteo';
+  return target;
+}
+
 async function getMetNorwayPoint(lat, lon) {
   const key = metCacheKey(lat, lon);
   let hit = weatherCache.get(key);
@@ -378,8 +423,15 @@ async function getMetNorwayPoint(lat, lon) {
     }
     const raw = await response.json();
     const data = buildMetNorwayOpenMeteoShape(raw);
+    try {
+      const probability = await getOpenMeteoPrecipitationProbability(lat, lon);
+      mergePrecipitationProbability(data, probability);
+    } catch (probabilityError) {
+      console.warn('[Precipitation probability] Open-Meteo enrichment unavailable:', probabilityError.message);
+      // Keep missing values as null; never report a false 0% probability.
+    }
     const item = { data, at: Date.now() };
-    weatherCache.set(key, item);
+    setBoundedCache(weatherCache, key, item, MAX_WEATHER_CACHE_ENTRIES);
     await writeWeatherDiskCache(key, item);
     return data;
   })();
@@ -477,14 +529,22 @@ const server = http.createServer(async (req, res) => {
   if (req.method === 'GET' && url.pathname === '/api/ecmwf') {
     try {
       const key = 'ecmwf?' + url.searchParams.toString();
-      const cached = weatherCache.get(key);
+      const cached = ecmwfCache.get(key);
       let items;
-      if (cached && Date.now() - cached.at < 6 * 60 * 60 * 1000) items = cached.data;
-      else if (weatherInflight.has(key)) items = await weatherInflight.get(key);
-      else {
-        const task = getEcmwfGrid(url).then(data => { weatherCache.set(key, { data, at: Date.now() }); return data; });
-        weatherInflight.set(key, task);
-        try { items = await task; } finally { weatherInflight.delete(key); }
+      if (cached && Date.now() - cached.at < 6 * 60 * 60 * 1000) {
+        // Refresh LRU position on hit.
+        ecmwfCache.delete(key);
+        ecmwfCache.set(key, cached);
+        items = cached.data;
+      } else if (ecmwfInflight.has(key)) {
+        items = await ecmwfInflight.get(key);
+      } else {
+        const task = getEcmwfGrid(url).then(data => {
+          setBoundedCache(ecmwfCache, key, { data, at: Date.now() }, MAX_ECMWF_CACHE_ENTRIES);
+          return data;
+        });
+        ecmwfInflight.set(key, task);
+        try { items = await task; } finally { ecmwfInflight.delete(key); }
       }
       return send(res, 200, JSON.stringify(items), {
         'Content-Type': 'application/json; charset=utf-8',
