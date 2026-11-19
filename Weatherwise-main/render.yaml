@@ -1,7 +1,0 @@
-services:
-  - type: web
-    name: weatherwise
-    runtime: docker
-    plan: free
-    healthCheckPath: /health
-    autoDeploy: true
