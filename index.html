@@ -4566,15 +4566,12 @@ function initPointWeatherMap(){
  const host=$('pointWeatherMap'); if(!host||pointWeatherMap)return;
  if(!window.L){host.innerHTML='<div style="padding:24px;color:#e9f1fb">Δεν φορτώθηκε η βιβλιοθήκη του χάρτη. Ελέγξτε τη σύνδεση και ανανεώστε τη σελίδα.</div>';return}
  pointWeatherMap=L.map(host,{zoomControl:true,scrollWheelZoom:true}).setView([48.5,15],4);
- const pointBaseTiles=L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}{r}.png',{attribution:'© OpenStreetMap contributors © CARTO',maxZoom:19});
- pointBaseTiles.on('tileerror',()=>{
-  if(!pointWeatherMap._pointFallbackTiles){
-   pointWeatherMap._pointFallbackTiles=true;
-   pointWeatherMap.eachLayer(layer=>{if(layer instanceof L.TileLayer)pointWeatherMap.removeLayer(layer)});
-   L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{attribution:'© OpenStreetMap contributors © CARTO',maxZoom:19,subdomains:'abcd'}).addTo(pointWeatherMap);
-  }
- });
- pointBaseTiles.addTo(pointWeatherMap);
+ // Use the public OpenStreetMap raster tiles: no CARTO API key or token is required.
+ // A restrained grayscale treatment gives the pale, low-contrast reference-map appearance.
+ const pointBaseTiles=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+  attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>',
+  maxZoom:19,subdomains:'abc',crossOrigin:true
+ }).addTo(pointWeatherMap);
  pointWeatherMap.on('click',e=>loadPointWeather(e.latlng.lat,e.latlng.lng));
  loadPointWeather(37.9838,23.7275);
  setTimeout(()=>pointWeatherMap.invalidateSize(),250);
@@ -5406,4 +5403,19 @@ html body[data-theme] #overview > .weather-layout > .city-current[data-landmark-
 #meteoAlarmMap .leaflet-marker-pane{z-index:600}
 #meteoAlarmMap .leaflet-tooltip-pane{z-index:650}
 #meteoAlarmMap .leaflet-control-container{z-index:800}
+
+/* Interactive point-weather map: pale, minimal European basemap */
+#pointWeatherMap{background:#cfd3d5!important}
+#pointWeatherMap .leaflet-tile-pane{
+ filter:grayscale(1) saturate(.12) brightness(1.10) contrast(.78);
+}
+#pointWeatherMap .leaflet-control-zoom a{
+ background:rgba(255,255,255,.94);color:#526d83;border-color:#d4dce2;
+ box-shadow:0 2px 9px rgba(31,49,65,.12)
+}
+#pointWeatherMap .leaflet-control-zoom a:hover{background:#eaf1f5;color:#263f55}
+#pointWeatherMap .leaflet-control-attribution{
+ background:rgba(255,255,255,.82);color:#52616d;font-size:10px
+}
+#pointWeatherMap .leaflet-control-attribution a{color:#426b88}
 </style>
