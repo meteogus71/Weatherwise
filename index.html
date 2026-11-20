@@ -4310,10 +4310,6 @@ function meteoAlarmRenderMap(){
  requestAnimationFrame(()=>{meteoAlarmMap.invalidateSize({pan:false});meteoAlarmMap.setView([38.45,23.55],5.8);});
  setTimeout(()=>{if(meteoAlarmMap){meteoAlarmMap.invalidateSize({pan:false});meteoAlarmMap.setView([38.45,23.55],5.8);}},450);
 }
-function meteoAlarmRegionGeometryShift(geometry,dx,dy){
- const shiftCoords=coords=>Array.isArray(coords)&&typeof coords[0]==='number'?[coords[0]+dx,coords[1]+dy]:coords.map(shiftCoords);
- return {...geometry,coordinates:shiftCoords(geometry.coordinates)};
-}
 async function meteoAlarmLoadRegions(){
  const urls=[
   'https://gisco-services.ec.europa.eu/distribution/v2/nuts/geojson/NUTS_RG_01M_2024_4326_LEVL_2.geojson',
@@ -4357,19 +4353,25 @@ function meteoAlarmDrawRegions(){
  meteoAlarmRegionLayer.clearLayers();
  meteoAlarmRegionFeatures.forEach(f=>{
   const level=meteoAlarmRegionLevel(f.key),fill=meteoAlarmRegionColor(level);
-  const shadowFeature={...f.feature,geometry:meteoAlarmRegionGeometryShift(f.feature.geometry,.10,-.075)};
-  L.geoJSON(shadowFeature,{interactive:false,style:{color:'#061a2b',weight:2,opacity:.9,fillColor:'#061a2b',fillOpacity:.78},className:'ww-region-extrusion'}).addTo(meteoAlarmRegionLayer);
-  const layer=L.geoJSON(f.feature,{
-   style:{color:level?'#ffffff':'#607b91',weight:level?2.1:1.5,opacity:1,fillColor:fill,fillOpacity:level?.88:.22,lineJoin:'round'},
+  L.geoJSON(f.feature,{
+   style:{
+    color:level?'#ffffff':'#71869a',
+    weight:level?2.1:1.45,
+    opacity:1,
+    fillColor:fill,
+    fillOpacity:level?.88:.24,
+    lineJoin:'round',
+    lineCap:'round'
+   },
    onEachFeature:(feature,polygon)=>{
     polygon.bindTooltip('<strong>'+f.name+'</strong><br>'+(level?meteoAlarmGreekSeverity(level)+' προειδοποίηση':'Χωρίς ενεργή προειδοποίηση'),{className:'ww-map-tooltip',sticky:true,direction:'top'});
     polygon.on('mouseover',()=>{
-     polygon.setStyle({weight:3.6,fillOpacity:level?.98:.42,color:'#fff'});
-     if(polygon.getElement())polygon.getElement().classList.add('ww-region-lifted');
+     polygon.setStyle({weight:3.4,fillOpacity:level?.98:.42,color:'#fff'});
+     const el=polygon.getElement();if(el)el.classList.add('ww-region-lifted');
     });
     polygon.on('mouseout',()=>{
-     polygon.setStyle({weight:level?2.1:1.5,fillOpacity:level?.88:.22,color:level?'#ffffff':'#607b91'});
-     if(polygon.getElement())polygon.getElement().classList.remove('ww-region-lifted');
+     polygon.setStyle({weight:level?2.1:1.45,fillOpacity:level?.88:.24,color:level?'#ffffff':'#71869a'});
+     const el=polygon.getElement();if(el)el.classList.remove('ww-region-lifted');
     });
     polygon.on('click',()=>{
      const cards=[...document.querySelectorAll('.meteoalarm-alert-card')];
@@ -5168,4 +5170,21 @@ html body[data-theme] #overview > .weather-layout > .city-current[data-landmark-
 .meteoalarm-alert-time-zone,.meteoalarm-alert-meta{color:#c1d0dd!important}
 .meteoalarm-alert-description{color:#edf4fa!important}
 .meteoalarm-alert-link{color:#8edcff!important}
+
+/* Alignment fine-tuning: one exact GIS geometry per region; 3D depth is a visual shadow only */
+#meteoAlarmMap .leaflet-overlay-pane svg{overflow:visible}
+#meteoAlarmMap .leaflet-overlay-pane path.ww-region-lifted{
+ filter:drop-shadow(0 10px 5px rgba(4,15,28,.62)) drop-shadow(0 0 5px rgba(255,255,255,.42));
+}
+#meteoAlarmMap .leaflet-overlay-pane path{
+ vector-effect:non-scaling-stroke;
+}
+.ww-region-path path{
+ filter:drop-shadow(0 4px 2px rgba(5,20,35,.38));
+ transition:filter .18s,stroke-width .18s,fill-opacity .18s;
+}
+.ww-region-path path:hover{
+ filter:drop-shadow(0 10px 5px rgba(4,15,28,.62)) drop-shadow(0 0 5px rgba(255,255,255,.4));
+}
+.ww-region-extrusion{display:none!important}
 </style>
