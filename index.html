@@ -4160,6 +4160,7 @@ function meteoAlarmSeverity(value){
  if(v.includes('extreme')||v.includes('red'))return 'red';
  if(v.includes('severe')||v.includes('orange'))return 'orange';
  if(v.includes('moderate')||v.includes('yellow'))return 'yellow';
+ if(v.includes('minor')||v.includes('low')||v.includes('green'))return 'green';
  return 'unknown';
 }
 function meteoAlarmGreekSeverity(value){
@@ -4286,9 +4287,9 @@ const meteoAlarmRegionAliases={
  'crete':['crete','kriti','κρητη']
 };
 function meteoAlarmRegionKey(text){const v=meteoAlarmNormalizeRegionText(text);for(const [key,aliases] of Object.entries(meteoAlarmRegionAliases)){if(aliases.some(a=>v.includes(meteoAlarmNormalizeRegionText(a))))return key;}for(const [key,name] of Object.entries(meteoAlarmRegionNames)){const n=meteoAlarmNormalizeRegionText(name);if(n&&v.includes(n))return key;}return '';}
-function meteoAlarmLevelRank(level){return ({red:3,orange:2,yellow:1})[level]||0;}
+function meteoAlarmLevelRank(level){return ({red:4,orange:3,yellow:2,green:1})[level]||0;}
 function meteoAlarmRegionLevel(region){let best='';for(const a of meteoAlarmEntries.filter(x=>meteoAlarmOverlapDay(x,meteoAlarmSelectedDay))){const names=meteoAlarmAreaNames(a.area);if(names.some(n=>meteoAlarmRegionKey(n)===region)&&meteoAlarmLevelRank(a.level)>meteoAlarmLevelRank(best))best=a.level;}return best;}
-function meteoAlarmRegionColor(level){return ({yellow:'#facc15',orange:'#f97316',red:'#dc2626'})[level]||'#35404d';}
+function meteoAlarmRegionColor(level){return ({green:'#78d62b',yellow:'#ffdf27',orange:'#f28a16',red:'#ef2929'})[level]||'#35404d';}
 let meteoAlarmEuropeMap=null,meteoAlarmEuropeMarker=null;
 const METEOALARM_GREEK_NUTS2={
  'EL30':{key:'attica',name:'Αττική'},
@@ -4310,12 +4311,62 @@ function meteoAlarmRenderMap(){
  const host=$('meteoAlarmMap');
  if(meteoAlarmMap){meteoAlarmMap.remove();meteoAlarmMap=null;}
  host.innerHTML='';
- // Start with Greece centred; fitBounds is repeated after the official boundaries load.
- meteoAlarmMap=L.map(host,{scrollWheelZoom:true,zoomControl:true,minZoom:4,maxZoom:11,preferCanvas:false,zoomSnap:.25}).setView([38.45,23.55],5.8);
- L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap contributors'}).addTo(meteoAlarmMap);
+ meteoAlarmMap=L.map(host,{scrollWheelZoom:true,zoomControl:false,minZoom:4,maxZoom:12,preferCanvas:false,zoomSnap:.25,attributionControl:true}).setView([38.45,23.55],5.8);
+ // Satellite imagery similar to the supplied reference, with geographic labels on top.
+ const imagery=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{
+  maxZoom:19,attribution:'Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics'
+ }).addTo(meteoAlarmMap);
+ L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',{
+  maxZoom:19,opacity:.88,attribution:''
+ }).addTo(meteoAlarmMap);
  meteoAlarmRegionLayer=L.layerGroup().addTo(meteoAlarmMap);
+ // Custom glass controls: zoom, return to Greece and scale.
+ const GlassControls=L.Control.extend({
+  options:{position:'topleft'},
+  onAdd:function(){
+   const wrap=L.DomUtil.create('div','ww-map-controls');
+   wrap.innerHTML='<div class="ww-zoom-stack"><button type="button" class="ww-map-btn" data-action="zoom-in" aria-label="Μεγέθυνση" title="Μεγέθυνση"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button><button type="button" class="ww-map-btn" data-action="zoom-out" aria-label="Σμίκρυνση" title="Σμίκρυνση"><svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button></div><button type="button" class="ww-map-btn ww-locate-btn" data-action="locate" aria-label="Εστίαση στην Ελλάδα" title="Εστίαση στην Ελλάδα"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></button>';
+   L.DomEvent.disableClickPropagation(wrap);
+   L.DomEvent.on(wrap,'click',e=>{
+    const btn=e.target.closest('button');if(!btn)return;
+    if(btn.dataset.action==='zoom-in')meteoAlarmMap.zoomIn();
+    if(btn.dataset.action==='zoom-out')meteoAlarmMap.zoomOut();
+    if(btn.dataset.action==='locate')meteoAlarmMap.fitBounds([[34.45,19.2],[41.85,29.9]],{padding:[18,18],animate:true});
+   });
+   return wrap;
+  }
+ });
+ meteoAlarmMap.addControl(new Mini());
+ meteoAlarmMap.addControl(new GlassControls());
+ L.control.scale({imperial:false,metric:true,position:'bottomleft',maxWidth:130}).addTo(meteoAlarmMap);
+ const RiskLegend=L.Control.extend({
+  options:{position:'bottomleft'},
+  onAdd:function(){
+   const el=L.DomUtil.create('div','ww-alert-map-legend ww-map-legend-control');
+   el.innerHTML='<strong>ΕΠΙΠΕΔΟ ΚΙΝΔΥΝΟΥ</strong><span><i class="red"></i>Πολύ υψηλό</span><span><i class="orange"></i>Υψηλό</span><span><i class="yellow"></i>Μέτριο</span><span><i class="green"></i>Χαμηλό</span><span><i class="none"></i>Καμία προειδοποίηση</span>';
+   L.DomEvent.disableClickPropagation(el);return el;
+  }
+ });
+ meteoAlarmMap.addControl(new RiskLegend());
+ // Small interactive Europe locator with a Greece viewport rectangle.
+ const Mini=L.Control.extend({
+  options:{position:'topleft'},
+  onAdd:function(){
+   const box=L.DomUtil.create('div','ww-europe-inset');
+   box.innerHTML='<div class="ww-inset-title">ΕΥΡΩΠΗ</div><div class="ww-inset-map" aria-label="Χάρτης Ευρώπης"></div>';
+   L.DomEvent.disableClickPropagation(box);L.DomEvent.disableScrollPropagation(box);
+   setTimeout(()=>{
+    if(!box.isConnected||box._miniMap)return;
+    const mini=L.map(box.querySelector('.ww-inset-map'),{zoomControl:false,attributionControl:false,dragging:true,scrollWheelZoom:false,doubleClickZoom:false,boxZoom:false,keyboard:false,touchZoom:false}).setView([53,15],3);
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:12}).addTo(mini);
+    L.rectangle([[34.45,19.2],[41.85,29.9]],{color:'#dcecff',weight:1.5,fillColor:'#60a5fa',fillOpacity:.12,dashArray:'4 3'}).addTo(mini);
+    mini.on('click',e=>meteoAlarmMap.setView(e.latlng,5.8,{animate:true}));
+    box._miniMap=mini;setTimeout(()=>mini.invalidateSize(),80);
+   },0);
+   return box;
+  }
+ });
  meteoAlarmLoadRegions();
- // Leaflet can initialize before the tab/panel has its final dimensions.
  requestAnimationFrame(()=>{meteoAlarmMap.invalidateSize({pan:false});meteoAlarmMap.setView([38.45,23.55],5.8);});
  setTimeout(()=>{if(meteoAlarmMap){meteoAlarmMap.invalidateSize({pan:false});meteoAlarmMap.setView([38.45,23.55],5.8);}},450);
 }
@@ -5281,4 +5332,50 @@ html body[data-theme] #overview > .weather-layout > .city-current[data-landmark-
 #meteoAlarmMap .ww-region-path path{
   fill-opacity:.88;
 }
+
+/* MeteoAlarm map: satellite basemap and glass control set matching supplied visual reference */
+#meteoAlarmMap{background:#071d38!important;overflow:hidden;border-radius:12px}
+#meteoAlarmMap .leaflet-tile-pane{filter:saturate(1.12) contrast(1.04) brightness(.88)}
+#meteoAlarmMap .leaflet-control-attribution{background:rgba(5,18,34,.72)!important;color:#d8e8f8!important;border-radius:6px 0 0 0}
+#meteoAlarmMap .leaflet-control-attribution a{color:#9bc9f4!important}
+#meteoAlarmMap .leaflet-bottom{z-index:650}
+#meteoAlarmMap .leaflet-control-scale-line{background:rgba(7,24,45,.72);border-color:#e5efff;color:#fff;text-shadow:none;font-size:10px}
+.ww-map-controls{display:flex;flex-direction:column;gap:8px;margin:14px 0 0 14px}
+.ww-zoom-stack,.ww-map-btn{border:1px solid rgba(210,231,255,.36);background:rgba(8,29,53,.72);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 5px 18px rgba(0,0,0,.3)}
+.ww-zoom-stack{display:flex;flex-direction:column;border-radius:17px;overflow:hidden}
+.ww-map-btn{width:48px;height:48px;display:grid;place-items:center;color:#f4f8ff;cursor:pointer;transition:background .18s,transform .18s}
+.ww-zoom-stack .ww-map-btn{border:0;background:transparent}
+.ww-zoom-stack .ww-map-btn+ .ww-map-btn{border-top:1px solid rgba(220,235,255,.22)}
+.ww-map-btn:hover{background:rgba(75,132,190,.48);transform:translateY(-1px)}
+.ww-map-btn svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ww-locate-btn{border-radius:16px}
+.ww-europe-inset{width:142px;margin:14px 0 0 14px;padding:7px;border:1px solid rgba(220,238,255,.35);border-radius:15px;background:rgba(7,25,47,.78);backdrop-filter:blur(12px);box-shadow:0 7px 22px rgba(0,0,0,.32);overflow:hidden}
+.ww-inset-title{font-size:9px;letter-spacing:.16em;font-weight:800;color:#d9eaff;padding:1px 4px 6px}
+.ww-inset-map{height:92px;width:100%;border-radius:9px;overflow:hidden;background:#173654}
+.ww-inset-map .leaflet-control-container{display:none}
+#meteoAlarmMap .ww-map-tooltip{background:rgba(7,25,47,.94);color:#fff;border:1px solid rgba(219,237,255,.35);border-radius:9px;padding:8px 11px;box-shadow:0 8px 22px #0008}
+#meteoAlarmMap .ww-map-tooltip:before{border-top-color:rgba(7,25,47,.94)}
+.ww-alert-map-legend{position:absolute!important;z-index:700;left:14px;bottom:42px;display:flex;flex-direction:column;gap:8px;width:max-content;max-width:190px;padding:12px 14px!important;border:1px solid rgba(220,238,255,.32);border-radius:13px;background:rgba(7,25,47,.78)!important;color:#f0f6ff!important;backdrop-filter:blur(12px);box-shadow:0 7px 22px rgba(0,0,0,.32);font-size:11px!important}
+.ww-alert-map-legend:before{content:'ΕΠΙΠΕΔΟ ΚΙΝΔΥΝΟΥ';font-size:10px;font-weight:800;letter-spacing:.06em;color:#dcecff;margin-bottom:2px}
+.ww-alert-map-legend span{display:flex;align-items:center;gap:8px}
+.ww-alert-map-legend i{width:12px!important;height:12px!important;border-radius:50%!important;box-shadow:0 0 0 2px #ffffff22}
+.ww-alert-map-legend i.red{background:#ef2929!important}
+.ww-alert-map-legend i.orange{background:#f28a16!important}
+.ww-alert-map-legend i.yellow{background:#ffdf27!important}
+.ww-alert-map-legend i.green{background:#79d62b!important}
+@media(max-width:700px){
+ .ww-europe-inset{width:112px;margin:9px 0 0 9px}.ww-inset-map{height:72px}
+ .ww-map-controls{margin:9px 0 0 9px}.ww-map-btn{width:42px;height:42px}
+ .ww-alert-map-legend{left:9px;bottom:34px;padding:9px 11px!important}
+}
+
+.ww-alert-map-column>.ww-alert-map-legend{display:none!important}
+#meteoAlarmMap .leaflet-top.leaflet-left{display:flex;flex-direction:column;align-items:flex-start}
+#meteoAlarmMap .leaflet-bottom.leaflet-left{display:flex;flex-direction:column;align-items:flex-start}
+#meteoAlarmMap .ww-map-legend-control{position:relative!important;left:auto!important;bottom:auto!important;margin:8px 0 12px 14px!important}
+.ww-alert-map-legend.ww-map-legend-control{display:flex!important;flex-direction:column;gap:7px;width:max-content;max-width:190px;padding:11px 13px!important;border:1px solid rgba(220,238,255,.32);border-radius:13px;background:rgba(7,25,47,.82)!important;color:#f0f6ff!important;backdrop-filter:blur(12px);box-shadow:0 7px 22px rgba(0,0,0,.32);font-size:11px!important}
+.ww-alert-map-legend.ww-map-legend-control strong{font-size:10px;letter-spacing:.06em;color:#dcecff;margin-bottom:2px}
+.ww-alert-map-legend.ww-map-legend-control i{width:12px!important;height:12px!important;border-radius:50%!important;box-shadow:0 0 0 2px #ffffff22}
+.ww-alert-map-legend i.red{background:#ef2929!important}.ww-alert-map-legend i.orange{background:#f28a16!important}.ww-alert-map-legend i.yellow{background:#ffdf27!important}.ww-alert-map-legend i.green{background:#78d62b!important}.ww-alert-map-legend i.none{background:#35404d!important;border:1px solid #8297aa}
+@media(max-width:700px){#meteoAlarmMap .ww-map-legend-control{margin:6px 0 8px 9px!important}}
 </style>
