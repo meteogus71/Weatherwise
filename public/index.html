@@ -4365,24 +4365,29 @@ function meteoAlarmRenderMap(){
  });
  meteoAlarmMap.addControl(new RiskLegend());
 
- // Correct Leaflet sizing after the tab becomes visible or the layout changes.
- const refreshMapSize=()=>{
+ // Fit Greece only after the map has its real, visible dimensions.
+ // If Leaflet fits while the tab is hidden/collapsed, it can start at an extreme zoom.
+ let meteoAlarmInitialGreeceFitDone=false;
+ const fitGreeceOnFirstVisibleSize=()=>{
   if(!meteoAlarmMap||!host.isConnected)return;
   const rect=host.getBoundingClientRect();
-  if(rect.width>100&&rect.height>100)meteoAlarmMap.invalidateSize({pan:false,animate:false});
+  if(rect.width<500||rect.height<300)return;
+  meteoAlarmMap.invalidateSize({pan:false,animate:false});
+  if(!meteoAlarmInitialGreeceFitDone){
+   meteoAlarmMap.fitBounds([[34.45,19.2],[41.85,29.9]],{
+    paddingTopLeft:[24,24],paddingBottomRight:[24,24],
+    maxZoom:6.5,animate:false
+   });
+   meteoAlarmInitialGreeceFitDone=true;
+  }
  };
- requestAnimationFrame(()=>{
-  refreshMapSize();
-  if(meteoAlarmMap)meteoAlarmMap.fitBounds([[34.45,19.2],[41.85,29.9]],{padding:[24,24],animate:false});
- });
- setTimeout(()=>{
-  refreshMapSize();
-  if(meteoAlarmMap)meteoAlarmMap.fitBounds([[34.45,19.2],[41.85,29.9]],{padding:[24,24],animate:false});
- },250);
- setTimeout(refreshMapSize,600);
+ requestAnimationFrame(fitGreeceOnFirstVisibleSize);
+ requestAnimationFrame(()=>requestAnimationFrame(fitGreeceOnFirstVisibleSize));
+ setTimeout(fitGreeceOnFirstVisibleSize,250);
+ setTimeout(fitGreeceOnFirstVisibleSize,700);
  if(window.ResizeObserver){
   if(window._meteoAlarmMapResizeObserver)window._meteoAlarmMapResizeObserver.disconnect();
-  window._meteoAlarmMapResizeObserver=new ResizeObserver(refreshMapSize);
+  window._meteoAlarmMapResizeObserver=new ResizeObserver(fitGreeceOnFirstVisibleSize);
   window._meteoAlarmMapResizeObserver.observe(host);
  }
  imagery.on('tileerror',e=>console.warn('Esri World Imagery tile failed:',e.tile?.src||e));
@@ -4422,7 +4427,14 @@ async function meteoAlarmLoadRegions(){
  // Fit to Greece, including islands, with useful surrounding European context.
  if(meteoAlarmMap){
   const bounds=L.latLngBounds([[34.45,19.2],[41.85,29.9]]);
-  meteoAlarmMap.fitBounds([[34.45,19.2],[41.85,29.9]],{padding:[24,24],animate:false});
+  const rect=$('meteoAlarmMap')?.getBoundingClientRect();
+  if(rect&&rect.width>=500&&rect.height>=300){
+   meteoAlarmMap.invalidateSize({pan:false,animate:false});
+   if(typeof meteoAlarmInitialGreeceFitDone!=='undefined'&&!meteoAlarmInitialGreeceFitDone){
+    meteoAlarmMap.fitBounds([[34.45,19.2],[41.85,29.9]],{paddingTopLeft:[24,24],paddingBottomRight:[24,24],maxZoom:6.5,animate:false});
+    meteoAlarmInitialGreeceFitDone=true;
+   }
+  }
   setTimeout(()=>meteoAlarmMap&&meteoAlarmMap.invalidateSize({pan:false}),100);
  }
 }
