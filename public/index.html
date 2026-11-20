@@ -4279,7 +4279,7 @@ const meteoAlarmRegionAliases={
 function meteoAlarmRegionKey(text){const v=meteoAlarmNormalizeRegionText(text);for(const [key,aliases] of Object.entries(meteoAlarmRegionAliases)){if(aliases.some(a=>v.includes(meteoAlarmNormalizeRegionText(a))))return key;}for(const [key,name] of Object.entries(meteoAlarmRegionNames)){const n=meteoAlarmNormalizeRegionText(name);if(n&&v.includes(n))return key;}return '';}
 function meteoAlarmLevelRank(level){return ({red:3,orange:2,yellow:1})[level]||0;}
 function meteoAlarmRegionLevel(region){let best='';for(const a of meteoAlarmEntries.filter(x=>meteoAlarmOverlapDay(x,meteoAlarmSelectedDay))){const names=meteoAlarmAreaNames(a.area);if(names.some(n=>meteoAlarmRegionKey(n)===region)&&meteoAlarmLevelRank(a.level)>meteoAlarmLevelRank(best))best=a.level;}return best;}
-function meteoAlarmRegionColor(level){return ({yellow:'#facc15',orange:'#f97316',red:'#dc2626'})[level]||'#64748b';}
+function meteoAlarmRegionColor(level){return ({yellow:'#facc15',orange:'#f97316',red:'#dc2626'})[level]||'#35404d';}
 let meteoAlarmEuropeMap=null,meteoAlarmEuropeMarker=null;
 const METEOALARM_GREEK_NUTS2={
  'EL30':{key:'attica',name:'Αττική'},
@@ -4359,18 +4359,18 @@ function meteoAlarmDrawRegions(){
     weight:level?2.1:1.45,
     opacity:1,
     fillColor:fill,
-    fillOpacity:level?.88:.24,
+    fillOpacity:level?.88:.88,
     lineJoin:'round',
     lineCap:'round'
    },
    onEachFeature:(feature,polygon)=>{
     polygon.bindTooltip('<strong>'+f.name+'</strong><br>'+(level?meteoAlarmGreekSeverity(level)+' προειδοποίηση':'Χωρίς ενεργή προειδοποίηση'),{className:'ww-map-tooltip',sticky:true,direction:'top'});
     polygon.on('mouseover',()=>{
-     polygon.setStyle({weight:3.4,fillOpacity:level?.98:.42,color:'#fff'});
+     polygon.setStyle({weight:3.4,fillOpacity:level?.98:.94,color:'#fff'});
      const el=polygon.getElement();if(el)el.classList.add('ww-region-lifted');
     });
     polygon.on('mouseout',()=>{
-     polygon.setStyle({weight:level?2.1:1.45,fillOpacity:level?.88:.24,color:level?'#ffffff':'#71869a'});
+     polygon.setStyle({weight:level?2.1:1.45,fillOpacity:level?.88:.88,color:level?'#ffffff':'#71869a'});
      const el=polygon.getElement();if(el)el.classList.remove('ww-region-lifted');
     });
     polygon.on('click',()=>{
@@ -5187,4 +5187,11 @@ html body[data-theme] #overview > .weather-layout > .city-current[data-landmark-
  filter:drop-shadow(0 10px 5px rgba(4,15,28,.62)) drop-shadow(0 0 5px rgba(255,255,255,.4));
 }
 .ww-region-extrusion{display:none!important}
+
+/* Darker neutral regions without active MeteoAlarm warnings */
+#meteoAlarmMap .leaflet-overlay-pane path{
+}
+#meteoAlarmMap .ww-region-path path{
+  fill-opacity:.88;
+}
 </style>
