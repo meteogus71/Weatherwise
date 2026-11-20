@@ -4566,12 +4566,12 @@ function initPointWeatherMap(){
  const host=$('pointWeatherMap'); if(!host||pointWeatherMap)return;
  if(!window.L){host.innerHTML='<div style="padding:24px;color:#e9f1fb">Δεν φορτώθηκε η βιβλιοθήκη του χάρτη. Ελέγξτε τη σύνδεση και ανανεώστε τη σελίδα.</div>';return}
  pointWeatherMap=L.map(host,{zoomControl:true,scrollWheelZoom:true}).setView([48.5,15],4);
- const pointBaseTiles=L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}{r}.png?key=cb1_51yw_1_497f6b7d9f678b3bd71abfc2',{attribution:'© OpenStreetMap contributors © CARTO',maxZoom:19});
+ const pointBaseTiles=L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}{r}.png',{attribution:'© OpenStreetMap contributors © CARTO',maxZoom:19});
  pointBaseTiles.on('tileerror',()=>{
   if(!pointWeatherMap._pointFallbackTiles){
    pointWeatherMap._pointFallbackTiles=true;
    pointWeatherMap.eachLayer(layer=>{if(layer instanceof L.TileLayer)pointWeatherMap.removeLayer(layer)});
-   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap contributors',maxZoom:19}).addTo(pointWeatherMap);
+   L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{attribution:'© OpenStreetMap contributors © CARTO',maxZoom:19,subdomains:'abcd'}).addTo(pointWeatherMap);
   }
  });
  pointBaseTiles.addTo(pointWeatherMap);
