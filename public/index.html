@@ -4259,7 +4259,16 @@ const meteoAlarmRegionNames={
 function meteoAlarmDayRange(offset){const now=new Date();const start=new Date(now.getFullYear(),now.getMonth(),now.getDate()+offset);const end=new Date(start.getFullYear(),start.getMonth(),start.getDate()+1);return {start,end};}
 function meteoAlarmDayLabel(offset){const d=meteoAlarmDayRange(offset).start;return new Intl.DateTimeFormat('el-GR',{weekday:'long',day:'2-digit',month:'short',year:'numeric'}).format(d).replace(/\./g,'').toUpperCase();}
 function meteoAlarmInitDaybar(){document.querySelectorAll('.ww-alert-day').forEach(btn=>{const n=Number(btn.dataset.day);btn.querySelector('small').textContent=meteoAlarmDayLabel(n);btn.addEventListener('click',()=>{meteoAlarmSelectedDay=n;document.querySelectorAll('.ww-alert-day').forEach(b=>{const active=Number(b.dataset.day)===n;b.classList.toggle('active',active);b.setAttribute('aria-selected',String(active));});renderMeteoAlarmAlerts(meteoAlarmEntries);});});}
-function meteoAlarmOverlapDay(a,offset){const {start,end}=meteoAlarmDayRange(offset);const from=new Date(a.effective||a.onset||a.sent||0);const to=new Date(a.expires||a.effective||a.onset||a.sent||0);if(isNaN(from)||isNaN(to))return offset===0;return from<end&&to>=start;}
+function meteoAlarmOverlapDay(a,offset){
+ const {start,end}=meteoAlarmDayRange(offset);
+ const fromValue=a.onset||a.effective;
+ const toValue=a.expires;
+ if(!fromValue||!toValue)return false;
+ const from=new Date(fromValue),to=new Date(toValue);
+ if(!Number.isFinite(from.getTime())||!Number.isFinite(to.getTime()))return false;
+ // CAP intervals are half-open: the warning is not active at its exact expiry instant.
+ return from<end&&to>start;
+}
 function meteoAlarmAreaNames(area){return String(area||'').split(/[,;|]/).map(x=>x.trim().toLowerCase()).filter(Boolean);}
 function meteoAlarmNormalizeRegionText(text){return String(text||'').toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').replace(/περιφερεια(κη)?/g,'').replace(/region of|region|regional unit of/g,'').replace(/[^a-zα-ω0-9]+/g,' ').trim();}
 const meteoAlarmRegionAliases={
@@ -4389,9 +4398,87 @@ function renderMeteoAlarmAlerts(entries){
  const host=$('meteoAlarmAlertsList'),count=$('meteoAlarmDayCount');if(!host)return;
  const dayEntries=entries.filter(a=>meteoAlarmOverlapDay(a,meteoAlarmSelectedDay)).sort((a,b)=>meteoAlarmLevelRank(b.level)-meteoAlarmLevelRank(a.level));if(count)count.textContent=dayEntries.length+' '+(dayEntries.length===1?'προειδοποίηση':'προειδοποιήσεις');
  if(!dayEntries.length){host.innerHTML='<div class="notice">Δεν υπάρχει προειδοποίηση MeteoAlarm για την επιλεγμένη ημέρα.</div>';meteoAlarmDrawRegions();return;}
- host.innerHTML=dayEntries.map(a=>{const start=meteoAlarmLocalDateTime(a.effective||a.onset||a.sent),end=meteoAlarmLocalDateTime(a.expires);const icon=meteoAlarmPhenomenonIcon(a.event,a.headline,a.description);const level=a.level||'unknown';const region=meteoAlarmRegionKey(a.area);return `<article class="meteoalarm-alert-card ${meteoAlarmSafe(level)}" data-region="${meteoAlarmSafe(region)}"><div class="meteoalarm-alert-hero"><div class="meteoalarm-alert-hero-main"><div class="meteoalarm-alert-country">Ελλάδα · MeteoAlarm</div><span class="meteoalarm-alert-badge ${meteoAlarmSafe(level)}">${meteoAlarmGreekSeverity(level)} ΠΡΟΕΙΔΟΠΟΙΗΣΗ</span><div class="meteoalarm-alert-title">${meteoAlarmSafe(meteoAlarmGreekText(a.headline||a.event||'Προειδοποίηση καιρού','headline'))}</div></div><div class="meteoalarm-alert-icon" role="img" aria-label="${meteoAlarmSafe(a.event||'Καιρικό φαινόμενο')}">${icon}</div></div>${a.area?`<div class="meteoalarm-alert-area">${meteoAlarmSafe(meteoAlarmGreekText(a.area,'area'))}</div>`:''}<div class="meteoalarm-alert-body"><div class="meteoalarm-alert-times"><div class="meteoalarm-alert-time"><div class="meteoalarm-alert-time-label">ΕΝΑΡΞΗ</div><div class="meteoalarm-alert-time-value">${meteoAlarmSafe(start.date)}</div><div class="meteoalarm-alert-time-value">${meteoAlarmSafe(start.time)}</div><div class="meteoalarm-alert-time-zone">Τοπική ώρα Ελλάδας</div></div><div class="meteoalarm-alert-time"><div class="meteoalarm-alert-time-label">ΛΗΞΗ</div><div class="meteoalarm-alert-time-value">${meteoAlarmSafe(end.date)}</div><div class="meteoalarm-alert-time-value">${meteoAlarmSafe(end.time)}</div><div class="meteoalarm-alert-time-zone">Τοπική ώρα Ελλάδας</div></div></div>${a.description?`<div class="meteoalarm-alert-description">${meteoAlarmSafe(meteoAlarmGreekText(a.description,'description'))}</div>`:''}<div class="meteoalarm-alert-meta">Φαινόμενο: ${meteoAlarmSafe(meteoAlarmGreekText(a.event||'—','event'))} · Βεβαιότητα: ${meteoAlarmSafe(meteoAlarmGreekText(a.certainty||'—','certainty'))} · Έκδοση: ${meteoAlarmSafe(meteoAlarmDate(a.sent||a.updated))}</div>${a.url?`<a class="meteoalarm-alert-link" href="${meteoAlarmSafe(a.url)}" target="_blank" rel="noopener">Περισσότερες πληροφορίες ↗</a>`:''}</div></article>`;}).join('');meteoAlarmDrawRegions();
+ host.innerHTML=dayEntries.map(a=>{const start=meteoAlarmLocalDateTime(a.onset||a.effective),end=meteoAlarmLocalDateTime(a.expires);const icon=meteoAlarmPhenomenonIcon(a.event,a.headline,a.description);const level=a.level||'unknown';const region=meteoAlarmRegionKey(a.area);return `<article class="meteoalarm-alert-card ${meteoAlarmSafe(level)}" data-region="${meteoAlarmSafe(region)}"><div class="meteoalarm-alert-hero"><div class="meteoalarm-alert-hero-main"><div class="meteoalarm-alert-country">Ελλάδα · MeteoAlarm</div><span class="meteoalarm-alert-badge ${meteoAlarmSafe(level)}">${meteoAlarmGreekSeverity(level)} ΠΡΟΕΙΔΟΠΟΙΗΣΗ</span><div class="meteoalarm-alert-title">${meteoAlarmSafe(meteoAlarmGreekText(a.headline||a.event||'Προειδοποίηση καιρού','headline'))}</div></div><div class="meteoalarm-alert-icon" role="img" aria-label="${meteoAlarmSafe(a.event||'Καιρικό φαινόμενο')}">${icon}</div></div>${a.area?`<div class="meteoalarm-alert-area">${meteoAlarmSafe(meteoAlarmGreekText(a.area,'area'))}</div>`:''}<div class="meteoalarm-alert-body"><div class="meteoalarm-alert-times"><div class="meteoalarm-alert-time"><div class="meteoalarm-alert-time-label">ΕΝΑΡΞΗ</div><div class="meteoalarm-alert-time-value">${meteoAlarmSafe(start.date)}</div><div class="meteoalarm-alert-time-value">${meteoAlarmSafe(start.time)}</div><div class="meteoalarm-alert-time-zone">Τοπική ώρα Ελλάδας</div></div><div class="meteoalarm-alert-time"><div class="meteoalarm-alert-time-label">ΛΗΞΗ</div><div class="meteoalarm-alert-time-value">${meteoAlarmSafe(end.date)}</div><div class="meteoalarm-alert-time-value">${meteoAlarmSafe(end.time)}</div><div class="meteoalarm-alert-time-zone">Τοπική ώρα Ελλάδας</div></div></div>${a.description?`<div class="meteoalarm-alert-description">${meteoAlarmSafe(meteoAlarmGreekText(a.description,'description'))}</div>`:''}<div class="meteoalarm-alert-meta">Φαινόμενο: ${meteoAlarmSafe(meteoAlarmGreekText(a.event||'—','event'))} · Βεβαιότητα: ${meteoAlarmSafe(meteoAlarmGreekText(a.certainty||'—','certainty'))} · Έκδοση: ${meteoAlarmSafe(meteoAlarmDate(a.sent||a.updated))}</div>${a.url?`<a class="meteoalarm-alert-link" href="${meteoAlarmSafe(a.url)}" target="_blank" rel="noopener">Περισσότερες πληροφορίες ↗</a>`:''}</div></article>`;}).join('');meteoAlarmDrawRegions();
 }
-async function loadMeteoAlarmAlerts(){const statusEl=$('meteoAlarmFeedStatus'),updatedEl=$('meteoAlarmUpdated'),host=$('meteoAlarmAlertsList');if(!statusEl||!host)return;statusEl.textContent='ΛΗΨΗ ΔΕΔΟΜΕΝΩΝ…';try{const response=await fetch(METEOALARM_PROXY_ENDPOINT,{cache:'no-store'});if(!response.ok)throw new Error('HTTP '+response.status);const xmlTextValue=await response.text();const doc=new DOMParser().parseFromString(xmlTextValue,'application/xml');if(doc.querySelector('parsererror'))throw new Error('Μη έγκυρη XML ροή');const entries=Array.from(doc.getElementsByTagName('*')).filter(el=>el.localName==='entry');const now=Date.now();meteoAlarmEntries=entries.map(entry=>{const info=xmlLocalValues(entry,'info')[0]||entry;const title=xmlText(entry,'headline')||xmlText(entry,'title');const event=xmlText(entry,'event')||'Καιρικό φαινόμενο';const severity=xmlText(entry,'severity');const expires=xmlText(entry,'expires');const sent=xmlText(entry,'sent')||xmlText(entry,'updated');const effective=xmlText(entry,'effective')||xmlText(entry,'onset');const status=xmlText(entry,'status');const msgType=xmlText(entry,'msgType');const area=xmlLocalValues(info,'areaDesc').map(x=>x.textContent.trim()).filter(Boolean).join(', ')||xmlText(entry,'areaDesc');const description=xmlText(info,'description')||xmlText(entry,'summary')||xmlText(entry,'content');const certainty=xmlText(info,'certainty')||xmlText(entry,'certainty');const link=Array.from(entry.getElementsByTagName('*')).find(el=>el.localName==='link'&&el.getAttribute('href'));return {headline:title,event,severity,level:meteoAlarmSeverity(severity),expires,sent,effective,area,description,certainty,status,msgType,url:link?.getAttribute('href')||''};}).filter(a=>{const expiry=a.expires?new Date(a.expires).getTime():Infinity;const effective=a.effective?new Date(a.effective).getTime():0;return (!Number.isFinite(expiry)||expiry>=now-86400000)&&(!a.status||a.status.toLowerCase()==='actual')&&(!a.msgType||!['cancel','ack'].includes(a.msgType.toLowerCase()))&&(a.level!=='unknown'||a.event!=='')&&(effective<Date.now()+3*86400000);});renderMeteoAlarmAlerts(meteoAlarmEntries);statusEl.textContent='METEOALARM · ΕΠΙΣΗΜΗ ΡΟΗ';updatedEl.textContent='Τελευταίος έλεγχος: '+new Date().toLocaleString('el-GR');}catch(error){statusEl.textContent='ΜΗ ΔΙΑΘΕΣΙΜΗ ΑΥΤΗ ΤΗ ΣΤΙΓΜΗ';host.innerHTML=`<div class="notice">Δεν ήταν δυνατή η ανάκτηση της ροής CAP/Atom μέσω του proxy (${meteoAlarmSafe(error.message)}). Οι επίσημες προειδοποιήσεις παραμένουν διαθέσιμες από την ιστοσελίδα της ΕΜΥ. <a href="https://www.emy.gr/warnings" target="_blank" rel="noopener">Άνοιγμα ΕΜΥ ↗</a></div>`;updatedEl.textContent='Τελευταία προσπάθεια: '+new Date().toLocaleString('el-GR');}}
+async function loadMeteoAlarmAlerts(){
+ const statusEl=$('meteoAlarmFeedStatus'),updatedEl=$('meteoAlarmUpdated'),host=$('meteoAlarmAlertsList');
+ if(!statusEl||!host)return;
+ statusEl.textContent='ΛΗΨΗ ΔΕΔΟΜΕΝΩΝ…';
+ try{
+  const response=await fetch(METEOALARM_PROXY_ENDPOINT,{cache:'no-store'});
+  if(!response.ok)throw new Error('HTTP '+response.status);
+  const feedCacheState=(response.headers.get('X-WeatherWise-Cache')||'').toUpperCase();
+  const xmlTextValue=await response.text();
+  const doc=new DOMParser().parseFromString(xmlTextValue,'application/xml');
+  if(doc.querySelector('parsererror'))throw new Error('Μη έγκυρη XML ροή');
+  const entries=Array.from(doc.getElementsByTagName('*')).filter(el=>el.localName==='entry');
+  const now=Date.now(),horizon=now+3*86400000;
+  const parsed=entries.map(entry=>{
+   const info=xmlLocalValues(entry,'info')[0]||entry;
+   const read=(node,name)=>xmlText(node,name)||xmlText(entry,name);
+   const headline=read(info,'headline')||read(entry,'title');
+   const event=read(info,'event')||'Καιρικό φαινόμενο';
+   const severity=read(info,'severity');
+   const expires=read(info,'expires');
+   const sent=read(entry,'sent')||read(entry,'updated');
+   const effective=read(info,'effective');
+   const onset=read(info,'onset');
+   const status=read(entry,'status');
+   const msgType=read(entry,'msgType');
+   const area=xmlLocalValues(info,'areaDesc').map(x=>x.textContent.trim()).filter(Boolean).join(', ')||read(entry,'areaDesc');
+   const description=read(info,'description')||read(entry,'summary')||read(entry,'content');
+   const certainty=read(info,'certainty');
+   const urgency=read(info,'urgency');
+   const identifier=read(entry,'identifier');
+   const references=read(entry,'references');
+   const link=Array.from(entry.getElementsByTagName('*')).find(el=>el.localName==='link'&&el.getAttribute('href'));
+   return {headline,event,severity,level:meteoAlarmSeverity(severity),expires,sent,effective,onset,area,description,certainty,urgency,status,msgType,identifier,references,url:link?.getAttribute('href')||''};
+  });
+  // CAP Update messages supersede the messages listed in their references field.
+  const superseded=new Set();
+  parsed.filter(a=>(a.msgType||'').toLowerCase()==='update').forEach(a=>{
+   String(a.references||'').split(/\r?\n/).forEach(line=>{
+    const parts=line.trim().split(',');
+    if(parts.length>=2&&parts[1].trim())superseded.add(parts[1].trim());
+   });
+  });
+  const valid=parsed.filter(a=>{
+   const type=(a.msgType||'alert').toLowerCase();
+   const state=(a.status||'actual').toLowerCase();
+   const end=new Date(a.expires).getTime();
+   const start=new Date(a.onset||a.effective||a.sent).getTime();
+   // Reject canceled/test/draft messages, superseded originals and expired or undated alerts.
+   if(!['alert','update'].includes(type)||!['actual'].includes(state))return false;
+   if(a.identifier&&superseded.has(a.identifier))return false;
+   if(!a.expires||!Number.isFinite(end)||end<=now)return false;
+   if(!Number.isFinite(start)||start>=horizon||end<=start)return false;
+   if(a.level==='unknown')return false;
+   return true;
+  });
+  // Keep only the newest CAP message for the same area + phenomenon.
+  const newest=new Map();
+  valid.forEach(a=>{
+   const key=[String(a.area||'').toLowerCase().replace(/\s+/g,' ').trim(),String(a.event||'').toLowerCase().trim()].join('|');
+   const sentTime=new Date(a.sent||0).getTime()||0;
+   const previous=newest.get(key);
+   if(!previous||(new Date(previous.sent||0).getTime()||0)<sentTime)newest.set(key,a);
+  });
+  meteoAlarmEntries=Array.from(newest.values());
+  renderMeteoAlarmAlerts(meteoAlarmEntries);
+  statusEl.textContent=feedCacheState==='STALE'?'METEOALARM · ΠΑΛΑΙΑ ΡΟΗ':'METEOALARM · ΕΠΙΣΗΜΗ ΡΟΗ';
+  if(updatedEl)updatedEl.textContent=(feedCacheState==='STALE'?'Παλαιά δεδομένα · τελευταίος έλεγχος: ':'Τελευταίος έλεγχος: ')+new Date().toLocaleString('el-GR',{timeZone:'Europe/Athens'});
+  if(feedCacheState==='STALE'){
+   const note=document.createElement('div');note.className='notice';note.textContent='Προσοχή: η επίσημη ροή δεν ανανεώθηκε. Εμφανίζονται μόνο μηνύματα των οποίων η ώρα λήξης δεν έχει παρέλθει· ενδέχεται να μην περιλαμβάνονται νεότερες ακυρώσεις ή ενημερώσεις.';
+   host.prepend(note);
+  }
+ }catch(error){
+  statusEl.textContent='ΜΗ ΔΙΑΘΕΣΙΜΗ ΑΥΤΗ ΤΗ ΣΤΙΓΜΗ';
+  host.innerHTML=`<div class="notice">Δεν ήταν δυνατή η ανάκτηση της επίσημης ροής MeteoAlarm (${meteoAlarmSafe(error.message)}). Δεν θα εμφανιστούν παλαιές προειδοποιήσεις ως ενεργές. <a href="https://www.emy.gr/warnings" target="_blank" rel="noopener">Άνοιγμα ΕΜΥ ↗</a></div>`;
+  if(updatedEl)updatedEl.textContent='Τελευταία προσπάθεια: '+new Date().toLocaleString('el-GR',{timeZone:'Europe/Athens'});
+  meteoAlarmEntries=[];
+  meteoAlarmDrawRegions();
+ }
+}
 if($('meteoAlarmRefresh'))$('meteoAlarmRefresh').addEventListener('click',loadMeteoAlarmAlerts);meteoAlarmInitDaybar();meteoAlarmRenderMap();loadMeteoAlarmAlerts();setInterval(loadMeteoAlarmAlerts,5*60*1000);
 
 initMap();
