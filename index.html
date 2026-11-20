@@ -4311,16 +4311,28 @@ function meteoAlarmRenderMap(){
  const host=$('meteoAlarmMap');
  if(meteoAlarmMap){meteoAlarmMap.remove();meteoAlarmMap=null;}
  host.innerHTML='';
- meteoAlarmMap=L.map(host,{scrollWheelZoom:true,zoomControl:false,minZoom:4,maxZoom:12,preferCanvas:false,zoomSnap:.25,attributionControl:true}).setView([38.45,23.55],5.8);
- // Satellite imagery similar to the supplied reference, with geographic labels on top.
- const imagery=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{
-  maxZoom:19,attribution:'Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics'
- }).addTo(meteoAlarmMap);
- L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',{
-  maxZoom:19,opacity:.88,attribution:''
- }).addTo(meteoAlarmMap);
+ // Create map only after the container has a measurable size.
+ meteoAlarmMap=L.map(host,{
+  scrollWheelZoom:true,zoomControl:false,minZoom:4,maxZoom:12,
+  preferCanvas:false,zoomSnap:.25,attributionControl:true
+ });
+ meteoAlarmMap.setView([38.45,23.55],5.8);
+
+ // Esri World Imagery satellite tiles (canonical services.arcgisonline.com endpoint).
+ const imagery=L.tileLayer(
+  'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+  {maxZoom:19,maxNativeZoom:19,keepBuffer:4,updateWhenIdle:false,attribution:'Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics'}
+ ).addTo(meteoAlarmMap);
+
+ // Geographic labels and borders, transparent over the satellite imagery.
+ L.tileLayer(
+  'https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
+  {maxZoom:19,maxNativeZoom:19,keepBuffer:4,opacity:.9,attribution:''}
+ ).addTo(meteoAlarmMap);
+
  meteoAlarmRegionLayer=L.layerGroup().addTo(meteoAlarmMap);
- // Custom glass controls: zoom, return to Greece and scale.
+
+ // Glass zoom and locate controls.
  const GlassControls=L.Control.extend({
   options:{position:'topleft'},
   onAdd:function(){
@@ -4331,14 +4343,14 @@ function meteoAlarmRenderMap(){
     const btn=e.target.closest('button');if(!btn)return;
     if(btn.dataset.action==='zoom-in')meteoAlarmMap.zoomIn();
     if(btn.dataset.action==='zoom-out')meteoAlarmMap.zoomOut();
-    if(btn.dataset.action==='locate')meteoAlarmMap.fitBounds([[34.45,19.2],[41.85,29.9]],{padding:[18,18],animate:true});
+    if(btn.dataset.action==='locate')meteoAlarmMap.fitBounds([[34.45,19.2],[41.85,29.9]],{padding:[24,24],animate:true});
    });
    return wrap;
   }
  });
- meteoAlarmMap.addControl(new Mini());
  meteoAlarmMap.addControl(new GlassControls());
  L.control.scale({imperial:false,metric:true,position:'bottomleft',maxWidth:130}).addTo(meteoAlarmMap);
+
  const RiskLegend=L.Control.extend({
   options:{position:'bottomleft'},
   onAdd:function(){
@@ -4348,28 +4360,24 @@ function meteoAlarmRenderMap(){
   }
  });
  meteoAlarmMap.addControl(new RiskLegend());
- // Small interactive Europe locator with a Greece viewport rectangle.
- const Mini=L.Control.extend({
-  options:{position:'topleft'},
-  onAdd:function(){
-   const box=L.DomUtil.create('div','ww-europe-inset');
-   box.innerHTML='<div class="ww-inset-title">ΕΥΡΩΠΗ</div><div class="ww-inset-map" aria-label="Χάρτης Ευρώπης"></div>';
-   L.DomEvent.disableClickPropagation(box);L.DomEvent.disableScrollPropagation(box);
-   setTimeout(()=>{
-    if(!box.isConnected||box._miniMap)return;
-    const mini=L.map(box.querySelector('.ww-inset-map'),{zoomControl:false,attributionControl:false,dragging:true,scrollWheelZoom:false,doubleClickZoom:false,boxZoom:false,keyboard:false,touchZoom:false}).setView([53,15],3);
-    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:12}).addTo(mini);
-    L.rectangle([[34.45,19.2],[41.85,29.9]],{color:'#dcecff',weight:1.5,fillColor:'#60a5fa',fillOpacity:.12,dashArray:'4 3'}).addTo(mini);
-    mini.on('click',e=>meteoAlarmMap.setView(e.latlng,5.8,{animate:true}));
-    box._miniMap=mini;setTimeout(()=>mini.invalidateSize(),80);
-   },0);
-   return box;
-  }
- });
+
+ // Correct Leaflet sizing after the tab becomes visible or the layout changes.
+ const refreshMapSize=()=>{
+  if(!meteoAlarmMap||!host.isConnected)return;
+  const rect=host.getBoundingClientRect();
+  if(rect.width>100&&rect.height>100)meteoAlarmMap.invalidateSize({pan:false,animate:false});
+ };
+ requestAnimationFrame(refreshMapSize);
+ setTimeout(refreshMapSize,150);
+ setTimeout(refreshMapSize,600);
+ if(window.ResizeObserver){
+  if(window._meteoAlarmMapResizeObserver)window._meteoAlarmMapResizeObserver.disconnect();
+  window._meteoAlarmMapResizeObserver=new ResizeObserver(refreshMapSize);
+  window._meteoAlarmMapResizeObserver.observe(host);
+ }
+ imagery.on('tileerror',e=>console.warn('Esri World Imagery tile failed:',e.tile?.src||e));
  meteoAlarmLoadRegions();
- requestAnimationFrame(()=>{meteoAlarmMap.invalidateSize({pan:false});meteoAlarmMap.setView([38.45,23.55],5.8);});
- setTimeout(()=>{if(meteoAlarmMap){meteoAlarmMap.invalidateSize({pan:false});meteoAlarmMap.setView([38.45,23.55],5.8);}},450);
-}
+} 
 async function meteoAlarmLoadRegions(){
  const urls=[
   'https://gisco-services.ec.europa.eu/distribution/v2/nuts/geojson/NUTS_RG_01M_2024_4326_LEVL_2.geojson',
@@ -5266,9 +5274,9 @@ html body[data-theme] #overview > .weather-layout > .city-current[data-landmark-
 
 /* MeteoAlarm map: region geometry, visible extrusion and Europe locator */
 #meteoAlarmMap{position:relative;overflow:hidden;background:#0b2942!important;isolation:isolate}
-#meteoAlarmEuropeLocator{position:absolute;z-index:800;left:14px;top:14px;width:164px;padding:8px;border-radius:13px;background:rgba(8,28,48,.92);border:1px solid rgba(180,220,255,.55);box-shadow:0 10px 28px rgba(0,0,0,.38);backdrop-filter:blur(10px);color:#fff}
+
 .ww-europe-locator-title{font-size:10px;font-weight:900;letter-spacing:.12em;padding:1px 3px 6px}
-#meteoAlarmEuropeMiniMap{height:104px;width:100%;border-radius:8px;overflow:hidden;background:#b9c9d5}
+
 .ww-europe-locator-caption{display:flex;align-items:center;gap:7px;padding:7px 2px 1px;font-size:10px;font-weight:700}
 .ww-europe-locator-caption span{width:8px;height:8px;border-radius:50%;background:#ef4444;box-shadow:0 0 0 3px #ef444455}
 .ww-region-extrusion{filter:drop-shadow(0 5px 3px rgba(0,0,0,.45))}
@@ -5277,7 +5285,7 @@ html body[data-theme] #overview > .weather-layout > .city-current[data-landmark-
 .ww-region-path.ww-region-lifted{filter:drop-shadow(0 13px 7px rgba(0,0,0,.65)) drop-shadow(0 0 8px rgba(255,255,255,.55));transform:translateY(-5px) scale(1.012);stroke-width:3.8!important}
 .ww-map-tooltip{background:rgba(7,25,43,.96)!important;color:#fff!important;border:1px solid rgba(255,255,255,.35)!important;border-radius:8px!important;box-shadow:0 5px 18px #0005!important}
 .ww-map-tooltip:before{border-top-color:rgba(7,25,43,.96)!important}
-@media(max-width:560px){#meteoAlarmEuropeLocator{width:118px;left:8px;top:8px;padding:6px}#meteoAlarmEuropeMiniMap{height:76px}}
+@media(max-width:560px){}
 
 /* Final MeteoAlarm map correction: Greece-first framing, crisp region borders and raised polygons */
 #meteoAlarmMap{position:relative!important;overflow:hidden!important;background:#b9c9d5!important;isolation:isolate}
@@ -5349,10 +5357,10 @@ html body[data-theme] #overview > .weather-layout > .city-current[data-landmark-
 .ww-map-btn:hover{background:rgba(75,132,190,.48);transform:translateY(-1px)}
 .ww-map-btn svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .ww-locate-btn{border-radius:16px}
-.ww-europe-inset{width:142px;margin:14px 0 0 14px;padding:7px;border:1px solid rgba(220,238,255,.35);border-radius:15px;background:rgba(7,25,47,.78);backdrop-filter:blur(12px);box-shadow:0 7px 22px rgba(0,0,0,.32);overflow:hidden}
-.ww-inset-title{font-size:9px;letter-spacing:.16em;font-weight:800;color:#d9eaff;padding:1px 4px 6px}
-.ww-inset-map{height:92px;width:100%;border-radius:9px;overflow:hidden;background:#173654}
-.ww-inset-map .leaflet-control-container{display:none}
+
+
+
+
 #meteoAlarmMap .ww-map-tooltip{background:rgba(7,25,47,.94);color:#fff;border:1px solid rgba(219,237,255,.35);border-radius:9px;padding:8px 11px;box-shadow:0 8px 22px #0008}
 #meteoAlarmMap .ww-map-tooltip:before{border-top-color:rgba(7,25,47,.94)}
 .ww-alert-map-legend{position:absolute!important;z-index:700;left:14px;bottom:42px;display:flex;flex-direction:column;gap:8px;width:max-content;max-width:190px;padding:12px 14px!important;border:1px solid rgba(220,238,255,.32);border-radius:13px;background:rgba(7,25,47,.78)!important;color:#f0f6ff!important;backdrop-filter:blur(12px);box-shadow:0 7px 22px rgba(0,0,0,.32);font-size:11px!important}
@@ -5364,7 +5372,7 @@ html body[data-theme] #overview > .weather-layout > .city-current[data-landmark-
 .ww-alert-map-legend i.yellow{background:#ffdf27!important}
 .ww-alert-map-legend i.green{background:#79d62b!important}
 @media(max-width:700px){
- .ww-europe-inset{width:112px;margin:9px 0 0 9px}.ww-inset-map{height:72px}
+ 
  .ww-map-controls{margin:9px 0 0 9px}.ww-map-btn{width:42px;height:42px}
  .ww-alert-map-legend{left:9px;bottom:34px;padding:9px 11px!important}
 }
@@ -5378,4 +5386,20 @@ html body[data-theme] #overview > .weather-layout > .city-current[data-landmark-
 .ww-alert-map-legend.ww-map-legend-control i{width:12px!important;height:12px!important;border-radius:50%!important;box-shadow:0 0 0 2px #ffffff22}
 .ww-alert-map-legend i.red{background:#ef2929!important}.ww-alert-map-legend i.orange{background:#f28a16!important}.ww-alert-map-legend i.yellow{background:#ffdf27!important}.ww-alert-map-legend i.green{background:#78d62b!important}.ww-alert-map-legend i.none{background:#35404d!important;border:1px solid #8297aa}
 @media(max-width:700px){#meteoAlarmMap .ww-map-legend-control{margin:6px 0 8px 9px!important}}
+
+/* Esri/Leaflet tile sizing fix: prevent global responsive image rules shrinking tiles */
+#meteoAlarmMap .leaflet-tile{
+ max-width:none!important;
+ max-height:none!important;
+ width:256px!important;
+ height:256px!important;
+}
+#meteoAlarmMap .leaflet-container{width:100%;height:100%;background:#102c49}
+#meteoAlarmMap .leaflet-tile-container img{max-width:none!important;max-height:none!important}
+#meteoAlarmMap .leaflet-pane{z-index:auto}
+#meteoAlarmMap .leaflet-tile-pane{z-index:200}
+#meteoAlarmMap .leaflet-overlay-pane{z-index:400}
+#meteoAlarmMap .leaflet-marker-pane{z-index:600}
+#meteoAlarmMap .leaflet-tooltip-pane{z-index:650}
+#meteoAlarmMap .leaflet-control-container{z-index:800}
 </style>
