@@ -4320,7 +4320,7 @@ function meteoAlarmRenderMap(){
   scrollWheelZoom:true,zoomControl:false,minZoom:4,maxZoom:12,
   preferCanvas:false,zoomSnap:.25,attributionControl:true
  });
- meteoAlarmMap.setView([38.45,23.55],5.8);
+ meteoAlarmMap.fitBounds([[34.45,19.2],[41.85,29.9]],{padding:[24,24],animate:false});
 
  // Esri World Imagery satellite tiles (canonical services.arcgisonline.com endpoint).
  const imagery=L.tileLayer(
@@ -4371,8 +4371,14 @@ function meteoAlarmRenderMap(){
   const rect=host.getBoundingClientRect();
   if(rect.width>100&&rect.height>100)meteoAlarmMap.invalidateSize({pan:false,animate:false});
  };
- requestAnimationFrame(refreshMapSize);
- setTimeout(refreshMapSize,150);
+ requestAnimationFrame(()=>{
+  refreshMapSize();
+  if(meteoAlarmMap)meteoAlarmMap.fitBounds([[34.45,19.2],[41.85,29.9]],{padding:[24,24],animate:false});
+ });
+ setTimeout(()=>{
+  refreshMapSize();
+  if(meteoAlarmMap)meteoAlarmMap.fitBounds([[34.45,19.2],[41.85,29.9]],{padding:[24,24],animate:false});
+ },250);
  setTimeout(refreshMapSize,600);
  if(window.ResizeObserver){
   if(window._meteoAlarmMapResizeObserver)window._meteoAlarmMapResizeObserver.disconnect();
@@ -4416,7 +4422,7 @@ async function meteoAlarmLoadRegions(){
  // Fit to Greece, including islands, with useful surrounding European context.
  if(meteoAlarmMap){
   const bounds=L.latLngBounds([[34.45,19.2],[41.85,29.9]]);
-  meteoAlarmMap.fitBounds(bounds,{paddingTopLeft:[18,18],paddingBottomRight:[18,18],animate:false});
+  meteoAlarmMap.fitBounds([[34.45,19.2],[41.85,29.9]],{padding:[24,24],animate:false});
   setTimeout(()=>meteoAlarmMap&&meteoAlarmMap.invalidateSize({pan:false}),100);
  }
 }
