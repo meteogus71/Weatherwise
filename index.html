@@ -4261,19 +4261,75 @@ function meteoAlarmDayLabel(offset){const d=meteoAlarmDayRange(offset).start;ret
 function meteoAlarmInitDaybar(){document.querySelectorAll('.ww-alert-day').forEach(btn=>{const n=Number(btn.dataset.day);btn.querySelector('small').textContent=meteoAlarmDayLabel(n);btn.addEventListener('click',()=>{meteoAlarmSelectedDay=n;document.querySelectorAll('.ww-alert-day').forEach(b=>{const active=Number(b.dataset.day)===n;b.classList.toggle('active',active);b.setAttribute('aria-selected',String(active));});renderMeteoAlarmAlerts(meteoAlarmEntries);});});}
 function meteoAlarmOverlapDay(a,offset){const {start,end}=meteoAlarmDayRange(offset);const from=new Date(a.effective||a.onset||a.sent||0);const to=new Date(a.expires||a.effective||a.onset||a.sent||0);if(isNaN(from)||isNaN(to))return offset===0;return from<end&&to>=start;}
 function meteoAlarmAreaNames(area){return String(area||'').split(/[,;|]/).map(x=>x.trim().toLowerCase()).filter(Boolean);}
-function meteoAlarmRegionKey(text){const v=String(text||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');for(const [k] of Object.entries(meteoAlarmRegionNames)){if(v.includes(k.normalize('NFD').replace(/[\u0300-\u036f]/g,'')))return k;}for(const [k,el] of Object.entries(meteoAlarmRegionNames)){if(v.includes(el.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')))return k;}return '';}
+function meteoAlarmNormalizeRegionText(text){return String(text||'').toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').replace(/περιφερεια(κη)?/g,'').replace(/region of|region|regional unit of/g,'').replace(/[^a-zα-ω0-9]+/g,' ').trim();}
+const meteoAlarmRegionAliases={
+ 'central macedonia':['central macedonia','kentriki makedonia','κεντρικη μακεδονια','θεσσαλονικη'],
+ 'east macedonia and thrace':['east macedonia and thrace','eastern macedonia and thrace','anatoliki makedonia kai thraki','ανατολικη μακεδονια και θρακη','thrace'],
+ 'western macedonia':['western macedonia','dytiki makedonia','δυτικη μακεδονια'],
+ 'epirus':['epirus','ipeiros','ηπειρος'],'thessaly':['thessaly','thessalia','θεσσαλια'],
+ 'ionian islands':['ionian islands','ionioi nisoi','ιονια νησια','ιονιο'],
+ 'western greece':['western greece','dytiki ellada','δυτικη ελλαδα'],
+ 'central greece':['central greece','sterea ellada','στερεα ελλαδα'],
+ 'attica':['attica','attiki','αττικη','athens'],
+ 'peloponnese':['peloponnese','peloponnisos','πελοποννησος'],
+ 'north aegean':['north aegean','voreio aigaio','βορειο αιγαιο'],
+ 'south aegean':['south aegean','notio aigaio','νοτιο αιγαιο','cyclades','dodecanese'],
+ 'crete':['crete','kriti','κρητη']
+};
+function meteoAlarmRegionKey(text){const v=meteoAlarmNormalizeRegionText(text);for(const [key,aliases] of Object.entries(meteoAlarmRegionAliases)){if(aliases.some(a=>v.includes(meteoAlarmNormalizeRegionText(a))))return key;}for(const [key,name] of Object.entries(meteoAlarmRegionNames)){const n=meteoAlarmNormalizeRegionText(name);if(n&&v.includes(n))return key;}return '';}
 function meteoAlarmLevelRank(level){return ({red:3,orange:2,yellow:1})[level]||0;}
 function meteoAlarmRegionLevel(region){let best='';for(const a of meteoAlarmEntries.filter(x=>meteoAlarmOverlapDay(x,meteoAlarmSelectedDay))){const names=meteoAlarmAreaNames(a.area);if(names.some(n=>meteoAlarmRegionKey(n)===region)&&meteoAlarmLevelRank(a.level)>meteoAlarmLevelRank(best))best=a.level;}return best;}
 function meteoAlarmRegionColor(level){return ({yellow:'#facc15',orange:'#f97316',red:'#dc2626'})[level]||'#64748b';}
-function meteoAlarmRenderMap(){if(!window.L||!$('meteoAlarmMap'))return;if(meteoAlarmMap){meteoAlarmMap.remove();meteoAlarmMap=null;}meteoAlarmMap=L.map('meteoAlarmMap',{scrollWheelZoom:true,zoomControl:true}).setView([39.1,23.1],5.2);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:11,attribution:'© OpenStreetMap'}).addTo(meteoAlarmMap);meteoAlarmRegionLayer=L.layerGroup().addTo(meteoAlarmMap);meteoAlarmLoadRegions();}
-async function meteoAlarmLoadRegions(){
- const query='[out:json][timeout:25];area["ISO3166-1"="GR"][admin_level="2"]->.gr;relation(area.gr)["boundary"="administrative"]["admin_level"="4"];out geom;';
- try{const r=await fetch('https://overpass-api.de/api/interpreter?data='+encodeURIComponent(query));if(!r.ok)throw Error('Overpass '+r.status);const data=await r.json();meteoAlarmRegionFeatures=[];
-  data.elements.filter(e=>e.type==='relation').forEach(rel=>{const raw=rel.tags?.['name:en']||rel.tags?.name||'';const key=meteoAlarmRegionKey(raw);if(!key)return;const polygons=[];(rel.members||[]).filter(m=>m.role==='outer'&&m.geometry?.length>2).forEach(m=>polygons.push(m.geometry.map(p=>[p.lat,p.lon])));if(!polygons.length)return;meteoAlarmRegionFeatures.push({key,name:meteoAlarmRegionNames[key],polygons});});
-  meteoAlarmDrawRegions();
- }catch(e){const el=$('meteoAlarmMap');if(el&&!el.querySelector('.ww-map-data-note')){const note=document.createElement('div');note.className='ww-map-data-note';note.style.cssText='position:absolute;z-index:500;bottom:8px;left:8px;background:#fff;color:#334155;padding:6px 9px;border-radius:6px;font-size:10px;box-shadow:0 2px 8px #0002';note.textContent='Τα διοικητικά όρια δεν ήταν διαθέσιμα αυτή τη στιγμή';el.appendChild(note);}}
+let meteoAlarmEuropeMap=null,meteoAlarmEuropeMarker=null;
+function meteoAlarmRenderMap(){
+ if(!window.L||!$('meteoAlarmMap'))return;
+ const host=$('meteoAlarmMap');
+ if(meteoAlarmMap){meteoAlarmMap.remove();meteoAlarmMap=null;}
+ host.innerHTML='';
+ meteoAlarmMap=L.map(host,{scrollWheelZoom:true,zoomControl:true,minZoom:4,maxZoom:12}).setView([39.0,22.7],5.25);
+ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap contributors'}).addTo(meteoAlarmMap);
+ meteoAlarmRegionLayer=L.layerGroup().addTo(meteoAlarmMap);
+ const locator=document.createElement('div');locator.id='meteoAlarmEuropeLocator';locator.innerHTML='<div class="ww-europe-locator-title">ΕΥΡΩΠΗ</div><div id="meteoAlarmEuropeMiniMap"></div><div class="ww-europe-locator-caption"><span></span> Ελλάδα</div>';host.appendChild(locator);
+ meteoAlarmEuropeMap=L.map('meteoAlarmEuropeMiniMap',{zoomControl:false,dragging:true,scrollWheelZoom:false,doubleClickZoom:false,boxZoom:false,keyboard:false,attributionControl:false}).setView([49,15],3);
+ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:6}).addTo(meteoAlarmEuropeMap);
+ meteoAlarmEuropeMarker=L.circleMarker([39,22.7],{radius:5,color:'#fff',weight:2,fillColor:'#ef4444',fillOpacity:1}).addTo(meteoAlarmEuropeMap).bindTooltip('Ελλάδα');
+ meteoAlarmEuropeMap.on('click',e=>meteoAlarmMap.setView(e.latlng,5.25));
+ meteoAlarmMap.on('moveend zoomend',()=>{if(meteoAlarmEuropeMarker)meteoAlarmEuropeMarker.setLatLng(meteoAlarmMap.getCenter());});
+ meteoAlarmLoadRegions();
 }
-function meteoAlarmDrawRegions(){if(!meteoAlarmRegionLayer)return;meteoAlarmRegionLayer.clearLayers();meteoAlarmRegionFeatures.forEach(f=>{const level=meteoAlarmRegionLevel(f.key);f.polygons.forEach(coords=>{const layer=L.polygon(coords,{className:'ww-region-path',color:'#536273',weight:1.2,opacity:.95,fillColor:meteoAlarmRegionColor(level),fillOpacity:level?.72:.13}).addTo(meteoAlarmRegionLayer);layer.bindTooltip(f.name+(level?' · '+meteoAlarmGreekSeverity(level):' · Χωρίς προειδοποίηση'),{className:'ww-map-tooltip',sticky:true});layer.on('mouseover',()=>layer.setStyle({weight:3.5,fillOpacity:level?.92:.28}));layer.on('mouseout',()=>layer.setStyle({weight:1.2,fillOpacity:level?.72:.13}));layer.on('click',()=>{const cards=[...document.querySelectorAll('.meteoalarm-alert-card')];cards.forEach(c=>c.classList.toggle('ww-region-selected',c.dataset.region===f.key));const first=cards.find(c=>c.dataset.region===f.key);if(first)first.scrollIntoView({behavior:'smooth',block:'nearest'});});});});}
+async function meteoAlarmLoadRegions(){
+ const query='[out:json][timeout:40];area["ISO3166-1"="GR"][admin_level="2"]->.gr;relation(area.gr)["boundary"="administrative"]["admin_level"="4"];out geom;';
+ const endpoints=['https://overpass-api.de/api/interpreter','https://overpass.kumi.systems/api/interpreter'];
+ let data=null,lastError=null;
+ for(const endpoint of endpoints){try{const r=await fetch(endpoint+'?data='+encodeURIComponent(query),{cache:'force-cache'});if(!r.ok)throw Error('Overpass '+r.status);data=await r.json();if(data?.elements?.length)break;}catch(e){lastError=e;}}
+ if(!data?.elements?.length){const el=$('meteoAlarmMap');if(el&&!el.querySelector('.ww-map-data-note')){const note=document.createElement('div');note.className='ww-map-data-note';note.style.cssText='position:absolute;z-index:850;bottom:8px;left:8px;background:rgba(7,25,43,.94);color:#fff;padding:8px 10px;border-radius:8px;font-size:11px;box-shadow:0 2px 8px #0005';note.textContent='Τα γεωγραφικά όρια δεν είναι προσωρινά διαθέσιμα. Δοκιμάστε ξανά σε λίγο.';el.appendChild(note);}return;}
+ meteoAlarmRegionFeatures=[];
+ data.elements.filter(e=>e.type==='relation').forEach(rel=>{
+  const raw=rel.tags?.['name:en']||rel.tags?.name||rel.tags?.official_name||'';
+  const key=meteoAlarmRegionKey(raw);if(!key)return;
+  const polygons=[];
+  (rel.members||[]).filter(m=>m.role==='outer'&&m.geometry?.length>2).forEach(m=>polygons.push(m.geometry.map(p=>[p.lat,p.lon])));
+  if(polygons.length)meteoAlarmRegionFeatures.push({key,name:meteoAlarmRegionNames[key],polygons});
+ });
+ if(meteoAlarmRegionFeatures.length<10){const el=$('meteoAlarmMap');if(el&&!el.querySelector('.ww-map-data-note')){const note=document.createElement('div');note.className='ww-map-data-note';note.textContent='Δεν φορτώθηκαν όλα τα διοικητικά όρια. Ελέγξτε τη σύνδεση.';el.appendChild(note);}}
+ meteoAlarmDrawRegions();
+}
+function meteoAlarmDrawRegions(){
+ if(!meteoAlarmRegionLayer)return;
+ meteoAlarmRegionLayer.clearLayers();
+ meteoAlarmRegionFeatures.forEach(f=>{
+  const level=meteoAlarmRegionLevel(f.key),fill=meteoAlarmRegionColor(level);
+  f.polygons.forEach(coords=>{
+   const extrusion=coords.map(([lat,lon])=>[lat-0.045,lon+0.045]);
+   L.polygon(extrusion,{className:'ww-region-extrusion',color:'#071b2c',weight:2,opacity:.95,fillColor:'#071b2c',fillOpacity:.88,interactive:false}).addTo(meteoAlarmRegionLayer);
+   const layer=L.polygon(coords,{className:'ww-region-path '+(level?'has-alert':'no-alert'),color:level?'#fff':'#71869a',weight:level?1.8:1.15,opacity:1,fillColor:fill,fillOpacity:level?.9:.32}).addTo(meteoAlarmRegionLayer);
+   layer.bindTooltip('<strong>'+f.name+'</strong><br>'+(level?meteoAlarmGreekSeverity(level)+' προειδοποίηση':'Χωρίς ενεργή προειδοποίηση'),{className:'ww-map-tooltip',sticky:true,direction:'top'});
+   layer.on('mouseover',()=>{layer.setStyle({weight:3.4,fillOpacity:1,color:'#fff'});if(layer.getElement())layer.getElement().classList.add('ww-region-lifted');});
+   layer.on('mouseout',()=>{layer.setStyle({weight:level?1.8:1.15,fillOpacity:level?.9:.32,color:level?'#fff':'#71869a'});if(layer.getElement())layer.getElement().classList.remove('ww-region-lifted');});
+   layer.on('click',()=>{const cards=[...document.querySelectorAll('.meteoalarm-alert-card')];cards.forEach(c=>c.classList.toggle('ww-region-selected',c.dataset.region===f.key));const first=cards.find(c=>c.dataset.region===f.key);if(first)first.scrollIntoView({behavior:'smooth',block:'nearest'});else{const panel=$('meteoAlarmAlertsList');if(panel)panel.innerHTML='<div class="notice">Δεν υπάρχει ενεργή προειδοποίηση για '+meteoAlarmSafe(f.name)+' την επιλεγμένη ημέρα.</div>';}meteoAlarmMap.fitBounds(layer.getBounds().pad(.35),{maxZoom:7});});
+  });
+ });
+}
 function renderMeteoAlarmAlerts(entries){
  const host=$('meteoAlarmAlertsList'),count=$('meteoAlarmDayCount');if(!host)return;
  const dayEntries=entries.filter(a=>meteoAlarmOverlapDay(a,meteoAlarmSelectedDay)).sort((a,b)=>meteoAlarmLevelRank(b.level)-meteoAlarmLevelRank(a.level));if(count)count.textContent=dayEntries.length+' '+(dayEntries.length===1?'προειδοποίηση':'προειδοποιήσεις');
@@ -5014,4 +5070,19 @@ html body[data-theme] #overview > .weather-layout > .city-current[data-landmark-
 @media(max-width:900px){.ww-alerts-layout{grid-template-columns:1fr}#meteoAlarmMap{height:480px}.ww-alert-results-column .emy-alerts-list{max-height:none}}
 @media(max-width:560px){.ww-alert-day{min-width:calc(33.333% - 8px);flex:1;padding:10px 8px}.ww-alert-day span{font-size:11px}.ww-alert-day small{font-size:9px}.ww-alert-daybar-tools{width:100%;margin-left:0}.ww-alert-map-heading{align-items:flex-start;flex-direction:column;gap:3px}#meteoAlarmMap{height:390px}.ww-alert-results-column .meteoalarm-alert-times{grid-template-columns:1fr 1fr}}
 
+
+/* MeteoAlarm map: region geometry, visible extrusion and Europe locator */
+#meteoAlarmMap{position:relative;overflow:hidden;background:#0b2942!important;isolation:isolate}
+#meteoAlarmEuropeLocator{position:absolute;z-index:800;left:14px;top:14px;width:164px;padding:8px;border-radius:13px;background:rgba(8,28,48,.92);border:1px solid rgba(180,220,255,.55);box-shadow:0 10px 28px rgba(0,0,0,.38);backdrop-filter:blur(10px);color:#fff}
+.ww-europe-locator-title{font-size:10px;font-weight:900;letter-spacing:.12em;padding:1px 3px 6px}
+#meteoAlarmEuropeMiniMap{height:104px;width:100%;border-radius:8px;overflow:hidden;background:#b9c9d5}
+.ww-europe-locator-caption{display:flex;align-items:center;gap:7px;padding:7px 2px 1px;font-size:10px;font-weight:700}
+.ww-europe-locator-caption span{width:8px;height:8px;border-radius:50%;background:#ef4444;box-shadow:0 0 0 3px #ef444455}
+.ww-region-extrusion{filter:drop-shadow(0 5px 3px rgba(0,0,0,.45))}
+.ww-region-path{cursor:pointer;stroke-linejoin:round;stroke-linecap:round;transition:filter .18s,fill-opacity .18s,stroke-width .18s;transform-box:fill-box;transform-origin:center}
+.ww-region-path.has-alert{filter:drop-shadow(0 2px 2px rgba(0,0,0,.5))}
+.ww-region-path.ww-region-lifted{filter:drop-shadow(0 13px 7px rgba(0,0,0,.65)) drop-shadow(0 0 8px rgba(255,255,255,.55));transform:translateY(-5px) scale(1.012);stroke-width:3.8!important}
+.ww-map-tooltip{background:rgba(7,25,43,.96)!important;color:#fff!important;border:1px solid rgba(255,255,255,.35)!important;border-radius:8px!important;box-shadow:0 5px 18px #0005!important}
+.ww-map-tooltip:before{border-top-color:rgba(7,25,43,.96)!important}
+@media(max-width:560px){#meteoAlarmEuropeLocator{width:118px;left:8px;top:8px;padding:6px}#meteoAlarmEuropeMiniMap{height:76px}}
 </style>
