@@ -5250,6 +5250,22 @@ body[data-theme] .wl-sitebar .wl-brand-mark,
  const $=id=>document.getElementById(id),statusNode=$('wwCameraStatus'),countNode=$('wwCameraCount');
  const greeceBtn=$('wwCameraGreece'),europeBtn=$('wwCameraEurope'),refreshBtn=$('wwCameraRefresh'),detailNode=$('wwCameraDetail');
  const bounds={greece:{center:[38.25,24],zoom:6},europe:{center:[48.2,15],zoom:4}};
+ // Official SkylineWebcams embed image supplied by the user.
+ // This is an image preview (not an embedded live-video player).
+ const skylineCameras=[{
+  id:'skyline-570',
+  provider:'SkylineWebcams',
+  title:'Θεσσαλονίκη – Πλατεία Αριστοτέλους',
+  city:'Θεσσαλονίκη',
+  region:'Κεντρική Μακεδονία',
+  country:'Ελλάδα',
+  lat:40.6327,
+  lon:22.9410,
+  image:'https://embed.skylinewebcams.com/img/570.jpg',
+  liveUrl:'https://www.skylinewebcams.com/el/webcam/ellada/makedonia/thessaloniki/plateia-aristotelous.html',
+  detailUrl:'https://www.skylinewebcams.com/el/webcam/ellada/makedonia/thessaloniki/plateia-aristotelous.html'
+ }];
+
  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  function initMap(){
   if(cameraMap)return;
@@ -5262,6 +5278,7 @@ body[data-theme] .wl-sitebar .wl-brand-mark,
   return L.divIcon({className:'',html:'<div class="ww-camera-pin'+(selected?' selected':'')+'"><span>📷</span></div>',iconSize:[34,34],iconAnchor:[17,31],popupAnchor:[0,-28]});
  }
  function cameraCategory(cam){
+  if(cam.provider==='SkylineWebcams')return 'city';
   const c=JSON.stringify(cam).toLowerCase();
   if(/beach|coast|sea|παραλ|ακτή/.test(c))return 'beach';
   if(/mountain|ski|summit|βουνο|χιον/.test(c))return 'mountain';
@@ -5298,7 +5315,7 @@ body[data-theme] .wl-sitebar .wl-brand-mark,
   const live=cam.liveUrl?'<a class="ww-camera-live-link" href="'+esc(cam.liveUrl)+'" target="_blank" rel="noopener">▶ Άνοιγμα live προβολής</a>':'';
   const detail=cam.detailUrl?'<a class="ww-camera-source-link" href="'+esc(cam.detailUrl)+'" target="_blank" rel="noopener">Πηγή κάμερας ↗</a>':'';
   const lat=Number(cam.lat),lon=Number(cam.lon);
-  detailNode.innerHTML='<div class="ww-camera-detail-content"><div class="ww-camera-selected-tag">ΕΠΙΛΕΓΜΕΝΗ ΚΑΜΕΡΑ</div><h4>'+title+'</h4><div class="ww-camera-detail-location">'+location+'</div><div class="ww-camera-preview">'+image+'</div><div class="ww-camera-detail-actions">'+live+detail+'</div><div class="ww-camera-metadata"><div><small>ΓΕΩΓΡΑΦΙΚΟ ΠΛΑΤΟΣ</small><strong>'+lat.toFixed(5)+'°</strong></div><div><small>ΓΕΩΓΡΑΦΙΚΟ ΜΗΚΟΣ</small><strong>'+lon.toFixed(5)+'°</strong></div><div><small>ΤΟΠΙΚΗ ΩΡΑ ΚΑΜΕΡΑΣ</small><strong id="wwCameraLocalTime">—</strong></div><div><small>ΚΑΤΑΣΤΑΣΗ</small><strong>'+(cam.liveUrl?'Live player διαθέσιμο':'Εικόνα / timelapse')+'</strong></div></div><div id="wwCameraWeather" class="ww-camera-weather"><div class="ww-weather-loading">Φόρτωση μετεωρολογικών δεδομένων…</div></div></div>';
+  detailNode.innerHTML='<div class="ww-camera-detail-content"><div class="ww-camera-selected-tag">ΕΠΙΛΕΓΜΕΝΗ ΚΑΜΕΡΑ</div><h4>'+title+'</h4><div class="ww-camera-detail-location">'+location+'</div><div class="ww-camera-preview">'+image+'</div><div class="ww-camera-detail-actions">'+live+detail+'</div><div class="ww-camera-metadata"><div><small>ΓΕΩΓΡΑΦΙΚΟ ΠΛΑΤΟΣ</small><strong>'+lat.toFixed(5)+'°</strong></div><div><small>ΓΕΩΓΡΑΦΙΚΟ ΜΗΚΟΣ</small><strong>'+lon.toFixed(5)+'°</strong></div><div><small>ΤΟΠΙΚΗ ΩΡΑ ΚΑΜΕΡΑΣ</small><strong id="wwCameraLocalTime">—</strong></div><div><small>ΚΑΤΑΣΤΑΣΗ</small><strong>'+(cam.provider==='SkylineWebcams'?'Preview εικόνας διαθέσιμο':'Live player διαθέσιμο')+'</strong></div></div><div id="wwCameraWeather" class="ww-camera-weather"><div class="ww-weather-loading">Φόρτωση μετεωρολογικών δεδομένων…</div></div></div>';
   try{$('wwCameraLocalTime').textContent=new Intl.DateTimeFormat('el-GR',{dateStyle:'medium',timeStyle:'medium',timeZone:Intl.DateTimeFormat().resolvedOptions().timeZone}).format(new Date());}catch(e){}
   loadWeather(cam);
  }
@@ -5306,9 +5323,13 @@ body[data-theme] .wl-sitebar .wl-brand-mark,
   if(loading)return;loading=true;currentArea=area;greeceBtn.classList.toggle('active',area==='greece');europeBtn.classList.toggle('active',area==='europe');statusNode.textContent='Αναζήτηση διαθέσιμων καμερών…';countNode.textContent='—';initMap();cameraMap.setView(bounds[area].center,bounds[area].zoom);
   try{
    const r=await fetch('/api/webcams?area='+area,{cache:'no-store'}),data=await r.json();if(!r.ok)throw Error(data.error||'Αποτυχία φόρτωσης');
-   if(!data.configured){allCameras=[];renderMarkers();statusNode.textContent='Απαιτείται Windy Webcams API key για πραγματικές κάμερες.';detailNode.innerHTML='<div class="ww-camera-detail-empty"><div class="ww-camera-empty-icon">🔑</div><h4>Απαιτείται σύνδεση καμερών</h4><p>Πρόσθεσε το WINDY_WEBCAMS_API_KEY στο περιβάλλον του server για να εμφανιστούν πραγματικές κάμερες.</p></div>';return;}
-   allCameras=Array.isArray(data.cameras)?data.cameras:[];renderMarkers();statusNode.textContent=allCameras.length?'διαθέσιμες κάμερες · επίλεξε σημείο στον χάρτη':'Δεν βρέθηκαν κάμερες.';
-   if(allCameras.length&&!selectedCamera)selectCamera(allCameras[0]);
+   const windyCameras=data.configured&&Array.isArray(data.cameras)?data.cameras:[];
+   allCameras=[...skylineCameras,...windyCameras];
+   renderMarkers();
+   statusNode.textContent=windyCameras.length
+    ?'SkylineWebcams + Windy · επίλεξε σημείο στον χάρτη'
+    :'1 κάμερα SkylineWebcams · επίλεξε το σημείο στον χάρτη';
+   if(allCameras.length&&(!selectedCamera||!allCameras.some(c=>c.id===selectedCamera.id)))selectCamera(allCameras[0]);
   }catch(e){statusNode.textContent='Σφάλμα φόρτωσης καμερών: '+e.message;countNode.textContent='—';}
   finally{loading=false;setTimeout(()=>cameraMap&&cameraMap.invalidateSize(),150);}
  }
