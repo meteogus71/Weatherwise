@@ -53,3 +53,18 @@
 - ECMWF grid responses are retained in memory for up to 6 hours; the worker also caches downloaded GRIB files under `/tmp/weatherwise-ecmwf`.
 
 Important: this reliability patch reduces duplicate API calls and can serve stale data after a successful earlier request. It does not yet migrate the dashboard's current conditions and 7-day forecast away from Open-Meteo; the existing ECMWF Open Data integration is used by the forecast-map grid endpoints. A full dashboard migration requires a multi-step ECMWF forecast data pipeline and field mapping.
+
+
+## Weather cameras map
+
+The **Κάμερες καιρού** section now includes a Leaflet map with camera markers, a Greece/Europe view switch, refresh control, and marker popups with the provider's latest image and available live/player link.
+
+### Enable the public webcam catalogue
+
+The camera catalogue is supplied by the Windy Webcams API. Create a free Webcams API key at https://api.windy.com/keys and add this environment variable to the hosting service (for example Render):
+
+`WINDY_WEBCAMS_API_KEY=your_key_here`
+
+The key is used only by `server.js` and is never exposed in the browser. After adding it, redeploy/restart the service. The endpoint `/api/webcams` caches results for 10 minutes. Windy requires attribution and links back to the webcam detail/player. Some entries provide periodically refreshed images or timelapses rather than continuous live video; a live player link is shown only when the provider supplies one.
+
+Without the API key, the map still loads but shows a clear setup message instead of invented camera markers.

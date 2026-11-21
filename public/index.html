@@ -2800,7 +2800,25 @@ body[data-frame-shadow="off"] .ww-day-chart,body[data-frame-shadow="off"] .ww-da
       <div class="europe-foot">Οι τιμές αφορούν την τελευταία διαθέσιμη μέτρηση κάθε πόλης. Κλικ σε μπάρα για μετάβαση στην τοπική πρόγνωση.</div>
     </div>
   </section>
-  <section class="section" id="cameras"><div class="card"><h3>Κάμερες καιρού</h3><p class="small">Εδώ μπορεί να συνδεθεί κατάλογος live μετεωρολογικών καμερών και τα σημεία τους στον χάρτη.</p><div class="notice">Δεν έχουν προστεθεί ακόμη πηγές καμερών. Απαιτούνται συγκεκριμένα δημόσια camera feeds.</div></div></section>
+  <section class="section" id="cameras">
+  <div class="card ww-cameras-shell">
+    <div class="card-head ww-cameras-head">
+      <div><h3>ΚΑΜΕΡΕΣ ΚΑΙΡΟΥ</h3><p class="small">Δημόσιες κάμερες καιρού και τοπίου σε πραγματικές γεωγραφικές θέσεις</p></div>
+      <div class="ww-camera-actions">
+        <button class="btn active" id="wwCameraGreece" type="button">Ελλάδα</button>
+        <button class="btn" id="wwCameraEurope" type="button">Ευρώπη</button>
+        <button class="btn" id="wwCameraRefresh" type="button">↻ Ανανέωση</button>
+      </div>
+    </div>
+    <div class="ww-camera-summary">
+      <span class="ww-camera-live-dot"></span><strong id="wwCameraCount">—</strong>
+      <span id="wwCameraStatus">Φόρτωση διαθέσιμων καμερών…</span>
+    </div>
+    <div id="wwCamerasMap" class="ww-cameras-map" role="application" aria-label="Χάρτης διαθέσιμων καμερών καιρού"></div>
+    <div class="ww-camera-credit">Κάμερες: <a href="https://www.windy.com/webcams/" target="_blank" rel="noopener">Windy Webcams</a> · Χάρτης © OpenStreetMap contributors</div>
+    <p class="small ww-camera-note">Η διαθεσιμότητα και η συχνότητα ανανέωσης εξαρτώνται από τον φορέα κάθε κάμερας. Ορισμένες κάμερες παρέχουν πρόσφατη εικόνα ή timelapse και όχι συνεχή ζωντανή μετάδοση.</p>
+  </div>
+</section>
   <section class="section" id="alerts">
  <div class="card ww-alerts-dashboard">
   <div class="card-head"><h3>ΠΡΟΕΙΔΟΠΟΙΗΣΕΙΣ METEOALARM</h3><span id="meteoAlarmFeedStatus">ΣΥΝΔΕΣΗ…</span></div>
@@ -5210,6 +5228,98 @@ body[data-theme] .wl-sitebar .wl-brand-mark,
   box-shadow:none!important; border-radius:0!important;
 }
 </style>
+
+<script>
+(function(){
+  const section=document.getElementById('cameras');
+  const mapNode=document.getElementById('wwCamerasMap');
+  if(!section||!mapNode||typeof L==='undefined') return;
+  let cameraMap=null, cameraLayer=null, currentArea='greece', loading=false;
+  const statusNode=document.getElementById('wwCameraStatus');
+  const countNode=document.getElementById('wwCameraCount');
+  const greeceBtn=document.getElementById('wwCameraGreece');
+  const europeBtn=document.getElementById('wwCameraEurope');
+  const refreshBtn=document.getElementById('wwCameraRefresh');
+  const bounds={
+    greece:{center:[38.25,24.0],zoom:6},
+    europe:{center:[48.2,15.0],zoom:4}
+  };
+  function escapeHtml(v){
+    return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+  function initMap(){
+    if(cameraMap) return;
+    cameraMap=L.map(mapNode,{zoomControl:true,preferCanvas:true,scrollWheelZoom:true}).setView(bounds.greece.center,bounds.greece.zoom);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{
+      subdomains:'abcd',maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+    }).addTo(cameraMap);
+    cameraLayer=L.layerGroup().addTo(cameraMap);
+    setTimeout(()=>cameraMap.invalidateSize(),120);
+  }
+  function markerIcon(){
+    return L.divIcon({className:'',html:'<div class="ww-camera-pin"><span>📷</span></div>',iconSize:[32,32],iconAnchor:[16,30],popupAnchor:[0,-28]});
+  }
+  function popupHtml(cam){
+    const title=escapeHtml(cam.title||'Κάμερα');
+    const loc=escapeHtml([cam.city,cam.region,cam.country].filter(Boolean).join(', '));
+    const image=cam.image?'<img loading="lazy" src="'+escapeHtml(cam.image)+'" alt="'+title+'">':'';
+    const live=cam.liveUrl?'<a href="'+escapeHtml(cam.liveUrl)+'" target="_blank" rel="noopener">▶ Ζωντανή προβολή</a>':'';
+    const detail=cam.detailUrl?'<a href="'+escapeHtml(cam.detailUrl)+'" target="_blank" rel="noopener">Περισσότερα / εικόνες ↗</a>':'';
+    const kind=cam.liveUrl?'LIVE':'Πρόσφατη εικόνα / timelapse';
+    return '<div class="ww-camera-popup"><strong>'+title+'</strong><div class="ww-cam-location">'+loc+'</div><span class="ww-cam-kind">'+kind+'</span>'+image+'<div>'+live+detail+'</div></div>';
+  }
+  async function loadCameras(area){
+    if(loading) return;
+    loading=true; currentArea=area;
+    greeceBtn?.classList.toggle('active',area==='greece');
+    europeBtn?.classList.toggle('active',area==='europe');
+    statusNode.textContent='Αναζήτηση διαθέσιμων καμερών…';
+    countNode.textContent='—';
+    initMap();
+    const b=bounds[area];
+    cameraMap.setView(b.center,b.zoom);
+    try{
+      const response=await fetch('/api/webcams?area='+encodeURIComponent(area),{cache:'no-store'});
+      const data=await response.json();
+      if(!response.ok) throw new Error(data.error||'Αποτυχία φόρτωσης καμερών');
+      if(!data.configured){
+        cameraLayer.clearLayers();
+        statusNode.textContent='Απαιτείται δωρεάν Windy Webcams API key για την εμφάνιση πραγματικών καμερών.';
+        countNode.textContent='0';
+        return;
+      }
+      const cams=Array.isArray(data.cameras)?data.cameras:[];
+      cameraLayer.clearLayers();
+      cams.forEach(cam=>{
+        if(!Number.isFinite(Number(cam.lat))||!Number.isFinite(Number(cam.lon))) return;
+        const marker=L.marker([Number(cam.lat),Number(cam.lon)],{icon:markerIcon(),title:cam.title||'Κάμερα'}).bindPopup(popupHtml(cam),{maxWidth:290});
+        marker.addTo(cameraLayer);
+      });
+      countNode.textContent=String(cams.length);
+      statusNode.textContent=cams.length?'διαθέσιμες κάμερες στην επιλεγμένη περιοχή':'Δεν βρέθηκαν κάμερες στην επιλεγμένη περιοχή.';
+      if(cams.length&&area==='greece'){
+        const group=cameraLayer.getLayers();
+        if(group.length>1) cameraMap.fitBounds(cameraLayer.getBounds().pad(.12),{maxZoom:8});
+        else if(group.length===1) cameraMap.setView(group[0].getLatLng(),8);
+      }
+    }catch(err){
+      console.error('WeatherWise cameras:',err);
+      statusNode.textContent='Δεν ήταν δυνατή η φόρτωση: '+(err.message||'άγνωστο σφάλμα');
+      countNode.textContent='—';
+    }finally{loading=false;setTimeout(()=>cameraMap&&cameraMap.invalidateSize(),120);}
+  }
+  greeceBtn?.addEventListener('click',()=>loadCameras('greece'));
+  europeBtn?.addEventListener('click',()=>loadCameras('europe'));
+  refreshBtn?.addEventListener('click',()=>loadCameras(currentArea));
+  document.querySelectorAll('.nav[data-section="cameras"]').forEach(el=>el.addEventListener('click',()=>{
+    initMap();setTimeout(()=>{cameraMap.invalidateSize();if(!countNode.textContent||countNode.textContent==='—')loadCameras(currentArea);},180);
+  }));
+  if(section.classList.contains('active')||section.style.display!=='none'){
+    setTimeout(()=>{if(section.getBoundingClientRect().height>0)loadCameras('greece');},300);
+  }
+})();
+</script>
+
 </body>
 </html>
 
@@ -5501,4 +5611,28 @@ body[data-theme="weatherlive"] .wl-intro{
  border:1px solid #3a454b!important;box-shadow:none!important;
 }
 body[data-theme="weatherlive"] .theme-preset{border-color:#3a454b}
+
+/* WeatherWise public webcam map */
+.ww-cameras-shell{overflow:hidden}
+.ww-cameras-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.ww-camera-actions{display:flex;gap:8px;flex-wrap:wrap}
+.ww-camera-actions .btn{padding:8px 13px}
+.ww-camera-actions .btn.active{border-color:var(--cyan);color:var(--cyan);box-shadow:inset 0 0 0 1px var(--cyan)}
+.ww-camera-summary{display:flex;align-items:center;gap:9px;margin:12px 0;color:var(--muted);font-size:13px}
+.ww-camera-summary strong{color:var(--text);font-variant-numeric:tabular-nums}
+.ww-camera-live-dot{width:9px;height:9px;border-radius:50%;background:#72b98b;box-shadow:0 0 0 4px rgba(114,185,139,.13)}
+.ww-cameras-map{height:min(68vh,680px);min-height:420px;width:100%;border:1px solid var(--line);border-radius:15px;overflow:hidden;background:#e9edf0;z-index:1}
+.ww-cameras-map .leaflet-control-zoom a{color:#24333d}
+.ww-camera-pin{width:32px;height:32px;border-radius:50% 50% 50% 8px;transform:rotate(-45deg);background:#f7fbfc;border:2px solid #2d7780;box-shadow:0 3px 10px #172b3a55;display:flex;align-items:center;justify-content:center}
+.ww-camera-pin span{transform:rotate(45deg);font-size:16px;line-height:1}
+.ww-camera-popup{min-width:210px;max-width:270px;font:13px/1.45 "DM Sans",sans-serif;color:#26333b}
+.ww-camera-popup strong{display:block;font-size:14px;margin-bottom:3px}
+.ww-camera-popup .ww-cam-location{color:#687984;margin-bottom:8px}
+.ww-camera-popup img{display:block;width:100%;max-height:145px;object-fit:cover;border-radius:8px;margin:7px 0}
+.ww-camera-popup a{display:inline-block;margin:5px 8px 0 0;color:#176b82;font-weight:700}
+.ww-camera-popup .ww-cam-kind{display:inline-block;padding:3px 7px;border-radius:20px;background:#e9f3f4;color:#24636e;font-size:11px}
+.ww-camera-credit,.ww-camera-note{margin-top:10px;color:var(--muted);font-size:11px}
+.ww-camera-credit a{color:var(--cyan)}
+body[data-theme="weatherlive"] .ww-cameras-map{border-color:#465157}
+@media(max-width:650px){.ww-cameras-map{height:62vh;min-height:360px}.ww-cameras-head{display:block}.ww-camera-actions{margin-top:12px}}
 </style>

@@ -12,6 +12,9 @@ let cachedFeed = null;
 let cachedAt = 0;
 let lastGoodFeed = null;
 
+const webcamCache = new Map();
+const WEBCAM_CACHE_MS = 10 * 60 * 1000;
+
 const weatherCache = new Map();
 const weatherInflight = new Map();
 const WEATHER_CACHE_MS = 30 * 60 * 1000;
@@ -1383,6 +1386,135 @@ const server = http.createServer(async (req, res) => {
         'Cache-Control': 'no-store'
       }
     );
+  }
+
+  if (
+    req.method === 'GET' &&
+    url.pathname === '/api/webcams'
+  ) {
+    const apiKey = process.env.WINDY_WEBCAMS_API_KEY || process.env.WINDY_API_KEY;
+    if (!apiKey) {
+      return send(
+        res,
+        200,
+        JSON.stringify({
+          configured: false,
+          cameras: [],
+          provider: 'Windy Webcams',
+          setup: 'Set WINDY_WEBCAMS_API_KEY in the hosting environment.'
+        }),
+        {
+          'Content-Type': 'application/json; charset=utf-8',
+          'Cache-Control': 'no-store'
+        }
+      );
+    }
+
+    const area = url.searchParams.get('area') === 'europe' ? 'europe' : 'greece';
+    const cacheKey = `windy-webcams:${area}`;
+    const cached = webcamCache.get(cacheKey);
+    if (cached && Date.now() - cached.at < WEBCAM_CACHE_MS) {
+      return send(
+        res,
+        200,
+        JSON.stringify({ configured: true, cameras: cached.cameras, cached: true, provider: 'Windy Webcams' }),
+        { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' }
+      );
+    }
+
+    try {
+      const bbox = area === 'europe'
+        ? '71,40,34,-12'
+        : '42.5,30.5,34.5,19';
+      const apiUrl = new URL('https://api.windy.com/webcams/api/v3/webcams');
+      apiUrl.searchParams.set('bbox', bbox);
+      apiUrl.searchParams.set('include', 'categories,images,location,player,urls');
+      apiUrl.searchParams.set('lang', 'en');
+      apiUrl.searchParams.set('limit', '50');
+      apiUrl.searchParams.set('offset', '0');
+
+      const upstream = await fetch(apiUrl, {
+        headers: {
+          'x-windy-api-key': apiKey,
+          'Accept': 'application/json',
+          'User-Agent': 'WeatherWise/1.0'
+        },
+        signal: AbortSignal.timeout(20000)
+      });
+
+      if (!upstream.ok) {
+        const detail = (await upstream.text()).slice(0, 300);
+        throw new Error(`Windy Webcams HTTP ${upstream.status}: ${detail}`);
+      }
+
+      const payload = await upstream.json();
+      const rows = Array.isArray(payload)
+        ? payload
+        : (payload.webcams || payload.result?.webcams || payload.data || []);
+
+      const cameras = rows.map(cam => {
+        const loc = cam.location || {};
+        const player = cam.player || {};
+        const images = cam.images || cam.image || {};
+        const urls = cam.urls || cam.url || {};
+        const currentImage = images.current || images.daylight || {};
+        const livePart = player.live;
+        const liveUrl = typeof livePart === 'string'
+          ? livePart
+          : (livePart?.embed || livePart?.url || null);
+        const dayPart = player.day;
+        const dayUrl = typeof dayPart === 'string'
+          ? dayPart
+          : (dayPart?.embed || dayPart?.link || null);
+        return {
+          id: String(cam.webcamId || cam.id || ''),
+          title: cam.title || cam.name || 'Weather camera',
+          lat: Number(loc.latitude ?? cam.latitude),
+          lon: Number(loc.longitude ?? cam.longitude),
+          city: loc.city || '',
+          region: loc.region || '',
+          country: loc.country || '',
+          status: cam.status || '',
+          image: currentImage.icon || currentImage.preview || currentImage.thumbnail || '',
+          liveUrl: liveUrl || '',
+          detailUrl: urls.detail || urls.current?.desktop || urls.current?.mobile || cam.url || '',
+          updated: cam.lastUpdatedOn || images.update || null
+        };
+      }).filter(cam =>
+        Number.isFinite(cam.lat) &&
+        Number.isFinite(cam.lon) &&
+        cam.lat >= -90 && cam.lat <= 90 &&
+        cam.lon >= -180 && cam.lon <= 180 &&
+        cam.status !== 'inactive'
+      );
+
+      webcamCache.set(cacheKey, { cameras, at: Date.now() });
+      return send(
+        res,
+        200,
+        JSON.stringify({ configured: true, cameras, cached: false, provider: 'Windy Webcams' }),
+        {
+          'Content-Type': 'application/json; charset=utf-8',
+          'Cache-Control': 'public, max-age=300'
+        }
+      );
+    } catch (err) {
+      console.error('[Windy Webcams]', err.message);
+      if (cached?.cameras) {
+        return send(
+          res,
+          200,
+          JSON.stringify({ configured: true, cameras: cached.cameras, cached: true, warning: err.message, provider: 'Windy Webcams' }),
+          { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' }
+        );
+      }
+      return send(
+        res,
+        502,
+        JSON.stringify({ error: 'Δεν ήταν δυνατή η ανάκτηση καμερών από το Windy Webcams.', detail: err.message }),
+        { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' }
+      );
+    }
   }
 
   if (
