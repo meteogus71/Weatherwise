@@ -3802,7 +3802,13 @@ async function loadWeather(){
  }
  const currentWeatherIcon=$('weatherIcon');
  if(currentWeatherIcon){
-  currentWeatherIcon.textContent=icon(Number(c.weather_code),isNight);
+  const currentCode=Number(c.weather_code);
+  if(isNight&&(currentCode===1||currentCode===2)){
+   // Layer the moon behind the cloud, like a single composed weather pictogram.
+   currentWeatherIcon.innerHTML='<span class="ww-night-partly-cloudy" aria-hidden="true"><span class="ww-night-moon">🌙</span><span class="ww-night-cloud">☁️</span></span>';
+  }else{
+   currentWeatherIcon.textContent=icon(currentCode,isNight);
+  }
   currentWeatherIcon.setAttribute('aria-label',isNight?'Νυχτερινές καιρικές συνθήκες':'Ημερήσιες καιρικές συνθήκες');
   currentWeatherIcon.title=isNight?'Νύχτα':'Ημέρα';
  }
@@ -5798,6 +5804,23 @@ body[data-theme] .ww-camera-detail-actions a.ww-camera-live-link{
 html body #overview .city-current #weatherIcon{
  font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif!important;
  font-variant-emoji:emoji!important;
+}
+
+
+/* Compose the nighttime partly-cloudy pictogram: moon behind, cloud in front */
+#weatherIcon .ww-night-partly-cloudy{
+ position:relative;display:inline-block;width:1.55em;height:1.18em;
+ vertical-align:middle;line-height:1;
+}
+#weatherIcon .ww-night-moon{
+ position:absolute;z-index:1;left:0;top:-.08em;
+ font-size:.94em;line-height:1;
+ filter:drop-shadow(0 3px 5px rgba(0,0,0,.24));
+}
+#weatherIcon .ww-night-cloud{
+ position:absolute;z-index:2;right:-.04em;bottom:-.03em;
+ font-size:.83em;line-height:1;
+ filter:drop-shadow(0 4px 6px rgba(0,0,0,.3));
 }
 
 </style>
