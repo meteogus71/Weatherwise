@@ -2862,7 +2862,17 @@ let forecastSeries=null,forecastDaily=null,forecastParam='temperature',forecastH
 let selectedThreeDayDate=null,threeDayCharts=[];
 let europeChart=null,europeRows=[],europeSort='windy',europeSelectedCityKey=null;
 const codeText=c=>({0:"Αίθριος",1:"Κυρίως αίθριος",2:"Μερική νέφωση",3:"Νεφελώδης",45:"Ομίχλη",48:"Παγωμένη ομίχλη",51:"Ασθενής ψιχάλα",53:"Ψιχάλα",55:"Ισχυρή ψιχάλα",61:"Ασθενής βροχή",63:"Βροχή",65:"Ισχυρή βροχή",71:"Ασθενής χιονόπτωση",73:"Χιονόπτωση",75:"Ισχυρή χιονόπτωση",80:"Μπόρες",81:"Ισχυρές μπόρες",82:"Έντονες μπόρες",95:"Καταιγίδα",96:"Καταιγίδα με χαλάζι",99:"Ισχυρή καταιγίδα"})[c]||"Μεταβλητός καιρός";
-const icon=c=>c===0?"☀️":c<=2?"🌤️":c===3?"☁️":c<=48?"🌫️":c<=67?"🌧️":c<=77?"🌨️":c<=82?"🌦️":"⛈️";
+const icon=(code,isNight=false)=>{
+ if(code===0)return isNight?"🌙":"☀️";
+ if(code===1||code===2)return isNight?"🌙☁️":"🌤️";
+ if(code===3)return "☁️";
+ if(code===45||code===48)return "🌫️";
+ if([51,53,55,56,57].includes(code))return "🌦️";
+ if([61,63,65,66,67,80,81,82].includes(code))return "🌧️";
+ if([71,73,75,77,85,86].includes(code))return "🌨️";
+ if([95,96,99].includes(code))return "⛈️";
+ return "☁️";
+};
 const dir=d=>["Β","ΒΒΑ","ΒΑ","ΑΒΑ","Α","ΑΝΑ","ΝΑ","ΝΝΑ","Ν","ΝΝΔ","ΝΔ","ΔΝΔ","Δ","ΔΒΔ","ΒΔ","ΒΒΔ"][Math.round(d/22.5)%16];
 const temp=v=>Math.round(isF?v*9/5+32:v);
 let baseLayer,terrainLayer,activeOverlay=null,radarLayer=null,gridLayer=L.layerGroup(),windLayer=L.layerGroup(),radarTimer=null,gridTimer=null,mainGfsActive='none',largeGfsActive='none',largeGfsArea=null,largeGfsVectors=null;
@@ -3710,7 +3720,7 @@ async function loadWeather(){
  if(rainProbability===null)rainProbability=0;
  $('rainStat').innerHTML=`${rainProbability}<span class="unit">%</span>`;
  $('feels').textContent=`Αίσθηση: ${temp(c.apparent_temperature)}°`; $('windDir').textContent=`Διεύθυνση: ${dir(c.wind_direction_10m)} (${c.wind_direction_10m}°)`;
- $('cityName').textContent=city;const forecastLocationLabel=$('forecastLocationLabel');if(forecastLocationLabel)forecastLocationLabel.textContent='Περιοχή πρόγνωσης: '+city;updateCityLandmark(city);$('condition').textContent=codeText(c.weather_code);$('currentTemp').textContent=temp(c.temperature_2m)+'°';$('weatherIcon').textContent=icon(c.weather_code);
+ $('cityName').textContent=city;const forecastLocationLabel=$('forecastLocationLabel');if(forecastLocationLabel)forecastLocationLabel.textContent='Περιοχή πρόγνωσης: '+city;updateCityLandmark(city);$('condition').textContent=codeText(c.weather_code);$('currentTemp').textContent=temp(c.temperature_2m)+'°';
  $('updated').textContent='Ενημέρωση: '+new Date(c.time).toLocaleString('el-GR',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'short'});
  $('feels2').textContent=temp(c.apparent_temperature)+'°'+(isF?'F':'C');$('dew').textContent=temp(h.dew_point_2m?.[0] ?? c.temperature_2m)+'°'+(isF?'F':'C');$('pressure').textContent=Math.round(c.surface_pressure)+' hPa';$('visibility').textContent='—';
  // Pressure tendency: compare the latest hourly surface pressure with the value ~3 hours earlier.
@@ -3759,7 +3769,9 @@ async function loadWeather(){
   const match=text.match(/(?:T|^)(\d{2}:\d{2})/);
   return match?match[1]:(/^\d{2}:\d{2}/.test(text)?text.slice(0,5):'--:--');
  };
- let sunriseValue=day.sunrise?.[0], sunsetValue=day.sunset?.[0];
+ const currentLocalDate=String(c.time||'').slice(0,10);
+ const currentDailyIndex=Array.isArray(day.time)?Math.max(0,day.time.indexOf(currentLocalDate)):0;
+ let sunriseValue=day.sunrise?.[currentDailyIndex], sunsetValue=day.sunset?.[currentDailyIndex];
  // Some proxy responses omit daily sunrise/sunset although they were requested.
  if(!sunriseValue||!sunsetValue){
   try{
@@ -3773,6 +3785,25 @@ async function loadWeather(){
   }catch(sunError){console.warn('Sunrise/sunset fallback unavailable',sunError);}
  }
  $('sunTimes').textContent=`${formatSunTime(sunriseValue)} / ${formatSunTime(sunsetValue)}`;
+
+ // Determine day/night from the city's local sunrise and sunset, not the
+ // browser's local clock or the generic weather-code icon.
+ const toLocalMinutes=value=>{
+  const match=String(value||'').match(/(?:T|^)(\\d{2}):(\\d{2})/);
+  return match?Number(match[1])*60+Number(match[2]):NaN;
+ };
+ const currentLocalMinutes=toLocalMinutes(c.time);
+ const sunriseMinutes=toLocalMinutes(sunriseValue),sunsetMinutes=toLocalMinutes(sunsetValue);
+ let isNight=Number(c.is_day)===0;
+ if(Number.isFinite(currentLocalMinutes)&&Number.isFinite(sunriseMinutes)&&Number.isFinite(sunsetMinutes)){
+  isNight=currentLocalMinutes<sunriseMinutes||currentLocalMinutes>=sunsetMinutes;
+ }
+ const currentWeatherIcon=$('weatherIcon');
+ if(currentWeatherIcon){
+  currentWeatherIcon.textContent=icon(Number(c.weather_code),isNight);
+  currentWeatherIcon.setAttribute('aria-label',isNight?'Νυχτερινές καιρικές συνθήκες':'Ημερήσιες καιρικές συνθήκες');
+  currentWeatherIcon.title=isNight?'Νύχτα':'Ημέρα';
+ }
 
  const minT=Math.min(...day.temperature_2m_min),maxT=Math.max(...day.temperature_2m_max),span=Math.max(1,maxT-minT);
  const rows=day.time.map((date,i)=>{
