@@ -3789,12 +3789,14 @@ async function loadWeather(){
  // Determine day/night from the city's local sunrise and sunset, not the
  // browser's local clock or the generic weather-code icon.
  const toLocalMinutes=value=>{
-  const match=String(value||'').match(/(?:T|^)(\\d{2}):(\\d{2})/);
+  const match=String(value||'').match(/(?:T|^)(\d{2}):(\d{2})/);
   return match?Number(match[1])*60+Number(match[2]):NaN;
  };
  const currentLocalMinutes=toLocalMinutes(c.time);
  const sunriseMinutes=toLocalMinutes(sunriseValue),sunsetMinutes=toLocalMinutes(sunsetValue);
  let isNight=Number(c.is_day)===0;
+ // The daily sunrise/sunset timestamps are in the selected city's local timezone.
+ // When available, they are authoritative and override the provider's is_day flag.
  if(Number.isFinite(currentLocalMinutes)&&Number.isFinite(sunriseMinutes)&&Number.isFinite(sunsetMinutes)){
   isNight=currentLocalMinutes<sunriseMinutes||currentLocalMinutes>=sunsetMinutes;
  }
@@ -5789,6 +5791,13 @@ body[data-theme] .ww-camera-detail-actions a.ww-camera-live-link{
   justify-content:center !important;
   min-height:42px !important;
   padding:10px 16px !important;
+}
+
+
+/* City current-conditions icon: preserve native color emoji rendering */
+html body #overview .city-current #weatherIcon{
+ font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif!important;
+ font-variant-emoji:emoji!important;
 }
 
 </style>
