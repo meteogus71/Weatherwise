@@ -5250,9 +5250,25 @@ body[data-theme] .wl-sitebar .wl-brand-mark,
   function initMap(){
     if(cameraMap) return;
     cameraMap=L.map(mapNode,{zoomControl:true,preferCanvas:true,scrollWheelZoom:true}).setView(bounds.greece.center,bounds.greece.zoom);
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{
-      subdomains:'abcd',maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
-    }).addTo(cameraMap);
+    const reliefBase=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',{
+      maxZoom:19,
+      attribution:'Tiles &copy; <a href="https://www.esri.com/">Esri</a> — Sources: Esri, USGS, NOAA, OpenStreetMap contributors'
+    });
+    let reliefFallbackStarted=false;
+    let reliefTileErrors=0;
+    reliefBase.on('tileerror',()=>{
+      reliefTileErrors++;
+      if(reliefTileErrors>=3&&!reliefFallbackStarted){
+        reliefFallbackStarted=true;
+        cameraMap.removeLayer(reliefBase);
+        L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',{
+          maxZoom:17,
+          subdomains:'abc',
+          attribution:'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>, SRTM | Map style: &copy; <a href="https://opentopomap.org/">OpenTopoMap</a>'
+        }).addTo(cameraMap);
+      }
+    });
+    reliefBase.addTo(cameraMap);
     cameraLayer=L.layerGroup().addTo(cameraMap);
     setTimeout(()=>cameraMap.invalidateSize(),120);
   }
@@ -5613,6 +5629,23 @@ body[data-theme="weatherlive"] .wl-intro{
 body[data-theme="weatherlive"] .theme-preset{border-color:#3a454b}
 
 /* WeatherWise public webcam map */
+
+/* Camera map: light, understated relief basemap */
+.ww-cameras-map{background:#dce5e2!important}
+.ww-cameras-map .leaflet-tile-pane{
+ filter:saturate(.68) brightness(1.06) contrast(.92);
+}
+.ww-cameras-map .leaflet-control-zoom a{
+ background:rgba(250,252,250,.96)!important;
+ color:#40545a!important;
+ border-color:#cbd6d2!important;
+}
+.ww-cameras-map .leaflet-control-attribution{
+ background:rgba(250,252,250,.88)!important;
+ color:#52636a!important;
+}
+.ww-cameras-map .leaflet-control-attribution a{color:#476e7a!important}
+
 .ww-cameras-shell{overflow:hidden}
 .ww-cameras-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap}
 .ww-camera-actions{display:flex;gap:8px;flex-wrap:wrap}
