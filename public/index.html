@@ -5351,23 +5351,33 @@ body[data-theme] .wl-sitebar .wl-brand-mark,
   selectedCamera=cam;renderMarkers();
   const title=esc(cam.title||'Κάμερα'),location=esc([cam.city,cam.region,cam.country].filter(Boolean).join(', ')||'Τοποθεσία μη διαθέσιμη');
   const image=cam.image?'<img class="ww-camera-preview-image" src="'+esc(cam.image)+'" alt="'+title+'" referrerpolicy="no-referrer">':'<div class="ww-camera-no-image">📷<span>Δεν παρέχεται διαθέσιμη εικόνα προεπισκόπησης</span></div>';
-  const live=cam.liveUrl?'<a class="ww-camera-live-link" href="'+esc(cam.liveUrl)+'" target="_blank" rel="noopener">▶ Άνοιγμα live προβολής</a>':'';
+  const live=cam.liveUrl?'<a class="ww-camera-live-link" href="'+esc(cam.liveUrl)+'" target="_blank" rel="noopener">▶ Άνοιγμα κάμερας</a>':'';
   const detail=cam.detailUrl?'<a class="ww-camera-source-link" href="'+esc(cam.detailUrl)+'" target="_blank" rel="noopener">Πηγή κάμερας ↗</a>':'';
   const lat=Number(cam.lat),lon=Number(cam.lon);
-  detailNode.innerHTML='<div class="ww-camera-detail-content"><div class="ww-camera-selected-tag">ΕΠΙΛΕΓΜΕΝΗ ΚΑΜΕΡΑ</div><h4>'+title+'</h4><div class="ww-camera-detail-location">'+location+'</div><div class="ww-camera-preview">'+image+'</div><div class="ww-camera-detail-actions">'+live+detail+'</div><div class="ww-camera-metadata"><div><small>ΓΕΩΓΡΑΦΙΚΟ ΠΛΑΤΟΣ</small><strong>'+lat.toFixed(5)+'°</strong></div><div><small>ΓΕΩΓΡΑΦΙΚΟ ΜΗΚΟΣ</small><strong>'+lon.toFixed(5)+'°</strong></div><div><small>ΤΟΠΙΚΗ ΩΡΑ ΚΑΜΕΡΑΣ</small><strong id="wwCameraLocalTime">—</strong></div><div><small>ΚΑΤΑΣΤΑΣΗ</small><strong>'+(cam.provider==='SkylineWebcams'?'Preview εικόνας διαθέσιμο':'Live player διαθέσιμο')+'</strong></div></div><div id="wwCameraWeather" class="ww-camera-weather"><div class="ww-weather-loading">Φόρτωση μετεωρολογικών δεδομένων…</div></div></div>';
+  detailNode.innerHTML='<div class="ww-camera-detail-content"><div class="ww-camera-selected-tag">ΕΠΙΛΕΓΜΕΝΗ ΚΑΜΕΡΑ</div><h4>'+title+'</h4><div class="ww-camera-detail-location">'+location+'</div><div class="ww-camera-preview">'+image+'</div><div class="ww-camera-detail-actions">'+live+detail+'</div>'+(cam.attribution?'<div class="ww-camera-weather-source">Αναφορά πηγής: '+esc(cam.attribution)+'</div>':'')+'<div class="ww-camera-metadata"><div><small>ΓΕΩΓΡΑΦΙΚΟ ΠΛΑΤΟΣ</small><strong>'+lat.toFixed(5)+'°</strong></div><div><small>ΓΕΩΓΡΑΦΙΚΟ ΜΗΚΟΣ</small><strong>'+lon.toFixed(5)+'°</strong></div><div><small>ΤΟΠΙΚΗ ΩΡΑ ΚΑΜΕΡΑΣ</small><strong id="wwCameraLocalTime">—</strong></div><div><small>ΚΑΤΑΣΤΑΣΗ</small><strong>'+(cam.provider==='SkylineWebcams'?'Preview εικόνας διαθέσιμο':'Live player διαθέσιμο')+'</strong></div></div><div id="wwCameraWeather" class="ww-camera-weather"><div class="ww-weather-loading">Φόρτωση μετεωρολογικών δεδομένων…</div></div></div>';
   try{$('wwCameraLocalTime').textContent=new Intl.DateTimeFormat('el-GR',{dateStyle:'medium',timeStyle:'medium',timeZone:Intl.DateTimeFormat().resolvedOptions().timeZone}).format(new Date());}catch(e){}
   loadWeather(cam);
  }
  async function loadCameras(area){
   if(loading)return;loading=true;currentArea=area;greeceBtn.classList.toggle('active',area==='greece');europeBtn.classList.toggle('active',area==='europe');statusNode.textContent='Αναζήτηση διαθέσιμων καμερών…';countNode.textContent='—';initMap();cameraMap.setView(bounds[area].center,bounds[area].zoom);
   try{
-   const r=await fetch('/api/webcams?area='+area,{cache:'no-store'}),data=await r.json();if(!r.ok)throw Error(data.error||'Αποτυχία φόρτωσης');
-   const windyCameras=data.configured&&Array.isArray(data.cameras)?data.cameras:[];
-   allCameras=[...skylineCameras,...windyCameras];
+   const worldeyeUrl='/api/worldeye/cameras?limit=100'+(area==='greece'?'&country=Greece':'');
+   const [worldeyeResult,windyResult]=await Promise.allSettled([
+    fetch(worldeyeUrl,{cache:'no-store'}).then(async r=>{const d=await r.json();if(!r.ok)throw Error(d.detail||d.error||'WorldEye API error');return d;}),
+    fetch('/api/webcams?area='+area,{cache:'no-store'}).then(async r=>{const d=await r.json();if(!r.ok)throw Error(d.error||'Windy API error');return d;})
+   ]);
+   const worldeyeData=worldeyeResult.status==='fulfilled'?worldeyeResult.value:{configured:false,cameras:[]};
+   const windyData=windyResult.status==='fulfilled'?windyResult.value:{configured:false,cameras:[]};
+   const worldeyeCameras=worldeyeData.configured&&Array.isArray(worldeyeData.cameras)?worldeyeData.cameras:[];
+   const windyCameras=windyData.configured&&Array.isArray(windyData.cameras)?windyData.cameras:[];
+   const combined=[...worldeyeCameras,...skylineCameras,...windyCameras];
+   const seen=new Set();allCameras=combined.filter(cam=>{const key=String(cam.id||'');if(seen.has(key))return false;seen.add(key);return true;});
    renderMarkers();
-   statusNode.textContent=windyCameras.length
-    ?'SkylineWebcams + Windy · επίλεξε σημείο στον χάρτη'
-    :'1 κάμερα SkylineWebcams · επίλεξε το σημείο στον χάρτη';
+   statusNode.textContent=worldeyeCameras.length
+    ?`WorldEye: ${worldeyeCameras.length} κάμερες${windyCameras.length?' · επιπλέον Windy':''} · επίλεξε σημείο στον χάρτη`
+    :worldeyeData.configured===false
+      ?'Πρόσθεσε WORLDEYE_API_KEY στο Render για ενεργοποίηση WorldEye · διαθέσιμες οι υπόλοιπες πηγές'
+      :'Δεν βρέθηκαν κάμερες WorldEye στην περιοχή · έλεγχος άλλων πηγών';
    if(allCameras.length&&(!selectedCamera||!allCameras.some(c=>c.id===selectedCamera.id)))selectCamera(allCameras[0]);
   }catch(e){statusNode.textContent='Σφάλμα φόρτωσης καμερών: '+e.message;countNode.textContent='—';}
   finally{loading=false;setTimeout(()=>cameraMap&&cameraMap.invalidateSize(),150);}

@@ -68,3 +68,12 @@ The camera catalogue is supplied by the Windy Webcams API. Create a free Webcams
 The key is used only by `server.js` and is never exposed in the browser. After adding it, redeploy/restart the service. The endpoint `/api/webcams` caches results for 10 minutes. Windy requires attribution and links back to the webcam detail/player. Some entries provide periodically refreshed images or timelapses rather than continuous live video; a live player link is shown only when the provider supplies one.
 
 Without the API key, the map still loads but shows a clear setup message instead of invented camera markers.
+
+
+## WorldEye camera catalogue
+For the optional WorldEye camera source, add `WORLDEYE_API_KEY` in Render → Environment.
+Keep the key server-side; never place it in `index.html`, `public/index.html`, or GitHub.
+WeatherWise calls the WorldEye API through `/api/worldeye/cameras`, caches results for five minutes,
+and displays the camera snapshot, watch link, coordinates, and the source attribution returned by WorldEye.
+The API returns snapshots and links to watch on WorldEye; it does not provide an in-page live video stream.
+The free API tier is limited to 100 requests per day. The application caches results to reduce usage.
