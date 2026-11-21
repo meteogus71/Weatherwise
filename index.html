@@ -5361,12 +5361,12 @@ body[data-theme] .wl-sitebar .wl-brand-mark,
  async function loadCameras(area){
   if(loading)return;loading=true;currentArea=area;greeceBtn.classList.toggle('active',area==='greece');europeBtn.classList.toggle('active',area==='europe');statusNode.textContent='Αναζήτηση διαθέσιμων καμερών…';countNode.textContent='—';initMap();cameraMap.setView(bounds[area].center,bounds[area].zoom);
   try{
-   const worldeyeUrl='/api/worldeye/cameras?limit=100'+(area==='greece'?'&country=Greece':'');
+   const worldeyeUrl='/api/worldeye/cameras?limit=50'+(area==='greece'?'&country=Greece':'');
    const [worldeyeResult,windyResult]=await Promise.allSettled([
     fetch(worldeyeUrl,{cache:'no-store'}).then(async r=>{const d=await r.json();if(!r.ok)throw Error(d.detail||d.error||'WorldEye API error');return d;}),
     fetch('/api/webcams?area='+area,{cache:'no-store'}).then(async r=>{const d=await r.json();if(!r.ok)throw Error(d.error||'Windy API error');return d;})
    ]);
-   const worldeyeData=worldeyeResult.status==='fulfilled'?worldeyeResult.value:{configured:false,cameras:[]};
+   const worldeyeData=worldeyeResult.status==='fulfilled'?worldeyeResult.value:{configured:null,cameras:[],requestError:worldeyeResult.reason?.message||'WorldEye request failed'};
    const windyData=windyResult.status==='fulfilled'?windyResult.value:{configured:false,cameras:[]};
    const worldeyeCameras=worldeyeData.configured&&Array.isArray(worldeyeData.cameras)?worldeyeData.cameras:[];
    const windyCameras=windyData.configured&&Array.isArray(windyData.cameras)?windyData.cameras:[];
@@ -5375,9 +5375,11 @@ body[data-theme] .wl-sitebar .wl-brand-mark,
    renderMarkers();
    statusNode.textContent=worldeyeCameras.length
     ?`WorldEye: ${worldeyeCameras.length} κάμερες${windyCameras.length?' · επιπλέον Windy':''} · επίλεξε σημείο στον χάρτη`
-    :worldeyeData.configured===false
-      ?'Πρόσθεσε WORLDEYE_API_KEY στο Render για ενεργοποίηση WorldEye · διαθέσιμες οι υπόλοιπες πηγές'
-      :'Δεν βρέθηκαν κάμερες WorldEye στην περιοχή · έλεγχος άλλων πηγών';
+    :worldeyeResult.status==='rejected'
+      ?`WorldEye: αποτυχία επικοινωνίας με API (${worldeyeData.requestError}) · εμφανίζονται οι υπόλοιπες πηγές`
+      :worldeyeData.configured===false
+        ?'Δεν βρέθηκε WORLDEYE_API_KEY στον server του Render · εμφανίζονται οι υπόλοιπες πηγές'
+        :'WorldEye: δεν επέστρεψε κάμερες για την περιοχή · εμφανίζονται οι υπόλοιπες πηγές';
    if(allCameras.length&&(!selectedCamera||!allCameras.some(c=>c.id===selectedCamera.id)))selectCamera(allCameras[0]);
   }catch(e){statusNode.textContent='Σφάλμα φόρτωσης καμερών: '+e.message;countNode.textContent='—';}
   finally{loading=false;setTimeout(()=>cameraMap&&cameraMap.invalidateSize(),150);}

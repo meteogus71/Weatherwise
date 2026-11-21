@@ -388,7 +388,7 @@ async function getMeteoAlarmFeed() {
       'Accept': 'application/atom+xml, application/xml, text/xml;q=0.9, */*;q=0.8',
       'User-Agent': 'WeatherWise-MeteoAlarm-Proxy/1.0'
     },
-    signal: AbortSignal.timeout(15000)
+    signal: AbortSignal.timeout(30000)
   });
 
   if (!upstream.ok) {
@@ -1583,7 +1583,7 @@ const server = http.createServer(async (req, res) => {
         count: cameras.length, attributionRequired: true
       }), { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'public, max-age=60' });
     } catch (err) {
-      console.error('[WorldEye]', err.message);
+      console.error('[WorldEye]', err.name === 'TimeoutError' || err.name === 'AbortError' ? 'Upstream request timed out after 30s' : err.message);
       if (cached?.cameras) {
         return send(res, 200, JSON.stringify({ configured: true, cameras: cached.cameras, cached: true, warning: err.message, provider: 'WorldEye' }),
           { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' });
