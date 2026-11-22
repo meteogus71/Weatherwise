@@ -2898,7 +2898,7 @@ body[data-theme="weatherlive"] #overview::after{
   <div class="ww-camera-workspace">
    <div class="ww-camera-map-column">
     <div id="wwCamerasMap" class="ww-cameras-map" role="application" aria-label="Χάρτης διαθέσιμων καμερών καιρού"></div>
-    <div class="ww-camera-credit">Κάμερες: <a href="https://www.windy.com/webcams/" target="_blank" rel="noopener">Windy Webcams</a> · Χάρτης © OpenStreetMap contributors</div>
+    <div class="ww-camera-credit">Κάμερες: SkylineWebcams · Χάρτης © OpenStreetMap contributors</div>
    </div>
    <aside class="ww-camera-detail" id="wwCameraDetail" aria-live="polite">
     <div class="ww-camera-detail-empty"><div class="ww-camera-empty-icon">📷</div><h4>Επιλέξτε μια κάμερα</h4><p>Πατήστε σε ένα σημείο του χάρτη για να δείτε την εικόνα, την τοποθεσία και τις τρέχουσες καιρικές συνθήκες.</p></div>
@@ -5542,17 +5542,13 @@ body[data-theme] .wl-sitebar .wl-brand-mark,
   loadWeather(cam);
  }
  async function loadCameras(area){
-  if(loading)return;loading=true;currentArea=area;greeceBtn.classList.toggle('active',area==='greece');europeBtn.classList.toggle('active',area==='europe');statusNode.textContent='Αναζήτηση διαθέσιμων καμερών…';countNode.textContent='—';initMap();cameraMap.setView(bounds[area].center,bounds[area].zoom);
+  if(loading)return;loading=true;currentArea=area;greeceBtn.classList.toggle('active',area==='greece');europeBtn.classList.toggle('active',area==='europe');statusNode.textContent='Φόρτωση καμερών SkylineWebcams…';countNode.textContent='—';initMap();cameraMap.setView(bounds[area].center,bounds[area].zoom);
   try{
-   const r=await fetch('/api/webcams?area='+area,{cache:'no-store'}),data=await r.json();if(!r.ok)throw Error(data.error||'Αποτυχία φόρτωσης');
-   const windyCameras=data.configured&&Array.isArray(data.cameras)?data.cameras:[];
-   allCameras=[...skylineCameras,...windyCameras];
+   allCameras=skylineCameras.slice();
    renderMarkers();
-   statusNode.textContent=windyCameras.length
-    ?'SkylineWebcams + Windy · επίλεξε σημείο στον χάρτη'
-    :'SkylineWebcams · επίλεξε σημείο στον χάρτη'; 
+   statusNode.textContent='SkylineWebcams · επίλεξε σημείο στον χάρτη';
    if(allCameras.length&&(!selectedCamera||!allCameras.some(c=>c.id===selectedCamera.id)))selectCamera(allCameras[0]);
-  }catch(e){statusNode.textContent='Σφάλμα φόρτωσης καμερών: '+e.message;countNode.textContent='—';}
+  }catch(e){statusNode.textContent='Σφάλμα εμφάνισης καμερών: '+e.message;countNode.textContent='—';}
   finally{loading=false;setTimeout(()=>cameraMap&&cameraMap.invalidateSize(),150);}
  }
  greeceBtn.addEventListener('click',()=>loadCameras('greece'));europeBtn.addEventListener('click',()=>loadCameras('europe'));refreshBtn.addEventListener('click',()=>loadCameras(currentArea));
