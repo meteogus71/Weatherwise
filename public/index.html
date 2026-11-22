@@ -2553,6 +2553,59 @@ body[data-theme="weatherlive"] #overview::after{
 }
 </style>
 
+
+<style id="weatherwise-carbon-menu-typography-hover-refine">
+/* Refinement of the current carbon menu only:
+   labels fit within their tabs, hover gets an underline, active text alone glows. */
+#sidebar.sidebar .nav{
+  flex:1 1 0!important;
+  min-width:0!important;
+  max-width:none!important;
+  padding:0 clamp(3px,.45vw,9px)!important;
+  font-size:clamp(9px,.68vw,12px)!important;
+  line-height:1.12!important;
+  letter-spacing:.025em!important;
+  white-space:normal!important;
+  overflow-wrap:anywhere!important;
+  word-break:normal!important;
+  text-overflow:clip!important;
+  text-shadow:none!important;
+  background:transparent!important;
+}
+#sidebar.sidebar .nav::after{
+  left:12%!important;right:12%!important;bottom:8px!important;
+  height:3px!important;border-radius:3px!important;
+  opacity:0!important;transform:scaleX(.35)!important;
+  box-shadow:0 0 7px var(--cyan),0 0 14px color-mix(in srgb,var(--cyan) 55%,transparent)!important;
+  transition:opacity .18s ease,transform .18s ease!important;
+}
+#sidebar.sidebar .nav:hover::after,
+#sidebar.sidebar .nav:focus-visible::after{
+  opacity:1!important;transform:scaleX(1)!important
+}
+/* The selected tab has no bar or filled background: only its letters illuminate. */
+#sidebar.sidebar .nav.active{
+  color:var(--text)!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  text-shadow:
+    0 0 5px color-mix(in srgb,var(--cyan) 82%,var(--text) 18%),
+    0 0 11px color-mix(in srgb,var(--cyan) 58%,transparent)!important;
+}
+#sidebar.sidebar .nav.active::after{opacity:0!important;transform:scaleX(.35)!important}
+#sidebar.sidebar .nav.active:hover::after{opacity:1!important;transform:scaleX(1)!important}
+#sidebar.sidebar .nav:hover:not(.active){
+  color:var(--text)!important;background:transparent!important;text-shadow:none!important
+}
+@media(max-width:1100px){
+ #sidebar.sidebar .nav{flex:0 0 120px!important;min-width:0!important;font-size:11px!important;padding:0 5px!important}
+}
+@media(max-width:700px){
+ #sidebar.sidebar .nav{flex:0 0 108px!important;font-size:10px!important;padding:0 4px!important}
+ #sidebar.sidebar .nav::after{bottom:7px!important;height:2px!important}
+}
+</style>
+
 </head>
 <body>
 <div id="ww-header-spacer" aria-hidden="true"></div>
