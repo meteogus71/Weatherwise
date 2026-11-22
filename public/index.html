@@ -2346,6 +2346,14 @@ body[data-theme="weatherlive"] #overview::after{
   box-shadow:none!important;
 }
 
+
+/* Community report: location input with one-tap browser geolocation */
+.report-location-row{display:flex;align-items:stretch;gap:9px;width:100%;min-width:0}
+.report-location-row input{flex:1 1 auto;min-width:0}
+#reportUseLocationBtn{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;gap:8px;white-space:nowrap}
+#reportUseLocationBtn:disabled{opacity:.65;cursor:wait}
+@media(max-width:620px){.report-location-row{flex-direction:column}.report-location-row #reportUseLocationBtn{width:100%}}
+
 </style>
 
 <style id="weatherwise-remove-forecast-outer-frame">
@@ -2537,7 +2545,7 @@ body[data-theme="weatherlive"] #overview::after{
       <div class="card">
         <div class="card-head"><h3>ΝΕΑ ΑΝΑΦΟΡΑ</h3><span>USER OBSERVATION</span></div>
         <form id="weatherReportForm" class="report-form">
-          <div class="field wide"><label for="reportLocation">Περιοχή / Τοποθεσία *</label><input id="reportLocation" name="location" required maxlength="120" placeholder="π.χ. Γαλάτσι, Αθήνα"></div>
+          <div class="field wide"><label for="reportLocation">Περιοχή / Τοποθεσία *</label><div class="report-location-row"><input id="reportLocation" name="location" required maxlength="120" placeholder="π.χ. Γαλάτσι, Αθήνα"><button class="btn" type="button" id="reportUseLocationBtn"><span aria-hidden="true">⌖</span> Αυτόματος γεωεντοπισμός</button></div><div class="small" id="reportLocationStatus" role="status" aria-live="polite">Χρησιμοποιήστε τον γεωεντοπισμό για αυτόματη συμπλήρωση της περιοχής σας.</div></div>
           <div class="field"><label for="reportType">Καιρικό φαινόμενο *</label><select id="reportType" name="type" required><option value="">Επιλέξτε…</option><option>Βροχή</option><option>Καταιγίδα</option><option>Χιονόπτωση</option><option>Χαλάζι</option><option>Ισχυρός άνεμος</option><option>Ομίχλη</option><option>Ηλιοφάνεια</option><option>Νεφοκάλυψη</option><option>Άλλο</option></select></div>
           <div class="field"><label for="reportIntensity">Ένταση φαινομένου</label><select id="reportIntensity"><option>Ασθενής</option><option selected>Μέτρια</option><option>Ισχυρή</option><option>Πολύ ισχυρή</option></select></div>
           <div class="field"><label for="reportObservedAt">Ώρα παρατήρησης</label><input id="reportObservedAt" type="datetime-local"></div>
@@ -4267,18 +4275,53 @@ function renderCommunityReports(){
  host.innerHTML=reports.slice().reverse().map(r=>`<article class="report-item"><div class="report-item-head"><b>${escapeReportText(r.location)}</b><span class="report-meta">${escapeReportText(r.dateLabel)}</span></div><div><b>${escapeReportText(r.type)}</b> · ${escapeReportText(r.intensity)}</div><p style="font-size:12px;line-height:1.5">${escapeReportText(r.description)}</p><div class="report-meta">${r.temperature!==''?'Θερμοκρασία: '+escapeReportText(r.temperature)+'°C · ':''}${r.observedAt?'Παρατήρηση: '+escapeReportText(r.observedAt):''}</div><div>${(r.photos||[]).map(p=>`<img src="${p}" alt="Φωτογραφία αναφοράς">`).join('')}</div></article>`).join('');
 }
 function escapeReportText(value){return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+let reportLocationCoordinates=null;
+const reportUseLocationBtn=$('reportUseLocationBtn');
+if(reportUseLocationBtn){
+ reportUseLocationBtn.addEventListener('click',()=>{
+  const status=$('reportLocationStatus');
+  if(!navigator.geolocation){
+   status.textContent='Ο φυλλομετρητής δεν υποστηρίζει γεωεντοπισμό.';
+   return;
+  }
+  reportUseLocationBtn.disabled=true;
+  reportUseLocationBtn.innerHTML='<span aria-hidden="true">⌖</span> Εντοπισμός…';
+  status.textContent='Αναμονή για άδεια πρόσβασης στην τοποθεσία…';
+  navigator.geolocation.getCurrentPosition(async position=>{
+   const latitude=position.coords.latitude,longitude=position.coords.longitude;
+   reportLocationCoordinates={latitude,longitude};
+   try{
+    const nearest=await reverseGeocodeNearestCity(latitude,longitude);
+    $('reportLocation').value=nearest.label||[nearest.name,nearest.country].filter(Boolean).join(', ');
+    status.textContent=`Εντοπίστηκε: ${$('reportLocation').value} · ${latitude.toFixed(5)}, ${longitude.toFixed(5)}`;
+   }catch(error){
+    $('reportLocation').value=`Στίγμα GPS ${latitude.toFixed(5)}, ${longitude.toFixed(5)}`;
+    status.textContent='Βρέθηκε η θέση σας, αλλά δεν αναγνωρίστηκε το όνομα της περιοχής. Συμπληρώθηκαν οι συντεταγμένες.';
+   }finally{
+    reportUseLocationBtn.disabled=false;
+    reportUseLocationBtn.innerHTML='<span aria-hidden="true">⌖</span> Αυτόματος γεωεντοπισμός';
+   }
+  },error=>{
+   reportLocationCoordinates=null;
+   status.textContent=error.code===1?'Δεν δόθηκε άδεια πρόσβασης στην τοποθεσία. Ελέγξτε τις άδειες του browser.':error.code===2?'Δεν ήταν δυνατός ο προσδιορισμός της θέσης σας.':'Η αναζήτηση τοποθεσίας έληξε χωρίς απάντηση.';
+   reportUseLocationBtn.disabled=false;
+   reportUseLocationBtn.innerHTML='<span aria-hidden="true">⌖</span> Αυτόματος γεωεντοπισμός';
+  },{enableHighAccuracy:true,timeout:15000,maximumAge:60000});
+ });
+}
+
 if(reportForm){
  const now=new Date();now.setMinutes(now.getMinutes()-now.getTimezoneOffset());$('reportObservedAt').value=now.toISOString().slice(0,16);
  renderCommunityReports();
  reportForm.addEventListener('submit',e=>{
   e.preventDefault();
   const reports=getCommunityReports();
-  const report={id:Date.now(),location:$('reportLocation').value.trim(),type:$('reportType').value,intensity:$('reportIntensity').value,observedAt:$('reportObservedAt').value,temperature:$('reportTemperature').value,description:$('reportDescription').value.trim(),photos:reportPhotoData,dateLabel:new Date().toLocaleString('el-GR',{dateStyle:'short',timeStyle:'short'})};
+  const report={id:Date.now(),location:$('reportLocation').value.trim(),coordinates:reportLocationCoordinates,type:$('reportType').value,intensity:$('reportIntensity').value,observedAt:$('reportObservedAt').value,temperature:$('reportTemperature').value,description:$('reportDescription').value.trim(),photos:reportPhotoData,dateLabel:new Date().toLocaleString('el-GR',{dateStyle:'short',timeStyle:'short'})};
   reports.push(report);
   try{
    localStorage.setItem('weatherwise-community-reports',JSON.stringify(reports));
    $('reportStatus').textContent='Η αναφορά αποθηκεύτηκε σε αυτή τη συσκευή.';
-   reportForm.reset();reportPhotoData=[];reportPreview.innerHTML='';
+   reportForm.reset();reportPhotoData=[];reportPreview.innerHTML='';reportLocationCoordinates=null;if($('reportLocationStatus'))$('reportLocationStatus').textContent='Χρησιμοποιήστε τον γεωεντοπισμό για αυτόματη συμπλήρωση της περιοχής σας.';
    const d=new Date();d.setMinutes(d.getMinutes()-d.getTimezoneOffset());$('reportObservedAt').value=d.toISOString().slice(0,16);
    renderCommunityReports();
   }catch(err){$('reportStatus').textContent='Δεν ήταν δυνατή η αποθήκευση. Δοκιμάστε λιγότερες ή μικρότερες φωτογραφίες.'}
