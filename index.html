@@ -2475,6 +2475,120 @@ body[data-theme="weatherlive"] #overview::after{
 }
 </style>
 
+
+<style id="weatherwise-segmented-glossy-menu">
+/* Experimental segmented navigation inspired by the supplied reference.
+   All colors are derived from the active WeatherWise theme tokens. */
+#sidebar.sidebar{
+  display:flex!important;
+  flex-direction:row!important;
+  flex-wrap:wrap!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:0!important;
+  width:100%!important;
+  min-height:78px!important;
+  height:auto!important;
+  box-sizing:border-box!important;
+  padding:12px 18px!important;
+  margin:0!important;
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb,var(--panel2) 94%,white 6%),
+      color-mix(in srgb,var(--panel) 96%,var(--blue) 4%))!important;
+  border:1px solid color-mix(in srgb,var(--line) 72%,var(--cyan) 28%)!important;
+  border-radius:18px!important;
+  box-shadow:
+    0 9px 24px color-mix(in srgb,var(--bg) 48%,transparent),
+    inset 0 1px 0 color-mix(in srgb,var(--text) 16%,transparent),
+    inset 0 -2px 0 color-mix(in srgb,var(--bg) 28%,transparent)!important;
+  overflow:visible!important;
+}
+#sidebar.sidebar .brand,
+#sidebar.sidebar .group-label,
+#sidebar.sidebar .side-bottom{display:none!important}
+#sidebar.sidebar .nav{
+  display:flex!important;
+  flex:1 1 120px!important;
+  align-items:center!important;
+  justify-content:center!important;
+  min-width:0!important;
+  width:auto!important;
+  min-height:52px!important;
+  box-sizing:border-box!important;
+  margin:0!important;
+  padding:10px 12px!important;
+  border-radius:0!important;
+  border:1px solid color-mix(in srgb,var(--line) 78%,var(--bg) 22%)!important;
+  border-right-color:color-mix(in srgb,var(--bg) 60%,var(--line))!important;
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb,var(--panel2) 82%,var(--blue) 18%),
+      color-mix(in srgb,var(--panel) 88%,var(--blue) 12%))!important;
+  color:var(--text)!important;
+  box-shadow:inset 0 1px 0 color-mix(in srgb,var(--text) 15%,transparent)!important;
+  font-size:13px!important;
+  font-weight:650!important;
+  line-height:1.2!important;
+  white-space:normal!important;
+  text-align:center!important;
+  cursor:pointer!important;
+  transition:background .18s ease,box-shadow .18s ease,filter .18s ease!important;
+}
+#sidebar.sidebar .nav:first-of-type{
+  border-radius:11px 0 0 11px!important;
+}
+#sidebar.sidebar .nav:last-of-type{
+  border-radius:0 11px 11px 0!important;
+}
+#sidebar.sidebar .nav .ico{
+  margin-right:7px!important;
+  color:var(--cyan)!important;
+}
+#sidebar.sidebar .nav:hover{
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb,var(--cyan) 34%,var(--panel2)),
+      color-mix(in srgb,var(--blue) 24%,var(--panel)))!important;
+  color:var(--text)!important;
+  box-shadow:inset 0 1px 0 color-mix(in srgb,var(--text) 24%,transparent),
+             0 0 13px color-mix(in srgb,var(--cyan) 20%,transparent)!important;
+  filter:brightness(1.08)!important;
+}
+#sidebar.sidebar .nav.active{
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb,var(--blue) 62%,var(--cyan) 38%),
+      color-mix(in srgb,var(--panel) 42%,var(--blue) 58%))!important;
+  color:var(--text)!important;
+  border-color:color-mix(in srgb,var(--cyan) 72%,var(--line))!important;
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb,var(--text) 36%,transparent),
+    inset 0 -3px 0 color-mix(in srgb,var(--cyan) 72%,transparent),
+    0 0 18px color-mix(in srgb,var(--cyan) 24%,transparent)!important;
+}
+#sidebar.sidebar .nav.active .ico{color:var(--text)!important}
+@media(max-width:900px){
+  #sidebar.sidebar{gap:3px!important;padding:9px!important}
+  #sidebar.sidebar .nav{
+    flex:1 1 calc(25% - 3px)!important;
+    min-height:44px!important;
+    border-radius:8px!important;
+    font-size:12px!important;
+  }
+}
+@media(max-width:600px){
+  #sidebar.sidebar{padding:7px!important}
+  #sidebar.sidebar .nav{
+    flex:1 1 calc(50% - 3px)!important;
+    min-height:42px!important;
+    padding:8px 6px!important;
+    font-size:11px!important;
+  }
+  #sidebar.sidebar .nav .ico{margin-right:5px!important}
+}
+</style>
+
 </head>
 <body>
 <div id="ww-header-spacer" aria-hidden="true"></div>
