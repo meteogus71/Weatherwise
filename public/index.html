@@ -5736,6 +5736,139 @@ body[data-theme] .wl-sitebar .wl-brand-mark,
 })();
 </script>
 
+
+
+<style id="weatherwise-rounded-segmented-theme-menu">
+/* WEATHERWISE — rounded segmented navigation inspired by the supplied reference.
+   Uses the active theme palette; the blue glass treatment is the default visual language. */
+body[data-theme] aside.sidebar{
+  position:sticky!important;
+  top:0!important;
+  z-index:1000!important;
+  display:flex!important;
+  flex-direction:row!important;
+  align-items:stretch!important;
+  gap:0!important;
+  width:calc(100% - 32px)!important;
+  max-width:1600px!important;
+  height:76px!important;
+  min-height:76px!important;
+  margin:12px auto 18px!important;
+  padding:5px!important;
+  box-sizing:border-box!important;
+  overflow-x:auto!important;
+  overflow-y:hidden!important;
+  scrollbar-width:thin!important;
+  scrollbar-color:color-mix(in srgb,var(--cyan) 60%,transparent) transparent!important;
+  border:1px solid color-mix(in srgb,var(--line) 70%,#fff 30%)!important;
+  border-radius:20px!important;
+  background:linear-gradient(180deg,
+    color-mix(in srgb,var(--panel2) 76%,#fff 24%) 0%,
+    color-mix(in srgb,var(--panel) 84%,#000 16%) 100%)!important;
+  box-shadow:0 7px 20px color-mix(in srgb,var(--bg) 38%,transparent),
+    inset 0 1px 0 #ffffff70,inset 0 -2px 0 #00000030!important;
+}
+body[data-theme] aside.sidebar .brand,
+body[data-theme] aside.sidebar .group-label,
+body[data-theme] aside.sidebar .side-bottom{display:none!important}
+body[data-theme] aside.sidebar .nav{
+  position:relative!important;
+  isolation:isolate!important;
+  display:flex!important;
+  flex:1 0 118px!important;
+  align-items:center!important;
+  justify-content:center!important;
+  flex-direction:column!important;
+  gap:3px!important;
+  width:auto!important;
+  min-width:118px!important;
+  max-width:190px!important;
+  height:100%!important;
+  min-height:0!important;
+  margin:0!important;
+  padding:7px 9px!important;
+  box-sizing:border-box!important;
+  border:0!important;
+  border-right:1px solid color-mix(in srgb,var(--line) 65%,#000 35%)!important;
+  border-radius:0!important;
+  background:transparent!important;
+  color:var(--text)!important;
+  text-align:center!important;
+  white-space:normal!important;
+  cursor:pointer!important;
+  transition:background .18s ease,color .18s ease,box-shadow .18s ease!important;
+}
+body[data-theme] aside.sidebar .nav:first-of-type{border-radius:14px 0 0 14px!important}
+body[data-theme] aside.sidebar .nav:last-of-type{border-right:0!important;border-radius:0 14px 14px 0!important}
+body[data-theme] aside.sidebar .nav::before{
+  content:""!important;
+  position:absolute!important;
+  z-index:-1!important;
+  inset:0!important;
+  border-radius:10px!important;
+  background:linear-gradient(180deg,
+    color-mix(in srgb,var(--panel2) 78%,#fff 22%),
+    color-mix(in srgb,var(--panel) 88%,#000 12%))!important;
+  opacity:0!important;
+  transition:opacity .18s ease,background .18s ease!important;
+}
+body[data-theme] aside.sidebar .nav .ico{
+  display:block!important;
+  width:auto!important;
+  height:25px!important;
+  min-height:25px!important;
+  flex:0 0 25px!important;
+  margin:0!important;
+  font-size:23px!important;
+  line-height:1!important;
+  color:var(--text)!important;
+  text-shadow:0 1px 2px #0005!important;
+}
+body[data-theme] aside.sidebar .nav .nav-label{
+  display:block!important;
+  max-width:100%!important;
+  font-size:clamp(10px,.85vw,13px)!important;
+  line-height:1.12!important;
+  font-weight:750!important;
+  letter-spacing:.01em!important;
+  text-align:center!important;
+  overflow-wrap:anywhere!important;
+  color:inherit!important;
+}
+body[data-theme] aside.sidebar .nav:hover,
+body[data-theme] aside.sidebar .nav:focus-visible,
+body[data-theme] aside.sidebar .nav.active,
+body[data-theme] aside.sidebar .nav[aria-current="page"]{
+  color:#fff!important;
+  outline:0!important;
+  box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--cyan) 55%,#fff 45%),
+    0 0 14px color-mix(in srgb,var(--cyan) 24%,transparent)!important;
+}
+body[data-theme] aside.sidebar .nav:hover::before,
+body[data-theme] aside.sidebar .nav:focus-visible::before,
+body[data-theme] aside.sidebar .nav.active::before,
+body[data-theme] aside.sidebar .nav[aria-current="page"]::before{
+  opacity:1!important;
+  background:linear-gradient(180deg,
+    color-mix(in srgb,var(--cyan) 48%,#fff 52%) 0%,
+    color-mix(in srgb,var(--blue) 62%,var(--panel2) 38%) 52%,
+    color-mix(in srgb,var(--blue) 68%,var(--panel) 32%) 100%)!important;
+}
+body[data-theme] aside.sidebar .nav:hover .ico,
+body[data-theme] aside.sidebar .nav.active .ico,
+body[data-theme] aside.sidebar .nav[aria-current="page"] .ico{color:#fff!important}
+@media(max-width:900px){
+ body[data-theme] aside.sidebar{width:calc(100% - 20px)!important;height:70px!important;min-height:70px!important;margin:10px auto 14px!important}
+ body[data-theme] aside.sidebar .nav{flex-basis:108px!important;min-width:108px!important;padding:6px 7px!important}
+}
+@media(max-width:560px){
+ body[data-theme] aside.sidebar{width:calc(100% - 14px)!important;height:66px!important;min-height:66px!important;margin:7px auto 12px!important;border-radius:15px!important}
+ body[data-theme] aside.sidebar .nav{flex-basis:100px!important;min-width:100px!important;padding:5px!important}
+ body[data-theme] aside.sidebar .nav .ico{font-size:20px!important;height:22px!important;min-height:22px!important;flex-basis:22px!important}
+ body[data-theme] aside.sidebar .nav .nav-label{font-size:10px!important}
+}
+</style>
+
 </body>
 </html>
 
