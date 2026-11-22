@@ -5439,7 +5439,6 @@ body[data-theme] .wl-sitebar .wl-brand-mark,
  {"id": "skyline-5289", "provider": "SkylineWebcams", "title": "Αγία Μαρίνα – Λέρος", "city": "Αγία Μαρίνα", "region": "Δωδεκάνησα", "country": "Ελλάδα", "lat": 37.133, "lon": 26.852, "image": "https://embed.skylinewebcams.com/img/5289.jpg", "liveUrl": "https://www.skylinewebcams.com/el/webcam/ellada/naigaio/dodecanisa/agia-marina-leros.html", "detailUrl": "https://www.skylinewebcams.com/el/webcam/ellada/naigaio/dodecanisa/agia-marina-leros.html"},
  {"id": "skyline-3099", "provider": "SkylineWebcams", "title": "Κάλυμνος", "city": "Κάλυμνος", "region": "Δωδεκάνησα", "country": "Ελλάδα", "lat": 36.956, "lon": 26.977, "image": "https://embed.skylinewebcams.com/img/3099.jpg", "liveUrl": "https://www.skylinewebcams.com/el/webcam/ellada/naigaio/dodecanisa/kalymnos.html", "detailUrl": "https://www.skylinewebcams.com/el/webcam/ellada/naigaio/dodecanisa/kalymnos.html"},
  {"id": "skyline-746", "provider": "SkylineWebcams", "title": "Πάρος – Παραλία Λιβάδι", "city": "Πάρος", "region": "Κυκλάδες", "country": "Ελλάδα", "lat": 37.085, "lon": 25.148, "image": "https://embed.skylinewebcams.com/img/746.jpg", "liveUrl": "https://www.skylinewebcams.com/el/webcam/ellada/naigaio/kyklades/paros-beach.html", "detailUrl": "https://www.skylinewebcams.com/el/webcam/ellada/naigaio/kyklades/paros-beach.html"},
- ,
  {"id": "skyline-3073", "provider": "SkylineWebcams", "title": "Παλιό λιμάνι Μυκόνου - Mykonos Port", "city": "Μύκονος", "region": "Νότιο Αιγαίο", "country": "Ελλάδα", "lat": 37.4467, "lon": 25.3289, "image": "https://embed.skylinewebcams.com/img/3073.jpg", "liveUrl": "https://www.skylinewebcams.com/el/webcam/ellada/naigaio/kyklades/port-of-mykonos.html", "detailUrl": "https://www.skylinewebcams.com/el/webcam/ellada/naigaio/kyklades/port-of-mykonos.html"},
  {"id": "skyline-1237", "provider": "SkylineWebcams", "title": "Πάρος - Λιμάνι της Νάουσας", "city": "Πάρος", "region": "Νότιο Αιγαίο", "country": "Ελλάδα", "lat": 37.085, "lon": 25.148, "image": "https://embed.skylinewebcams.com/img/1237.jpg", "liveUrl": "https://www.skylinewebcams.com/el/webcam/ellada/naigaio/kyklades/paros-naoussa-harbour.html", "detailUrl": "https://www.skylinewebcams.com/el/webcam/ellada/naigaio/kyklades/paros-naoussa-harbour.html"},
  {"id": "skyline-3346", "provider": "SkylineWebcams", "title": "Μάρπησσα Πάρου και Μονή Αγίου Αντωνίου", "city": "Πάρος", "region": "Νότιο Αιγαίο", "country": "Ελλάδα", "lat": 37.085, "lon": 25.148, "image": "https://embed.skylinewebcams.com/img/3346.jpg", "liveUrl": "https://www.skylinewebcams.com/el/webcam/ellada/naigaio/kyklades/marpissa-paros.html", "detailUrl": "https://www.skylinewebcams.com/el/webcam/ellada/naigaio/kyklades/marpissa-paros.html"},
@@ -5551,7 +5550,7 @@ body[data-theme] .wl-sitebar .wl-brand-mark,
    renderMarkers();
    statusNode.textContent=windyCameras.length
     ?'SkylineWebcams + Windy · επίλεξε σημείο στον χάρτη'
-    :'1 κάμερα SkylineWebcams · επίλεξε το σημείο στον χάρτη'; 
+    :'SkylineWebcams · επίλεξε σημείο στον χάρτη'; 
    if(allCameras.length&&(!selectedCamera||!allCameras.some(c=>c.id===selectedCamera.id)))selectCamera(allCameras[0]);
   }catch(e){statusNode.textContent='Σφάλμα φόρτωσης καμερών: '+e.message;countNode.textContent='—';}
   finally{loading=false;setTimeout(()=>cameraMap&&cameraMap.invalidateSize(),150);}
