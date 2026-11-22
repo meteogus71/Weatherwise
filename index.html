@@ -2589,6 +2589,70 @@ body[data-theme="weatherlive"] #overview::after{
 }
 </style>
 
+
+<style id="weatherwise-menu-equal-aligned-tabs">
+/* Equal-size menu tabs: consistent grid, centered icon and label */
+#sidebar.sidebar{
+  display:grid!important;
+  grid-template-columns:repeat(6,minmax(0,1fr))!important;
+  grid-auto-rows:88px!important;
+  grid-auto-flow:row!important;
+  align-items:stretch!important;
+  justify-items:stretch!important;
+  gap:0!important;
+  padding:12px 18px!important;
+  box-sizing:border-box!important;
+}
+#sidebar.sidebar .nav{
+  display:flex!important;
+  flex:initial!important;
+  width:100%!important;
+  min-width:0!important;
+  min-height:0!important;
+  height:100%!important;
+  box-sizing:border-box!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:7px!important;
+  margin:0!important;
+  padding:9px 7px!important;
+  text-align:center!important;
+  white-space:normal!important;
+  overflow:hidden!important;
+}
+#sidebar.sidebar .nav .ico{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  width:25px!important;
+  height:25px!important;
+  flex:0 0 25px!important;
+  margin:0!important;
+  line-height:1!important;
+  font-size:22px!important;
+}
+#sidebar.sidebar .nav .nav-label{
+  display:block!important;
+  width:100%!important;
+  min-width:0!important;
+  margin:0!important;
+  text-align:center!important;
+  line-height:1.2!important;
+  font-size:12px!important;
+  font-weight:650!important;
+  overflow-wrap:anywhere!important;
+}
+@media(max-width:900px){
+  #sidebar.sidebar{grid-template-columns:repeat(4,minmax(0,1fr))!important;grid-auto-rows:82px!important;padding:9px!important}
+}
+@media(max-width:600px){
+  #sidebar.sidebar{grid-template-columns:repeat(3,minmax(0,1fr))!important;grid-auto-rows:78px!important;padding:7px!important}
+  #sidebar.sidebar .nav{gap:5px!important;padding:7px 4px!important}
+  #sidebar.sidebar .nav .ico{font-size:20px!important;width:23px!important;height:23px!important;flex-basis:23px!important}
+  #sidebar.sidebar .nav .nav-label{font-size:10.5px!important}
+}
+</style>
 </head>
 <body>
 <div id="ww-header-spacer" aria-hidden="true"></div>
