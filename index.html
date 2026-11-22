@@ -2279,6 +2279,23 @@ body[data-frame-shadow="off"] .ww-day-chart,body[data-frame-shadow="off"] .ww-da
   .temp-evolution-card > .card-head > span{margin-left:0!important;text-align:left!important}
 }
 
+
+
+/* Remove the thin outer frame only in WorldCam Blue Dark and WeatherLive Dark.
+   Keep borders on individual cards, widgets, and controls unchanged. */
+body[data-theme="worldcam"],
+body[data-theme="weatherlive"]{
+  border:0!important;
+  outline:0!important;
+}
+body[data-theme="worldcam"] :is(#app,.app,.page,.page-shell,.content,.content-wrap,.main,main,.weather-content,.dashboard,.dashboard-grid),
+body[data-theme="weatherlive"] :is(#app,.app,.page,.page-shell,.content,.content-wrap,.main,main,.weather-content,.dashboard,.dashboard-grid){
+  border:0!important;
+  outline:0!important;
+  box-shadow:none!important;
+  border-radius:0!important;
+}
+
 </style>
 
 <style id="weatherwise-remove-forecast-outer-frame">
