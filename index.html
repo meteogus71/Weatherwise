@@ -6206,4 +6206,122 @@ html body #overview .city-current #weatherIcon{
 .sidebar .nav:hover .ico,.sidebar .nav.active .ico{color:var(--text)!important;text-shadow:0 0 14px color-mix(in srgb,var(--cyan) 80%,transparent)!important}
 @media(max-width:900px){.sidebar .nav{min-height:68px!important;gap:5px!important;padding:8px 4px!important}.sidebar .nav .ico{width:24px!important;height:24px!important;font-size:21px!important;flex-basis:24px!important}.sidebar .nav .nav-label{font-size:11px!important}}
 @media(max-width:560px){.sidebar .nav{min-height:64px!important}.sidebar .nav .nav-label{font-size:10px!important}}
+
+
+/* WEATHERWISE EXPERIMENTAL ANGLED METAL MENU — inspired by the supplied reference */
+body[data-theme] aside.sidebar{
+  display:grid!important;
+  grid-template-columns:repeat(6,minmax(0,1fr))!important;
+  grid-auto-rows:minmax(92px,auto)!important;
+  gap:0!important;
+  padding:10px 14px!important;
+  align-items:stretch!important;
+  background:linear-gradient(180deg,
+    color-mix(in srgb,var(--panel) 84%,#ffffff 16%),
+    color-mix(in srgb,var(--panel) 92%,#000000 8%))!important;
+  border:1px solid color-mix(in srgb,var(--line) 65%,#ffffff 35%)!important;
+  border-bottom:3px solid color-mix(in srgb,var(--cyan) 50%,var(--line))!important;
+  box-shadow:0 8px 22px color-mix(in srgb,var(--bg) 40%,transparent),inset 0 1px #ffffff55!important;
+  overflow:visible!important;
+}
+body[data-theme] aside.sidebar .nav{
+  position:relative!important;
+  isolation:isolate!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:5px!important;
+  min-width:0!important;
+  width:100%!important;
+  min-height:92px!important;
+  height:100%!important;
+  margin:0!important;
+  padding:10px 8px 8px!important;
+  box-sizing:border-box!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  color:var(--text)!important;
+  text-align:center!important;
+  white-space:normal!important;
+  cursor:pointer!important;
+  transition:color .18s ease,filter .18s ease,transform .18s ease!important;
+}
+body[data-theme] aside.sidebar .nav::before{
+  content:""!important;
+  position:absolute!important;
+  z-index:-1!important;
+  inset:1px 0 1px 0!important;
+  background:linear-gradient(180deg,
+    color-mix(in srgb,var(--panel2) 72%,#ffffff 28%) 0%,
+    color-mix(in srgb,var(--panel2) 84%,#aeb7c2 16%) 48%,
+    color-mix(in srgb,var(--panel) 78%,#000000 22%) 100%)!important;
+  border-left:1px solid color-mix(in srgb,var(--line) 62%,#ffffff 38%)!important;
+  border-right:1px solid color-mix(in srgb,var(--line) 62%,#000000 38%)!important;
+  clip-path:polygon(15% 0,100% 0,85% 100%,0 100%)!important;
+  box-shadow:inset 0 1px #ffffff55,inset 0 -2px #00000035!important;
+  transition:background .18s ease,filter .18s ease!important;
+}
+body[data-theme] aside.sidebar .nav .ico{
+  display:block!important;
+  font-size:30px!important;
+  line-height:1!important;
+  height:34px!important;
+  min-height:34px!important;
+  margin:0!important;
+  color:currentColor!important;
+  text-shadow:0 1px 2px #0008!important;
+}
+body[data-theme] aside.sidebar .nav .nav-label{
+  display:block!important;
+  max-width:100%!important;
+  font-size:12px!important;
+  line-height:1.15!important;
+  font-weight:800!important;
+  letter-spacing:.035em!important;
+  text-transform:uppercase!important;
+  text-align:center!important;
+  overflow-wrap:anywhere!important;
+  text-shadow:0 1px 2px #0008!important;
+}
+body[data-theme] aside.sidebar .nav:hover,
+body[data-theme] aside.sidebar .nav:focus-visible{
+  color:#fff!important;
+  filter:brightness(1.12)!important;
+  outline:0!important;
+}
+body[data-theme] aside.sidebar .nav:hover::before,
+body[data-theme] aside.sidebar .nav:focus-visible::before{
+  background:linear-gradient(180deg,
+    color-mix(in srgb,var(--amber) 64%,#ffffff 36%),
+    color-mix(in srgb,var(--amber) 76%,#7b5b1b 24%),
+    color-mix(in srgb,var(--amber) 58%,#171717 42%))!important;
+}
+body[data-theme] aside.sidebar .nav.active,
+body[data-theme] aside.sidebar .nav[aria-current="page"]{
+  color:#fff!important;
+  filter:brightness(1.08)!important;
+  box-shadow:none!important;
+}
+body[data-theme] aside.sidebar .nav.active::before,
+body[data-theme] aside.sidebar .nav[aria-current="page"]::before{
+  background:linear-gradient(180deg,
+    color-mix(in srgb,var(--amber) 62%,#fff 38%) 0%,
+    color-mix(in srgb,var(--amber) 84%,#9b762a 16%) 52%,
+    color-mix(in srgb,var(--amber) 64%,#24201a 36%) 100%)!important;
+  border-left:1px solid color-mix(in srgb,var(--amber) 65%,#fff 35%)!important;
+  border-right:1px solid color-mix(in srgb,var(--amber) 70%,#171717 30%)!important;
+  box-shadow:inset 0 1px #ffffff80,inset 0 -2px #00000045,0 3px 12px color-mix(in srgb,var(--amber) 20%,transparent)!important;
+}
+@media(max-width:900px){
+ body[data-theme] aside.sidebar{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+}
+@media(max-width:560px){
+ body[data-theme] aside.sidebar{grid-template-columns:repeat(3,minmax(0,1fr))!important;padding:8px 7px!important}
+ body[data-theme] aside.sidebar .nav{min-height:82px!important;padding:8px 5px!important}
+ body[data-theme] aside.sidebar .nav .ico{font-size:26px!important;height:30px!important;min-height:30px!important}
+ body[data-theme] aside.sidebar .nav .nav-label{font-size:10px!important}
+}
+
 </style>
