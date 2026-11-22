@@ -2296,6 +2296,56 @@ body[data-theme="weatherlive"] :is(#app,.app,.page,.page-shell,.content,.content
   border-radius:0!important;
 }
 
+
+/* FINAL FIX v2 — remove the page-level hairline frame in the two requested dark themes */
+html:has(body[data-theme="worldcam"]),
+html:has(body[data-theme="weatherlive"]),
+body[data-theme="worldcam"],
+body[data-theme="weatherlive"]{
+  border:0!important;
+  outline:0!important;
+  box-shadow:none!important;
+}
+body[data-theme="worldcam"] > .shell,
+body[data-theme="weatherlive"] > .shell,
+body[data-theme="worldcam"] > main,
+body[data-theme="weatherlive"] > main,
+body[data-theme="worldcam"] .shell,
+body[data-theme="weatherlive"] .shell,
+body[data-theme="worldcam"] main.main,
+body[data-theme="weatherlive"] main.main,
+body[data-theme="worldcam"] section#overview,
+body[data-theme="weatherlive"] section#overview,
+body[data-theme="worldcam"] #app,
+body[data-theme="weatherlive"] #app{
+  border:0!important;
+  outline:0!important;
+  box-shadow:none!important;
+  border-radius:0!important;
+}
+body[data-theme="worldcam"] .main,
+body[data-theme="weatherlive"] .main{
+  max-width:none!important;
+  border:0!important;
+  outline:0!important;
+  box-shadow:none!important;
+  border-radius:0!important;
+}
+body[data-theme="worldcam"] .main::before,
+body[data-theme="worldcam"] .main::after,
+body[data-theme="weatherlive"] .main::before,
+body[data-theme="weatherlive"] .main::after,
+body[data-theme="worldcam"] #overview::before,
+body[data-theme="worldcam"] #overview::after,
+body[data-theme="weatherlive"] #overview::before,
+body[data-theme="weatherlive"] #overview::after{
+  content:none!important;
+  display:none!important;
+  border:0!important;
+  outline:0!important;
+  box-shadow:none!important;
+}
+
 </style>
 
 <style id="weatherwise-remove-forecast-outer-frame">
