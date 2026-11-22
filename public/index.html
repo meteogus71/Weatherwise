@@ -2476,112 +2476,71 @@ body[data-theme="weatherlive"] #overview::after{
 </style>
 
 
-<style id="ww-menu-reference-experiment">
-/* Only the navigation menu is restyled. All page content and behavior remain untouched. */
+<style id="ww-menu-fullwidth-theme-adaptive">
+/* WeatherWise menu-only experiment: edge-to-edge segmented navigation.
+   All colours are driven by the active theme CSS variables, not a fixed theme list. */
 .shell{display:block!important;min-height:100vh}
 #sidebar.sidebar{
   position:relative!important;top:auto!important;left:auto!important;
-  width:calc(100% - 48px)!important;max-width:1600px!important;
+  width:100%!important;max-width:none!important;min-width:0!important;
   height:76px!important;min-height:76px!important;
-  margin:20px auto 22px!important;padding:0 42px 0 0!important;
+  margin:0!important;padding:0 58px 0 0!important;
   box-sizing:border-box!important;display:flex!important;
   flex-direction:row!important;align-items:stretch!important;gap:0!important;
-  overflow:hidden!important;border:1px solid color-mix(in srgb,var(--line) 75%,#fff 25%)!important;
-  border-radius:22px!important;
-  background:linear-gradient(180deg,#ffffff 0%,#f4f4f2 46%,#d6d6d4 100%)!important;
-  box-shadow:0 3px 0 #65758a,0 7px 15px #0003,inset 0 2px 3px #fff!important;
-  color:#333!important;z-index:50!important
+  overflow:hidden!important;border:1px solid var(--line)!important;
+  border-left:0!important;border-right:0!important;border-radius:0!important;
+  background:linear-gradient(180deg,
+    color-mix(in srgb,var(--panel2) 78%,var(--text) 22%) 0%,
+    var(--panel2) 48%,color-mix(in srgb,var(--panel) 78%,var(--bg) 22%) 100%)!important;
+  box-shadow:0 2px 5px color-mix(in srgb,var(--bg) 45%,transparent),
+    inset 0 1px 0 color-mix(in srgb,var(--text) 20%,transparent),
+    inset 0 -2px 0 color-mix(in srgb,var(--bg) 35%,transparent)!important;
+  color:var(--text)!important;z-index:50!important
 }
 #sidebar.sidebar .brand,#sidebar.sidebar .group-label,#sidebar.sidebar .side-bottom{display:none!important}
 #sidebar.sidebar .nav{
-  display:flex!important;flex:1 1 0!important;min-width:0!important;max-width:none!important;
-  height:100%!important;margin:0!important;padding:0 7px!important;
-  box-sizing:border-box!important;align-items:center!important;justify-content:center!important;
-  border:0!important;border-right:1px solid #bfc2c4!important;border-radius:0!important;
-  background:transparent!important;color:#3d4145!important;
-  font-size:clamp(10px,.95vw,15px)!important;font-weight:700!important;
-  line-height:1.15!important;text-align:center!important;white-space:normal!important;
+  display:flex!important;flex:0 0 clamp(112px,12vw,168px)!important;
+  min-width:0!important;max-width:none!important;height:100%!important;
+  margin:0!important;padding:0 9px!important;box-sizing:border-box!important;
+  align-items:center!important;justify-content:center!important;
+  border:0!important;border-right:1px solid color-mix(in srgb,var(--line) 82%,var(--text) 18%)!important;
+  border-radius:0!important;background:transparent!important;color:var(--text)!important;
+  font-size:clamp(11px,.95vw,15px)!important;font-weight:700!important;
+  line-height:1.2!important;text-align:center!important;white-space:normal!important;
   cursor:pointer!important;transition:background .18s ease,color .18s ease,box-shadow .18s ease!important
 }
 #sidebar.sidebar .nav .ico{display:none!important}
-#sidebar.sidebar .nav:hover{background:linear-gradient(180deg,#fff,#dcdedc)!important;color:#20252b!important}
+#sidebar.sidebar .nav:hover{
+  background:linear-gradient(180deg,
+    color-mix(in srgb,var(--cyan) 18%,var(--panel2) 82%),
+    color-mix(in srgb,var(--blue) 22%,var(--panel) 78%))!important;
+  color:var(--text)!important
+}
 #sidebar.sidebar .nav.active{
-  background:linear-gradient(180deg,#f7f7f5 0%,#e4e4e1 48%,#c8c9c7 100%)!important;
-  color:#20252b!important;box-shadow:inset 0 -3px 0 var(--cyan),inset 0 1px 0 #fff!important
+  background:linear-gradient(180deg,
+    color-mix(in srgb,var(--cyan) 35%,var(--panel2) 65%) 0%,
+    color-mix(in srgb,var(--blue) 28%,var(--panel) 72%) 100%)!important;
+  color:var(--text)!important;
+  box-shadow:inset 0 3px 0 color-mix(in srgb,var(--text) 42%,var(--cyan) 58%),
+    inset 0 -3px 0 var(--cyan)!important
 }
 #sidebar.sidebar::after{
-  content:"";position:absolute;right:17px;top:50%;width:11px;height:11px;
-  border-right:2px solid #62676b;border-bottom:2px solid #62676b;
-  transform:translateY(-70%) rotate(45deg);filter:drop-shadow(0 1px 0 #fff);
+  content:"";position:absolute;right:22px;top:50%;width:10px;height:10px;
+  border-right:2px solid var(--text);border-bottom:2px solid var(--text);
+  transform:translateY(-70%) rotate(45deg);opacity:.82;
+  filter:drop-shadow(0 1px 1px color-mix(in srgb,var(--bg) 65%,transparent));
   pointer-events:none
 }
-/* Dark metallic treatment for dark themes */
-body[data-theme="graphite"] #sidebar.sidebar,
-body[data-theme="contrast"] #sidebar.sidebar,
-body[data-theme="midnight-yellow-dark"] #sidebar.sidebar,
-body[data-theme="plum-dark"] #sidebar.sidebar,
-body[data-theme="emerald-dark"] #sidebar.sidebar,
-body[data-theme="lagoon-dark"] #sidebar.sidebar{
-  background:linear-gradient(180deg,#444 0%,#303030 48%,#171717 100%)!important;
-  border-color:#111!important;box-shadow:0 3px 0 #090909,0 7px 15px #0008,inset 0 2px 3px #777!important
-}
-body[data-theme="graphite"] #sidebar.sidebar .nav,
-body[data-theme="contrast"] #sidebar.sidebar .nav,
-body[data-theme="midnight-yellow-dark"] #sidebar.sidebar .nav,
-body[data-theme="plum-dark"] #sidebar.sidebar .nav,
-body[data-theme="emerald-dark"] #sidebar.sidebar .nav,
-body[data-theme="lagoon-dark"] #sidebar.sidebar .nav{color:#f0f0f0!important;border-right-color:#111!important}
-body[data-theme="graphite"] #sidebar.sidebar .nav:hover,
-body[data-theme="contrast"] #sidebar.sidebar .nav:hover,
-body[data-theme="midnight-yellow-dark"] #sidebar.sidebar .nav:hover,
-body[data-theme="plum-dark"] #sidebar.sidebar .nav:hover,
-body[data-theme="emerald-dark"] #sidebar.sidebar .nav:hover,
-body[data-theme="lagoon-dark"] #sidebar.sidebar .nav:hover{background:linear-gradient(180deg,#555,#292929)!important}
-body[data-theme="graphite"] #sidebar.sidebar .nav.active,
-body[data-theme="contrast"] #sidebar.sidebar .nav.active,
-body[data-theme="midnight-yellow-dark"] #sidebar.sidebar .nav.active,
-body[data-theme="plum-dark"] #sidebar.sidebar .nav.active,
-body[data-theme="emerald-dark"] #sidebar.sidebar .nav.active,
-body[data-theme="lagoon-dark"] #sidebar.sidebar .nav.active{
-  background:linear-gradient(180deg,#686868,#343434)!important;color:#fff!important;
-  box-shadow:inset 0 -3px 0 var(--amber),inset 0 1px 0 #999!important
-}
-/* Blue glass treatment for oceanic themes */
-body[data-theme="ocean"] #sidebar.sidebar,
-body[data-theme="glass"] #sidebar.sidebar,
-body[data-theme="intelligence"] #sidebar.sidebar,
-body[data-theme="aurora"] #sidebar.sidebar{
-  background:linear-gradient(180deg,#6688a8 0%,#304d70 50%,#142b49 100%)!important;
-  border-color:#91c8e8!important;box-shadow:0 3px 0 #10233d,0 7px 16px #0006,inset 0 2px 4px #d7f2ff80!important
-}
-body[data-theme="ocean"] #sidebar.sidebar .nav,
-body[data-theme="glass"] #sidebar.sidebar .nav,
-body[data-theme="intelligence"] #sidebar.sidebar .nav,
-body[data-theme="aurora"] #sidebar.sidebar .nav{color:#f5fbff!important;border-right-color:#183653!important}
-body[data-theme="ocean"] #sidebar.sidebar .nav:hover,
-body[data-theme="glass"] #sidebar.sidebar .nav:hover,
-body[data-theme="intelligence"] #sidebar.sidebar .nav:hover,
-body[data-theme="aurora"] #sidebar.sidebar .nav:hover{background:linear-gradient(180deg,#8db6d4,#355b80)!important}
-body[data-theme="ocean"] #sidebar.sidebar .nav.active,
-body[data-theme="glass"] #sidebar.sidebar .nav.active,
-body[data-theme="intelligence"] #sidebar.sidebar .nav.active,
-body[data-theme="aurora"] #sidebar.sidebar .nav.active{
-  background:linear-gradient(180deg,#a9d7f2 0%,#5688b2 48%,#274d75 100%)!important;
-  color:#fff!important;box-shadow:inset 0 -3px 0 #bcecff,inset 0 1px 0 #fff!important
-}
-body[data-theme="ocean"] #sidebar.sidebar::after,
-body[data-theme="glass"] #sidebar.sidebar::after,
-body[data-theme="intelligence"] #sidebar.sidebar::after,
-body[data-theme="aurora"] #sidebar.sidebar::after{border-color:#e7f8ff;filter:drop-shadow(0 1px 1px #10243b)}
 .main{max-width:1800px!important;margin:0 auto!important}
+/* Small screens keep the bar edge-to-edge and allow the tabs to scroll horizontally. */
 @media(max-width:1100px){
- #sidebar.sidebar{width:calc(100% - 28px)!important;height:68px!important;min-height:68px!important;margin:14px auto 18px!important;padding-right:32px!important;overflow-x:auto!important;scrollbar-width:thin!important}
- #sidebar.sidebar .nav{flex:0 0 125px!important;font-size:12px!important}
+ #sidebar.sidebar{height:68px!important;min-height:68px!important;padding-right:42px!important;overflow-x:auto!important;overflow-y:hidden!important;scrollbar-width:thin!important}
+ #sidebar.sidebar .nav{flex:0 0 128px!important;font-size:12px!important}
 }
 @media(max-width:700px){
- #sidebar.sidebar{width:calc(100% - 16px)!important;height:62px!important;min-height:62px!important;margin:10px auto 14px!important;border-radius:16px!important;padding-right:28px!important}
- #sidebar.sidebar .nav{flex:0 0 112px!important;font-size:11px!important}
- #sidebar.sidebar::after{right:10px;width:9px;height:9px}
+ #sidebar.sidebar{height:62px!important;min-height:62px!important;padding-right:34px!important}
+ #sidebar.sidebar .nav{flex:0 0 116px!important;font-size:11px!important}
+ #sidebar.sidebar::after{right:13px;width:9px;height:9px}
 }
 </style>
 
