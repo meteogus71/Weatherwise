@@ -2325,6 +2325,39 @@ body{font-size:calc(14px * var(--ww-font-scale,1))}
 }
 </style>
 
+
+<style id="weatherwise-menu-larger-type-depth">
+/* Larger navigation labels and subtle dimensional text treatment. */
+#sidebar.sidebar > .nav{
+  font-size:clamp(12px,.92vw,15px)!important;
+  font-weight:500!important;
+  letter-spacing:.035em!important;
+  line-height:1.25!important;
+  text-shadow:
+    0 1px 0 color-mix(in srgb,var(--bg) 55%,transparent),
+    0 2px 3px color-mix(in srgb,var(--bg) 48%,transparent),
+    0 0 7px color-mix(in srgb,var(--cyan) 12%,transparent)!important;
+}
+#sidebar.sidebar > .nav .ico{
+  filter:drop-shadow(0 1px 2px color-mix(in srgb,var(--bg) 55%,transparent));
+}
+#sidebar.sidebar .ww-menu-more-panel .nav{
+  font-size:14px!important;
+  font-weight:500!important;
+  letter-spacing:.015em!important;
+  text-shadow:
+    0 1px 0 color-mix(in srgb,var(--bg) 48%,transparent),
+    0 2px 3px color-mix(in srgb,var(--bg) 42%,transparent)!important;
+}
+#sidebar.sidebar .ww-menu-more-panel .nav .ico{
+  filter:drop-shadow(0 1px 2px color-mix(in srgb,var(--bg) 48%,transparent));
+}
+@media(max-width:700px){
+ #sidebar.sidebar > .nav{font-size:12px!important}
+ #sidebar.sidebar .ww-menu-more-panel .nav{font-size:13px!important}
+}
+</style>
+
 </head>
 <body>
 <div id="ww-header-spacer" aria-hidden="true"></div>
