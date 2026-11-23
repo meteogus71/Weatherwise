@@ -4669,8 +4669,22 @@ const meteoAlarmRegionAliases={
  'cyclades':['cyclades','kyklades','κυκλαδες'],
  'crete':['crete','kriti','κρητη'],
  'dodecanese':['dodecanese','dodekanisa','δωδεκανησα'],
- 'northeastern aegean':['northeastern aegean islands','northeast aegean','north eastern aegean','νησια βορειοανατολικου αιγαιου','βορειοανατολικο αιγαιο','lesvos','limnos','ikaria','samos','chios'],
- 'ionian islands':['ionian islands','ionioi nisoi','νησια ιονιου','ιονια νησια','ιονιο','zakynthos','corfu','kefalonia','lefkada','ithaki']
+ 'northeastern aegean':[
+  'northeastern aegean islands',
+  'north east aegean islands',
+  'north-east aegean islands',
+  'northeast aegean islands',
+  'northeast aegean',
+  'north eastern aegean',
+  'north east aegean',
+  'νησια βορειοανατολικου αιγαιου',
+  'βορειοανατολικο αιγαιο',
+  'lesvos',
+  'limnos',
+  'ikaria',
+  'samos',
+  'chios'
+'ionian islands':['ionian islands','ionioi nisoi','νησια ιονιου','ιονια νησια','ιονιο','zakynthos','corfu','kefalonia','lefkada','ithaki']
 };
 function meteoAlarmRegionKey(text){const v=meteoAlarmNormalizeRegionText(text);for(const [key,aliases] of Object.entries(meteoAlarmRegionAliases)){if(aliases.some(a=>v.includes(meteoAlarmNormalizeRegionText(a))))return key;}for(const [key,name] of Object.entries(meteoAlarmRegionNames)){const n=meteoAlarmNormalizeRegionText(name);if(n&&v.includes(n))return key;}return '';}
 function meteoAlarmLevelRank(level){return ({red:4,orange:3,yellow:2,green:1})[level]||0;}
