@@ -4838,8 +4838,9 @@ async function meteoAlarmLoadRegions(){
   if(!groupedFeatures[info.key])groupedFeatures[info.key]={name:info.name,features:[]};
   groupedFeatures[info.key].features.push(feature);
  });
- // Merge the detailed administrative polygons into the 16 requested weather regions.
- // The map's existing Leaflet styling, tooltip, hover lift and click behavior remain unchanged.
+ // Union all county-level NUTS-3 shapes into one region geometry per requested weather region.
+ // This removes internal county borders. The Leaflet map styling, tooltip, hover and click behavior
+ // below remain exactly as in the stable version.
  try{
   if(!window.turf){
    await new Promise((resolve,reject)=>{
@@ -4850,18 +4851,28 @@ async function meteoAlarmLoadRegions(){
     document.head.appendChild(script);
    });
   }
-  Object.entries(groupedFeatures).forEach(([key,group])=>{
-   const collection=turf.featureCollection(group.features.map(feature=>({
-    type:'Feature',properties:{regionKey:key},geometry:feature.geometry
-   })));
-   const dissolved=turf.dissolve(collection,{propertyName:'regionKey'});
-   dissolved.features.forEach(feature=>meteoAlarmRegionFeatures.push({key,name:group.name,feature}));
-  });
+  for(const [key,group] of Object.entries(groupedFeatures)){
+   const polygons=group.features.map(feature=>turf.feature(feature.geometry,{regionKey:key}));
+   if(!polygons.length)continue;
+   let merged=polygons[0];
+   for(let i=1;i<polygons.length;i++){
+    // Turf 7 union accepts a FeatureCollection and returns one Polygon/MultiPolygon feature.
+    merged=turf.union(turf.featureCollection([merged,polygons[i]]));
+    if(!merged)throw new Error('Union returned an empty geometry for '+key);
+   }
+   merged.properties={...(merged.properties||{}),regionKey:key};
+   meteoAlarmRegionFeatures.push({key,name:group.name,feature:merged});
+  }
  }catch(mergeError){
-  console.warn('MeteoAlarm: region dissolve unavailable; drawing mapped NUTS-3 units:',mergeError);
-  Object.entries(groupedFeatures).forEach(([key,group])=>{
-   group.features.forEach(feature=>meteoAlarmRegionFeatures.push({key,name:group.name,feature}));
-  });
+  console.error('MeteoAlarm: could not merge NUTS-3 shapes into weather regions:',mergeError);
+  meteoAlarmRegionFeatures=[];
+  const el=$('meteoAlarmMap');
+  if(el&&!el.querySelector('.ww-map-data-note')){
+   const note=document.createElement('div');note.className='ww-map-data-note';
+   note.textContent='Δεν ήταν δυνατή η συνένωση των γεωγραφικών ορίων. Ελέγξτε τη σύνδεση και ανανεώστε.';
+   el.appendChild(note);
+  }
+  return;
  }
  const regionKeys=new Set(meteoAlarmRegionFeatures.map(f=>f.key));
  if(regionKeys.size!==16){
