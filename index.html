@@ -4515,6 +4515,7 @@ if(reportForm){
 
 
 // Official severe-weather alerts: HNMS/EMY CAP feed distributed via MeteoAlarm.
+window.WEATHERWISE_METEOALARM_REGION_FIX='2026-11-23-v2';
 // Same-origin endpoint served by the companion proxy (Cloudflare Worker).
 // Deploy the worker with the route /api/meteoalarm on the same domain.
 const METEOALARM_PROXY_ENDPOINT='/api/meteoalarm';
@@ -4669,12 +4670,46 @@ const meteoAlarmRegionAliases={
  'cyclades':['cyclades','kyklades','κυκλαδες'],
  'crete':['crete','kriti','κρητη'],
  'dodecanese':['dodecanese','dodekanisa','δωδεκανησα'],
- 'northeastern aegean':['northeastern aegean islands','north east aegean islands','north-east aegean islands','north_east aegean islands','northeast aegean islands','northeast aegean','north eastern aegean','north east aegean','north-east aegean','north aegean islands','north aegean','νησια βορειοανατολικου αιγαιου','βορειοανατολικο αιγαιο','lesvos','lesvos island','mytilene','limnos','lemnos','ikaria','icaría','samos','chios','psara','oinousses'],
+ 'northeastern aegean':['northeastern aegean islands','north east aegean islands','north-east aegean islands','north_east aegean islands','northeast aegean islands','northeast aegean','north eastern aegean','north east aegean','north-east aegean','north aegean islands','north aegean island','north aegean','northern aegean','north aegean region','north aegean islands region','north aegean prefecture','north aegean (el41)','el41','el411','el412','el413','νησια βορειοανατολικου αιγαιου','νησια βορειου αιγαιου','βορειοανατολικο αιγαιο','βορειο αιγαιο','περιφερεια βορειου αιγαιου','βορειο αιγαιο πελαγος','lesvos','lesvos island','lesvos regional unit','mytilene','mitilini','limnos','lemnos','limnos island','ikaria','icaría','ikaria island','samos','samos island','chios','chios island','hios','psara','oinousses'],
  'ionian islands':['ionian islands','ionioi nisoi','νησια ιονιου','ιονια νησια','ιονιο','zakynthos','corfu','kefalonia','lefkada','ithaki']
 };
-function meteoAlarmRegionKey(text){const v=meteoAlarmNormalizeRegionText(text);for(const [key,aliases] of Object.entries(meteoAlarmRegionAliases)){if(aliases.some(a=>v.includes(meteoAlarmNormalizeRegionText(a))))return key;}for(const [key,name] of Object.entries(meteoAlarmRegionNames)){const n=meteoAlarmNormalizeRegionText(name);if(n&&v.includes(n))return key;}return '';}
+function meteoAlarmRegionKey(text){
+ const raw=String(text||'');
+ const v=meteoAlarmNormalizeRegionText(raw);
+ // CAP areaDesc may contain the official NUTS code instead of a readable region name.
+ if(/\bEL41(?:1|2|3)?\b/i.test(raw))return 'northeastern aegean';
+ for(const [key,aliases] of Object.entries(meteoAlarmRegionAliases)){
+  if(aliases.some(alias=>{
+   const a=meteoAlarmNormalizeRegionText(alias);
+   if(!a)return false;
+   // Use token boundaries for short codes; phrase aliases may occur inside a longer CAP description.
+   if(/^el\d+$/.test(a))return new RegExp('(?:^|\\s)'+a+'(?:$|\\s)','i').test(v);
+   return v.includes(a);
+  }))return key;
+ }
+ for(const [key,name] of Object.entries(meteoAlarmRegionNames)){
+  const n=meteoAlarmNormalizeRegionText(name);
+  if(n&&v.includes(n))return key;
+ }
+ return '';
+}
+function meteoAlarmAlertRegion(alert){
+ // Some legacy CAP/Atom entries omit areaDesc or put the region only in the headline.
+ const candidates=[alert?.area,alert?.headline,alert?.description,alert?.event].filter(Boolean);
+ for(const candidate of candidates){
+  const key=meteoAlarmRegionKey(candidate);
+  if(key)return key;
+ }
+ return '';
+}
 function meteoAlarmLevelRank(level){return ({red:4,orange:3,yellow:2,green:1})[level]||0;}
-function meteoAlarmRegionLevel(region){let best='';for(const a of meteoAlarmEntries.filter(x=>meteoAlarmOverlapDay(x,meteoAlarmSelectedDay))){const names=meteoAlarmAreaNames(a.area);if(names.some(n=>meteoAlarmRegionKey(n)===region)&&meteoAlarmLevelRank(a.level)>meteoAlarmLevelRank(best))best=a.level;}return best;}
+function meteoAlarmRegionLevel(region){
+ let best='';
+ for(const a of meteoAlarmEntries.filter(x=>meteoAlarmOverlapDay(x,meteoAlarmSelectedDay))){
+  if(meteoAlarmAlertRegion(a)===region&&meteoAlarmLevelRank(a.level)>meteoAlarmLevelRank(best))best=a.level;
+ }
+ return best;
+}
 function meteoAlarmRegionColor(level){return ({green:'#78d62b',yellow:'#ffdf27',orange:'#f28a16',red:'#ef2929'})[level]||'#35404d';}
 let meteoAlarmEuropeMap=null,meteoAlarmEuropeMarker=null;
 const METEOALARM_GREEK_NUTS3={
@@ -4953,22 +4988,47 @@ function meteoAlarmDrawRegions(){
      const el=polygon.getElement();if(el)el.classList.remove('ww-region-lifted');
     });
     polygon.on('click',()=>{
-     const cards=[...document.querySelectorAll('.meteoalarm-alert-card')];
-     cards.forEach(c=>c.classList.toggle('ww-region-selected',c.dataset.region===f.key));
-     const first=cards.find(c=>c.dataset.region===f.key);
-     if(first)first.scrollIntoView({behavior:'smooth',block:'nearest'});
-     else{const panel=$('meteoAlarmAlertsList');if(panel)panel.innerHTML='<div class="notice">Δεν υπάρχει ενεργή προειδοποίηση για '+meteoAlarmSafe(f.name)+' την επιλεγμένη ημέρα.</div>';}
+     // Filter the right-hand panel by the exact same region key used to color the polygon.
+     const matching=meteoAlarmEntries.filter(a=>
+      meteoAlarmOverlapDay(a,meteoAlarmSelectedDay)&&meteoAlarmAlertRegion(a)===f.key
+     );
+     console.info('[WeatherWise MeteoAlarm] Region selected:',f.key,
+      '| map level:',meteoAlarmRegionLevel(f.key),
+      '| matching alerts:',matching.length,
+      '| active-day alerts:',meteoAlarmEntries.filter(a=>meteoAlarmOverlapDay(a,meteoAlarmSelectedDay)).length
+     );
+     renderMeteoAlarmAlerts(meteoAlarmEntries,f.key);
      meteoAlarmMap.fitBounds(polygon.getBounds().pad(.45),{maxZoom:8});
     });
    }
   }).addTo(meteoAlarmRegionLayer);
  });
 }
-function renderMeteoAlarmAlerts(entries){
+function renderMeteoAlarmAlerts(entries,regionFilter=''){
  const host=$('meteoAlarmAlertsList'),count=$('meteoAlarmDayCount');if(!host)return;
- const dayEntries=entries.filter(a=>meteoAlarmOverlapDay(a,meteoAlarmSelectedDay)).sort((a,b)=>meteoAlarmLevelRank(b.level)-meteoAlarmLevelRank(a.level));if(count)count.textContent=dayEntries.length+' '+(dayEntries.length===1?'προειδοποίηση':'προειδοποιήσεις');
- if(!dayEntries.length){host.innerHTML='<div class="notice">Δεν υπάρχει προειδοποίηση MeteoAlarm για την επιλεγμένη ημέρα.</div>';meteoAlarmDrawRegions();return;}
- host.innerHTML=dayEntries.map(a=>{const start=meteoAlarmLocalDateTime(a.onset||a.effective),end=meteoAlarmLocalDateTime(a.expires);const icon=meteoAlarmPhenomenonIcon(a.event,a.headline,a.description);const level=a.level||'unknown';const region=meteoAlarmRegionKey(a.area);return `<article class="meteoalarm-alert-card ${meteoAlarmSafe(level)}" data-region="${meteoAlarmSafe(region)}"><div class="meteoalarm-alert-hero"><div class="meteoalarm-alert-hero-main"><div class="meteoalarm-alert-country">Ελλάδα · MeteoAlarm</div><span class="meteoalarm-alert-badge ${meteoAlarmSafe(level)}">${meteoAlarmGreekSeverity(level)} ΠΡΟΕΙΔΟΠΟΙΗΣΗ</span><div class="meteoalarm-alert-title">${meteoAlarmSafe(meteoAlarmGreekText(a.headline||a.event||'Προειδοποίηση καιρού','headline'))}</div></div><div class="meteoalarm-alert-icon" role="img" aria-label="${meteoAlarmSafe(a.event||'Καιρικό φαινόμενο')}">${icon}</div></div>${a.area?`<div class="meteoalarm-alert-area">${meteoAlarmSafe(meteoAlarmGreekText(a.area,'area'))}</div>`:''}<div class="meteoalarm-alert-body"><div class="meteoalarm-alert-times"><div class="meteoalarm-alert-time"><div class="meteoalarm-alert-time-label">ΕΝΑΡΞΗ</div><div class="meteoalarm-alert-time-value">${meteoAlarmSafe(start.date)}</div><div class="meteoalarm-alert-time-value">${meteoAlarmSafe(start.time)}</div><div class="meteoalarm-alert-time-zone">Τοπική ώρα Ελλάδας</div></div><div class="meteoalarm-alert-time"><div class="meteoalarm-alert-time-label">ΛΗΞΗ</div><div class="meteoalarm-alert-time-value">${meteoAlarmSafe(end.date)}</div><div class="meteoalarm-alert-time-value">${meteoAlarmSafe(end.time)}</div><div class="meteoalarm-alert-time-zone">Τοπική ώρα Ελλάδας</div></div></div>${a.description?`<div class="meteoalarm-alert-description">${meteoAlarmSafe(meteoAlarmGreekText(a.description,'description'))}</div>`:''}<div class="meteoalarm-alert-meta">Φαινόμενο: ${meteoAlarmSafe(meteoAlarmGreekText(a.event||'—','event'))} · Βεβαιότητα: ${meteoAlarmSafe(meteoAlarmGreekText(a.certainty||'—','certainty'))} · Έκδοση: ${meteoAlarmSafe(meteoAlarmDate(a.sent||a.updated))}</div>${a.url?`<a class="meteoalarm-alert-link" href="${meteoAlarmSafe(a.url)}" target="_blank" rel="noopener">Περισσότερες πληροφορίες ↗</a>`:''}</div></article>`;}).join('');meteoAlarmDrawRegions();
+ const allDayEntries=entries.filter(a=>meteoAlarmOverlapDay(a,meteoAlarmSelectedDay));
+ const dayEntries=allDayEntries.filter(a=>!regionFilter||meteoAlarmAlertRegion(a)===regionFilter)
+  .sort((a,b)=>meteoAlarmLevelRank(b.level)-meteoAlarmLevelRank(a.level));
+ if(count)count.textContent=regionFilter
+  ?dayEntries.length+' '+(dayEntries.length===1?'προειδοποίηση περιοχής':'προειδοποιήσεις περιοχής')
+  :allDayEntries.length+' '+(allDayEntries.length===1?'προειδοποίηση':'προειδοποιήσεις');
+ const selectedRegionName=regionFilter?(meteoAlarmRegionNames[regionFilter]||regionFilter):'';
+ const clearFilter=regionFilter
+  ?'<div class="notice ww-region-filter-head"><strong>'+meteoAlarmSafe(selectedRegionName)+'</strong><button type="button" data-clear-region class="ww-region-filter-clear">Όλες οι προειδοποιήσεις</button></div>'
+  :'';
+ if(!dayEntries.length){
+  const message=regionFilter
+   ?'Δεν βρέθηκε προειδοποίηση για '+meteoAlarmSafe(selectedRegionName)+' την επιλεγμένη ημέρα.'
+   :'Δεν υπάρχει προειδοποίηση MeteoAlarm για την επιλεγμένη ημέρα.';
+  host.innerHTML=clearFilter+'<div class="notice">'+message+'</div>';
+  const clear=host.querySelector('[data-clear-region]');
+  if(clear)clear.addEventListener('click',()=>renderMeteoAlarmAlerts(meteoAlarmEntries));
+  meteoAlarmDrawRegions();return;
+ }
+ host.innerHTML=clearFilter+dayEntries.map(a=>{const start=meteoAlarmLocalDateTime(a.onset||a.effective),end=meteoAlarmLocalDateTime(a.expires);const icon=meteoAlarmPhenomenonIcon(a.event,a.headline,a.description);const level=a.level||'unknown';const region=meteoAlarmAlertRegion(a);return `<article class="meteoalarm-alert-card ${meteoAlarmSafe(level)}" data-region="${meteoAlarmSafe(region)}"><div class="meteoalarm-alert-hero"><div class="meteoalarm-alert-hero-main"><div class="meteoalarm-alert-country">Ελλάδα · MeteoAlarm</div><span class="meteoalarm-alert-badge ${meteoAlarmSafe(level)}">${meteoAlarmGreekSeverity(level)} ΠΡΟΕΙΔΟΠΟΙΗΣΗ</span><div class="meteoalarm-alert-title">${meteoAlarmSafe(meteoAlarmGreekText(a.headline||a.event||'Προειδοποίηση καιρού','headline'))}</div></div><div class="meteoalarm-alert-icon" role="img" aria-label="${meteoAlarmSafe(a.event||'Καιρικό φαινόμενο')}">${icon}</div></div>${a.area?`<div class="meteoalarm-alert-area">${meteoAlarmSafe(meteoAlarmGreekText(a.area,'area'))}</div>`:''}<div class="meteoalarm-alert-body"><div class="meteoalarm-alert-times"><div class="meteoalarm-alert-time"><div class="meteoalarm-alert-time-label">ΕΝΑΡΞΗ</div><div class="meteoalarm-alert-time-value">${meteoAlarmSafe(start.date)}</div><div class="meteoalarm-alert-time-value">${meteoAlarmSafe(start.time)}</div><div class="meteoalarm-alert-time-zone">Τοπική ώρα Ελλάδας</div></div><div class="meteoalarm-alert-time"><div class="meteoalarm-alert-time-label">ΛΗΞΗ</div><div class="meteoalarm-alert-time-value">${meteoAlarmSafe(end.date)}</div><div class="meteoalarm-alert-time-value">${meteoAlarmSafe(end.time)}</div><div class="meteoalarm-alert-time-zone">Τοπική ώρα Ελλάδας</div></div></div>${a.description?`<div class="meteoalarm-alert-description">${meteoAlarmSafe(meteoAlarmGreekText(a.description,'description'))}</div>`:''}<div class="meteoalarm-alert-meta">Φαινόμενο: ${meteoAlarmSafe(meteoAlarmGreekText(a.event||'—','event'))} · Βεβαιότητα: ${meteoAlarmSafe(meteoAlarmGreekText(a.certainty||'—','certainty'))} · Έκδοση: ${meteoAlarmSafe(meteoAlarmDate(a.sent||a.updated))}</div>${a.url?`<a class="meteoalarm-alert-link" href="${meteoAlarmSafe(a.url)}" target="_blank" rel="noopener">Περισσότερες πληροφορίες ↗</a>`:''}</div></article>`;}).join('');
+ const clear=host.querySelector('[data-clear-region]');
+ if(clear)clear.addEventListener('click',()=>renderMeteoAlarmAlerts(meteoAlarmEntries));
+ meteoAlarmDrawRegions();
 }
 async function loadMeteoAlarmAlerts(){
  const statusEl=$('meteoAlarmFeedStatus'),updatedEl=$('meteoAlarmUpdated'),host=$('meteoAlarmAlertsList');
@@ -5034,6 +5094,9 @@ async function loadMeteoAlarmAlerts(){
    if(!previous||(new Date(previous.sent||0).getTime()||0)<sentTime)newest.set(key,a);
   });
   meteoAlarmEntries=Array.from(newest.values());
+  const unmappedAreas=[...new Set(meteoAlarmEntries.filter(a=>meteoAlarmOverlapDay(a,meteoAlarmSelectedDay)&&!meteoAlarmAlertRegion(a)).map(a=>String(a.area||a.headline||'(χωρίς areaDesc)')))];
+  if(unmappedAreas.length)console.warn('[WeatherWise MeteoAlarm] Ενεργές περιοχές χωρίς αντιστοίχιση γεωγραφικής ενότητας:',unmappedAreas);
+  console.info('[WeatherWise MeteoAlarm] Ενεργές προειδοποιήσεις ΒΑ Αιγαίου:',meteoAlarmEntries.filter(a=>meteoAlarmOverlapDay(a,meteoAlarmSelectedDay)&&meteoAlarmAlertRegion(a)==='northeastern aegean').map(a=>({area:a.area,level:a.level,expires:a.expires})));
   renderMeteoAlarmAlerts(meteoAlarmEntries);
   statusEl.textContent=feedCacheState==='STALE'?'METEOALARM · ΠΑΛΑΙΑ ΡΟΗ':'METEOALARM · ΕΠΙΣΗΜΗ ΡΟΗ';
   if(updatedEl)updatedEl.textContent=(feedCacheState==='STALE'?'Παλαιά δεδομένα · τελευταίος έλεγχος: ':'Τελευταίος έλεγχος: ')+new Date().toLocaleString('el-GR',{timeZone:'Europe/Athens'});
@@ -6310,4 +6373,8 @@ html body #overview .city-current #weatherIcon{
  filter:drop-shadow(0 4px 6px rgba(0,0,0,.3));
 }
 
+
+.ww-region-filter-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.ww-region-filter-clear{border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.07);color:inherit;border-radius:8px;padding:7px 10px;cursor:pointer;font:inherit;font-size:.85em}
+.ww-region-filter-clear:hover{background:rgba(255,255,255,.14)}
 </style>
