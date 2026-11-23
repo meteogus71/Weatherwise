@@ -4830,18 +4830,52 @@ async function meteoAlarmLoadRegions(){
  }
  meteoAlarmRegionFeatures=[];
  const groupedFeatures={};
+ const peloponneseNutsCodes=new Set(['EL632','EL633','EL651','EL652','EL653']);
  data.features.forEach(feature=>{
   const props=feature.properties||{};
   const code=String(props.NUTS_ID||props.nuts_id||'');
+  // Peloponnese is deliberately omitted here: the NUTS-3 file combines
+  // Messinia and Laconia, so its geometry cannot represent the EMY split.
+  if(peloponneseNutsCodes.has(code))return;
   const info=METEOALARM_GREEK_NUTS3[code];
   if(!info)return;
   if(!groupedFeatures[info.key])groupedFeatures[info.key]={name:info.name,features:[]};
   groupedFeatures[info.key].features.push(feature);
  });
- // Union all county-level NUTS-3 shapes into one region geometry per requested weather region.
- // This removes internal county borders. The Leaflet map styling, tooltip, hover and click behavior
- // below remain exactly as in the stable version.
+ // Use individual Greek regional-unit polygons for the exact EMY Peloponnese grouping.
+ // Red / Western: Achaia, Ilia, Messinia. Blue / Eastern: Corinthia, Argolis, Arcadia, Laconia.
  try{
+  const unitsUrl='https://raw.githubusercontent.com/peterdsp/greece-prefectures-and-units/main/greecePrefecturesUnits.geojson';
+  const unitsResponse=await fetch(unitsUrl,{mode:'cors',cache:'force-cache'});
+  if(!unitsResponse.ok)throw new Error('Regional-unit GeoJSON HTTP '+unitsResponse.status);
+  const unitsData=await unitsResponse.json();
+  const peloponneseGroups={
+   'western peloponnese':{name:'Δυτική Πελοπόννησος',need:3,features:[]},
+   'eastern peloponnese':{name:'Ανατολική Πελοπόννησος',need:4,features:[]}
+  };
+  const normalizeRegionName=value=>String(value||'')
+   .normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase()
+   .replace(/Ά/g,'Α').replace(/Έ/g,'Ε').replace(/Ή/g,'Η').replace(/Ί/g,'Ι')
+   .replace(/Ό/g,'Ο').replace(/Ύ/g,'Υ').replace(/Ώ/g,'Ω');
+  unitsData.features.forEach(feature=>{
+   const props=feature.properties||{};
+   const name=normalizeRegionName(props.name_greek||props.NAME_GREEK||props.name||props.NAME||'');
+   let key=null;
+   if(name.includes('ΑΧΑΙ')||name.includes('ΗΛΕΙ')||name.includes('ΜΕΣΣΗΝ')||
+      name.includes('ACHAIA')||name.includes('ILIA')||name.includes('MESSINIA')){
+    key='western peloponnese';
+   }else if(name.includes('ΚΟΡΙΝΘ')||name.includes('ΑΡΓΟΛ')||name.includes('ΑΡΚΑΔ')||name.includes('ΛΑΚΩΝ')||
+            name.includes('KORINTH')||name.includes('CORINTH')||name.includes('ARGOL')||name.includes('ARCAD')||name.includes('LAKON')){
+    key='eastern peloponnese';
+   }
+   if(key&&feature.geometry)peloponneseGroups[key].features.push(feature);
+  });
+  for(const [key,group] of Object.entries(peloponneseGroups)){
+   if(group.features.length!==group.need){
+    throw new Error('Βρέθηκαν '+group.features.length+' από τις '+group.need+' περιφερειακές ενότητες για '+group.name);
+   }
+   groupedFeatures[key]=group;
+  }
   if(!window.turf){
    await new Promise((resolve,reject)=>{
     const script=document.createElement('script');
@@ -4851,12 +4885,12 @@ async function meteoAlarmLoadRegions(){
     document.head.appendChild(script);
    });
   }
+  // Dissolve the component county/regional-unit polygons into one outer shape per weather region.
   for(const [key,group] of Object.entries(groupedFeatures)){
    const polygons=group.features.map(feature=>turf.feature(feature.geometry,{regionKey:key}));
    if(!polygons.length)continue;
    let merged=polygons[0];
    for(let i=1;i<polygons.length;i++){
-    // Turf 7 union accepts a FeatureCollection and returns one Polygon/MultiPolygon feature.
     merged=turf.union(turf.featureCollection([merged,polygons[i]]));
     if(!merged)throw new Error('Union returned an empty geometry for '+key);
    }
@@ -4864,12 +4898,12 @@ async function meteoAlarmLoadRegions(){
    meteoAlarmRegionFeatures.push({key,name:group.name,feature:merged});
   }
  }catch(mergeError){
-  console.error('MeteoAlarm: could not merge NUTS-3 shapes into weather regions:',mergeError);
+  console.error('MeteoAlarm: could not build EMY regional boundaries:',mergeError);
   meteoAlarmRegionFeatures=[];
   const el=$('meteoAlarmMap');
   if(el&&!el.querySelector('.ww-map-data-note')){
    const note=document.createElement('div');note.className='ww-map-data-note';
-   note.textContent='Δεν ήταν δυνατή η συνένωση των γεωγραφικών ορίων. Ελέγξτε τη σύνδεση και ανανεώστε.';
+   note.textContent='Δεν ήταν δυνατή η φόρτωση/συνένωση των ορίων ΕΜΥ. Ελέγξτε τη σύνδεση και ανανεώστε.';
    el.appendChild(note);
   }
   return;
