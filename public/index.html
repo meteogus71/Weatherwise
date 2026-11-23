@@ -5061,7 +5061,7 @@ function renderMeteoAlarmAlerts(entries,regionFilter=''){
   :allDayEntries.length+' '+(allDayEntries.length===1?'προειδοποίηση':'προειδοποιήσεις');
  const selectedRegionName=regionFilter?(meteoAlarmRegionNames[regionFilter]||regionFilter):'';
  const clearFilter=regionFilter
-  ?'<div class="notice ww-region-filter-head"><strong>'+meteoAlarmSafe(selectedRegionName)+'</strong><button type="button" data-clear-region class="ww-region-filter-clear">Όλες οι προειδοποιήσεις</button></div>'
+  ?'<div class="notice ww-region-filter-head"><strong>'+meteoAlarmSafe(selectedRegionName)+'</strong>'+(dayEntries.length?'<button type="button" data-clear-region class="ww-region-filter-clear">Όλες οι προειδοποιήσεις</button>':'')+'</div>'
   :'';
  if(!dayEntries.length){
   const message=regionFilter
