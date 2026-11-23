@@ -4694,7 +4694,13 @@ function meteoAlarmRegionKey(text){
  return '';
 }
 function meteoAlarmAlertRegion(alert){
- // Some legacy CAP/Atom entries omit areaDesc or put the region only in the headline.
+ // Prefer official CAP geocodes: EMY/MeteoAlarm may provide a generic areaDesc
+ // while the actual regional scope is encoded in <geocode><value>EL41x</value>.
+ const codes=Array.isArray(alert?.geocodes)?alert.geocodes:[];
+ for(const item of codes){
+  const code=String(typeof item==='string'?item:(item?.value||'')).toUpperCase().replace(/[^A-Z0-9]/g,'');
+  if(/^EL41(?:1|2|3)?$/.test(code))return 'northeastern aegean';
+ }
  const candidates=[alert?.area,alert?.headline,alert?.description,alert?.event].filter(Boolean);
  for(const candidate of candidates){
   const key=meteoAlarmRegionKey(candidate);
@@ -5056,13 +5062,18 @@ async function loadMeteoAlarmAlerts(){
    const status=read(entry,'status');
    const msgType=read(entry,'msgType');
    const area=xmlLocalValues(info,'areaDesc').map(x=>x.textContent.trim()).filter(Boolean).join(', ')||read(entry,'areaDesc');
+   // Preserve CAP geocodes (e.g. NUTS EL411/EL412/EL413) instead of discarding them.
+   const geocodes=xmlLocalValues(info,'geocode').map(g=>({
+    valueName:xmlLocalValues(g,'valueName').map(x=>x.textContent.trim()).filter(Boolean)[0]||'',
+    value:xmlLocalValues(g,'value').map(x=>x.textContent.trim()).filter(Boolean)[0]||''
+   })).filter(g=>g.value);
    const description=read(info,'description')||read(entry,'summary')||read(entry,'content');
    const certainty=read(info,'certainty');
    const urgency=read(info,'urgency');
    const identifier=read(entry,'identifier');
    const references=read(entry,'references');
    const link=Array.from(entry.getElementsByTagName('*')).find(el=>el.localName==='link'&&el.getAttribute('href'));
-   return {headline,event,severity,level:meteoAlarmSeverity(severity),expires,sent,effective,onset,area,description,certainty,urgency,status,msgType,identifier,references,url:link?.getAttribute('href')||''};
+   return {headline,event,severity,level:meteoAlarmSeverity(severity),expires,sent,effective,onset,area,geocodes,description,certainty,urgency,status,msgType,identifier,references,url:link?.getAttribute('href')||''};
   });
   // CAP Update messages supersede the messages listed in their references field.
   const superseded=new Set();
@@ -5088,7 +5099,10 @@ async function loadMeteoAlarmAlerts(){
   // Keep only the newest CAP message for the same area + phenomenon.
   const newest=new Map();
   valid.forEach(a=>{
-   const key=[String(a.area||'').toLowerCase().replace(/\s+/g,' ').trim(),String(a.event||'').toLowerCase().trim()].join('|');
+   // Keep same-event alerts for different CAP geocoded regions separate, even if areaDesc is generic.
+   const regionKey=meteoAlarmAlertRegion(a);
+   const geoKey=(a.geocodes||[]).map(g=>String(g.value||'').toUpperCase()).sort().join(',');
+   const key=[regionKey,geoKey,String(a.area||'').toLowerCase().replace(/\s+/g,' ').trim(),String(a.event||'').toLowerCase().trim()].join('|');
    const sentTime=new Date(a.sent||0).getTime()||0;
    const previous=newest.get(key);
    if(!previous||(new Date(previous.sent||0).getTime()||0)<sentTime)newest.set(key,a);
@@ -5096,7 +5110,7 @@ async function loadMeteoAlarmAlerts(){
   meteoAlarmEntries=Array.from(newest.values());
   const unmappedAreas=[...new Set(meteoAlarmEntries.filter(a=>meteoAlarmOverlapDay(a,meteoAlarmSelectedDay)&&!meteoAlarmAlertRegion(a)).map(a=>String(a.area||a.headline||'(χωρίς areaDesc)')))];
   if(unmappedAreas.length)console.warn('[WeatherWise MeteoAlarm] Ενεργές περιοχές χωρίς αντιστοίχιση γεωγραφικής ενότητας:',unmappedAreas);
-  console.info('[WeatherWise MeteoAlarm] Ενεργές προειδοποιήσεις ΒΑ Αιγαίου:',meteoAlarmEntries.filter(a=>meteoAlarmOverlapDay(a,meteoAlarmSelectedDay)&&meteoAlarmAlertRegion(a)==='northeastern aegean').map(a=>({area:a.area,level:a.level,expires:a.expires})));
+  console.info('[WeatherWise MeteoAlarm] Ενεργές προειδοποιήσεις ΒΑ Αιγαίου:',meteoAlarmEntries.filter(a=>meteoAlarmOverlapDay(a,meteoAlarmSelectedDay)&&meteoAlarmAlertRegion(a)==='northeastern aegean').map(a=>({area:a.area,geocodes:a.geocodes,level:a.level,expires:a.expires})));
   renderMeteoAlarmAlerts(meteoAlarmEntries);
   statusEl.textContent=feedCacheState==='STALE'?'METEOALARM · ΠΑΛΑΙΑ ΡΟΗ':'METEOALARM · ΕΠΙΣΗΜΗ ΡΟΗ';
   if(updatedEl)updatedEl.textContent=(feedCacheState==='STALE'?'Παλαιά δεδομένα · τελευταίος έλεγχος: ':'Τελευταίος έλεγχος: ')+new Date().toLocaleString('el-GR',{timeZone:'Europe/Athens'});
