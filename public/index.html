@@ -4662,22 +4662,22 @@ function meteoAlarmNormalizeRegionText(text){
   .replace(/[^a-zα-ω0-9]+/g,' ').trim();
 }
 const meteoAlarmRegionAliases={
- 'thrace':['thrace','thraki','θρακη'],
- 'east macedonia':['east macedonia','eastern macedonia','anatoliki makedonia','ανατολικη μακεδονια'],
- 'central macedonia':['central macedonia','kentriki makedonia','κεντρικη μακεδονια'],
- 'western macedonia':['western macedonia','dytiki makedonia','δυτικη μακεδονια'],
- 'epirus':['epirus','ipeiros','ηπειρος'],
- 'western sterea':['west sterea','western sterea','dytiki sterea','δυτικη στερεα','aitoloakarnania','αιτωλοακαρνανια'],
- 'thessaly':['thessaly','thessalia','θεσσαλια'],
- 'east sterea evvoia':['east sterea and evvoia','east sterea & evvoia','eastern sterea and evvoia','eastern sterea & evvoia','sterea and evvoia','sterea & evvoia','central greece','east central greece','ανατολικη στερεα και ευβοια','ανατολικη στερεα & ευβοια','ευβοια','euboea','evvoia'],
- 'western peloponnese':['western peloponnese','west peloponnese','western peloponnisos','west peloponnisos','west peloponnisos region','dytiki peloponnisos','δυτικη πελοποννησος','achaia','achaias','ileia','ilias','messinia','messinias'],
- 'eastern peloponnese':['eastern peloponnese','east peloponnese','eastern peloponnisos','east peloponnisos','anatoliki peloponnisos','ανατολικη πελοποννησος','argolida','arkadia','arcadia','korinthia','lakonia'],
- 'attica':['attica','attiki','αττικη','athens'],
- 'cyclades':['cyclades','kyklades','κυκλαδες'],
- 'crete':['crete','kriti','κρητη'],
- 'dodecanese':['dodecanese','dodekanisa','δωδεκανησα'],
- 'northeastern aegean':['northeastern aegean islands','north east aegean islands','north-east aegean islands','north_east aegean islands','northeast aegean islands','northeast aegean','north eastern aegean','north east aegean','north-east aegean','north aegean islands','north aegean island','north aegean','northern aegean','north aegean region','north aegean islands region','north aegean prefecture','north aegean (el41)','el41','el411','el412','el413','νησια βορειοανατολικου αιγαιου','νησια βορειου αιγαιου','βορειοανατολικο αιγαιο','βορειο αιγαιο','περιφερεια βορειου αιγαιου','βορειο αιγαιο πελαγος','lesvos','lesvos island','lesvos regional unit','mytilene','mitilini','limnos','lemnos','limnos island','ikaria','icaría','ikaria island','samos','samos island','chios','chios island','hios','psara','oinousses'],
- 'ionian islands':['ionian islands','ionioi nisoi','νησια ιονιου','ιονια νησια','ιονιο','zakynthos','corfu','kefalonia','lefkada','ithaki']
+ 'thrace':['thrace', 'thraki', 'θρακη', 'thráki', 'θράκη'],
+ 'east macedonia':['east macedonia', 'eastern macedonia', 'anatoliki makedonia', 'ανατολικη μακεδονια', 'east makedonia', 'eastern makedonia', 'ανατολική μακεδονία'],
+ 'central macedonia':['central macedonia', 'kentriki makedonia', 'κεντρικη μακεδονια', 'central makedonia', 'κεντρική μακεδονία'],
+ 'western macedonia':['western macedonia', 'dytiki makedonia', 'δυτικη μακεδονια', 'west makedonia', 'west macedonia', 'western makedonia', 'δυτική μακεδονία'],
+ 'epirus':['epirus', 'ipeiros', 'ηπειρος', 'ήπειρος'],
+ 'western sterea':['west sterea', 'western sterea', 'dytiki sterea', 'δυτικη στερεα', 'aitoloakarnania', 'αιτωλοακαρνανια', 'δυτική στερεά'],
+ 'thessaly':['thessaly', 'thessalia', 'θεσσαλια', 'θεσσαλία'],
+ 'east sterea evvoia':['east sterea and evvoia', 'east sterea & evvoia', 'eastern sterea and evvoia', 'eastern sterea & evvoia', 'sterea and evvoia', 'sterea & evvoia', 'central greece', 'east central greece', 'ανατολικη στερεα και ευβοια', 'ανατολικη στερεα & ευβοια', 'ευβοια', 'euboea', 'evvoia', 'ανατολική στερεά & εύβοια', 'ανατολική στερεά και εύβοια'],
+ 'western peloponnese':['western peloponnese', 'west peloponnese', 'western peloponnisos', 'west peloponnisos', 'west peloponnisos region', 'dytiki peloponnisos', 'δυτικη πελοποννησος', 'achaia', 'achaias', 'ileia', 'ilias', 'messinia', 'messinias', 'δυτική πελοπόννησος'],
+ 'eastern peloponnese':['eastern peloponnese', 'east peloponnese', 'eastern peloponnisos', 'east peloponnisos', 'anatoliki peloponnisos', 'ανατολικη πελοποννησος', 'argolida', 'arkadia', 'arcadia', 'korinthia', 'lakonia', 'ανατολική πελοπόννησος'],
+ 'attica':['attica', 'attiki', 'αττικη', 'athens', 'αττική'],
+ 'cyclades':['cyclades', 'kyklades', 'κυκλαδες', 'κυκλάδες'],
+ 'crete':['crete', 'kriti', 'κρητη', 'κρήτη'],
+ 'dodecanese':['dodecanese', 'dodekanisa', 'δωδεκανησα', 'dodekanisa islands', 'dodecanese islands', 'δωδεκάνησα'],
+ 'northeastern aegean':['northeastern aegean islands', 'north east aegean islands', 'north-east aegean islands', 'north_east aegean islands', 'northeast aegean islands', 'northeast aegean', 'north eastern aegean', 'north east aegean', 'north-east aegean', 'north aegean islands', 'north aegean island', 'north aegean', 'northern aegean', 'north aegean region', 'north aegean islands region', 'north aegean prefecture', 'north aegean (el41)', 'el41', 'el411', 'el412', 'el413', 'νησια βορειοανατολικου αιγαιου', 'νησια βορειου αιγαιου', 'βορειοανατολικο αιγαιο', 'βορειο αιγαιο', 'περιφερεια βορειου αιγαιου', 'βορειο αιγαιο πελαγος', 'lesvos', 'lesvos island', 'lesvos regional unit', 'mytilene', 'mitilini', 'limnos', 'lemnos', 'limnos island', 'ikaria', 'icaría', 'ikaria island', 'samos', 'samos island', 'chios', 'chios island', 'hios', 'psara', 'oinousses', 'νησιά βορειοανατολικού αιγαίου'],
+ 'ionian islands':['ionian islands', 'ionioi nisoi', 'νησια ιονιου', 'ιονια νησια', 'ιονιο', 'zakynthos', 'corfu', 'kefalonia', 'lefkada', 'ithaki', 'ionion islands', 'νησιά ιονίου']
 };
 function meteoAlarmRegionKeysFromText(text){
  const raw=String(text||'');
