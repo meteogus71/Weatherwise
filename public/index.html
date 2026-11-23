@@ -4571,16 +4571,23 @@ function meteoAlarmGreekText(value, kind='text'){
  const original=String(value||'').trim();
  if(!original)return '';
  const regions={
-  'central macedonia':'Κεντρική Μακεδονία','east macedonia and thrace':'Ανατολική Μακεδονία και Θράκη',
-  'western macedonia':'Δυτική Μακεδονία','epirus':'Ήπειρος','thessaly':'Θεσσαλία',
-  'ionian islands':'Ιόνια Νησιά','western greece':'Δυτική Ελλάδα','central greece':'Στερεά Ελλάδα',
-  'attica':'Αττική','peloponnese':'Πελοπόννησος','north aegean':'Βόρειο Αιγαίο',
-  'south aegean':'Νότιο Αιγαίο','crete':'Κρήτη','eastern macedonia':'Ανατολική Μακεδονία',
-  'thrace':'Θράκη','aegean sea':'Αιγαίο Πέλαγος','ionian sea':'Ιόνιο Πέλαγος',
+  'central macedonia':'Κεντρική Μακεδονία','east macedonia':'Ανατολική Μακεδονία',
+  'eastern macedonia':'Ανατολική Μακεδονία','thrace':'Θράκη',
+  'western macedonia':'Δυτική Μακεδονία','epirus':'Ήπειρος','western sterea':'Δυτική Στερεά',
+  'west sterea':'Δυτική Στερεά','thessaly':'Θεσσαλία',
+  'east sterea and evvoia':'Ανατολική Στερεά & Εύβοια','eastern sterea and evvoia':'Ανατολική Στερεά & Εύβοια',
+  'central greece':'Ανατολική Στερεά & Εύβοια',
+  'western peloponnese':'Δυτική Πελοπόννησος','west peloponnese':'Δυτική Πελοπόννησος',
+  'eastern peloponnese':'Ανατολική Πελοπόννησος','east peloponnese':'Ανατολική Πελοπόννησος',
+  'attica':'Αττική','cyclades':'Κυκλάδες','crete':'Κρήτη','dodecanese':'Δωδεκάνησα',
+  'northeastern aegean islands':'Νησιά Βορειοανατολικού Αιγαίου',
+  'northeast aegean islands':'Νησιά Βορειοανατολικού Αιγαίου',
+  'ionian islands':'Νησιά Ιονίου',
+  'aegean sea':'Αιγαίο Πέλαγος','ionian sea':'Ιόνιο Πέλαγος',
   'northwest aegean':'Βορειοδυτικό Αιγαίο','northeast aegean':'Βορειοανατολικό Αιγαίο',
   'central aegean':'Κεντρικό Αιγαίο','southeast aegean':'Νοτιοανατολικό Αιγαίο',
   'southwest aegean':'Νοτιοδυτικό Αιγαίο','crete sea':'Θάλασσα της Κρήτης'
- };
+};
  let s=original;
  // Τυπικός τίτλος CAP: "Yellow Rain Warning issued for Greece - Central Macedonia".
  const titleMatch=s.match(/^(Yellow|Orange|Red)\s+(.+?)\s+Warning\s+issued\s+for\s+Greece\s*[-–—:]\s*(.+)$/i);
@@ -4623,9 +4630,14 @@ function meteoAlarmGreekText(value, kind='text'){
 
 let meteoAlarmEntries=[],meteoAlarmSelectedDay=0,meteoAlarmMap=null,meteoAlarmRegionLayer=null,meteoAlarmRegionFeatures=[];
 const meteoAlarmRegionNames={
- 'central macedonia':'Κεντρική Μακεδονία','east macedonia and thrace':'Ανατολική Μακεδονία και Θράκη','eastern macedonia and thrace':'Ανατολική Μακεδονία και Θράκη',
- 'western macedonia':'Δυτική Μακεδονία','epirus':'Ήπειρος','thessaly':'Θεσσαλία','ionian islands':'Ιόνια Νησιά','western greece':'Δυτική Ελλάδα',
- 'central greece':'Στερεά Ελλάδα','attica':'Αττική','peloponnese':'Πελοπόννησος','north aegean':'Βόρειο Αιγαίο','south aegean':'Νότιο Αιγαίο','crete':'Κρήτη'
+ 'thrace':'Θράκη','east macedonia':'Ανατολική Μακεδονία',
+ 'central macedonia':'Κεντρική Μακεδονία','western macedonia':'Δυτική Μακεδονία',
+ 'epirus':'Ήπειρος','western sterea':'Δυτική Στερεά','thessaly':'Θεσσαλία',
+ 'east sterea evvoia':'Ανατολική Στερεά & Εύβοια',
+ 'western peloponnese':'Δυτική Πελοπόννησος','eastern peloponnese':'Ανατολική Πελοπόννησος',
+ 'attica':'Αττική','cyclades':'Κυκλάδες','crete':'Κρήτη',
+ 'dodecanese':'Δωδεκάνησα','northeastern aegean':'Νησιά Βορειοανατολικού Αιγαίου',
+ 'ionian islands':'Νησιά Ιονίου'
 };
 function meteoAlarmDayRange(offset){const now=new Date();const start=new Date(now.getFullYear(),now.getMonth(),now.getDate()+offset);const end=new Date(start.getFullYear(),start.getMonth(),start.getDate()+1);return {start,end};}
 function meteoAlarmDayLabel(offset){const d=meteoAlarmDayRange(offset).start;return new Intl.DateTimeFormat('el-GR',{weekday:'long',day:'2-digit',month:'short',year:'numeric'}).format(d).replace(/\./g,'').toUpperCase();}
@@ -4643,38 +4655,76 @@ function meteoAlarmOverlapDay(a,offset){
 function meteoAlarmAreaNames(area){return String(area||'').split(/[,;|]/).map(x=>x.trim().toLowerCase()).filter(Boolean);}
 function meteoAlarmNormalizeRegionText(text){return String(text||'').toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').replace(/περιφερεια(κη)?/g,'').replace(/region of|region|regional unit of/g,'').replace(/[^a-zα-ω0-9]+/g,' ').trim();}
 const meteoAlarmRegionAliases={
- 'central macedonia':['central macedonia','kentriki makedonia','κεντρικη μακεδονια','θεσσαλονικη'],
- 'east macedonia and thrace':['east macedonia and thrace','eastern macedonia and thrace','anatoliki makedonia kai thraki','ανατολικη μακεδονια και θρακη','thrace'],
+ 'thrace':['thrace','thraki','θρακη'],
+ 'east macedonia':['east macedonia','eastern macedonia','anatoliki makedonia','ανατολικη μακεδονια'],
+ 'central macedonia':['central macedonia','kentriki makedonia','κεντρικη μακεδονια'],
  'western macedonia':['western macedonia','dytiki makedonia','δυτικη μακεδονια'],
- 'epirus':['epirus','ipeiros','ηπειρος'],'thessaly':['thessaly','thessalia','θεσσαλια'],
- 'ionian islands':['ionian islands','ionioi nisoi','ιονια νησια','ιονιο'],
- 'western greece':['western greece','dytiki ellada','δυτικη ελλαδα'],
- 'central greece':['central greece','sterea ellada','στερεα ελλαδα','east sterea & evvoia','east sterea and evvoia','eastern sterea & evvoia','eastern sterea and evvoia','sterea & evvoia','sterea and evvoia','evvoia','euboea','east central greece','ανατολικη στερεα και ευβοια','στερεα και ευβοια','ευβοια'],
+ 'epirus':['epirus','ipeiros','ηπειρος'],
+ 'western sterea':['west sterea','western sterea','dytiki sterea','δυτικη στερεα','aitoloakarnania','αιτωλοακαρνανια'],
+ 'thessaly':['thessaly','thessalia','θεσσαλια'],
+ 'east sterea evvoia':['east sterea and evvoia','east sterea & evvoia','eastern sterea and evvoia','eastern sterea & evvoia','sterea and evvoia','sterea & evvoia','central greece','east central greece','ανατολικη στερεα και ευβοια','ανατολικη στερεα & ευβοια','ευβοια','euboea','evvoia'],
+ 'western peloponnese':['western peloponnese','west peloponnese','dytiki peloponnisos','δυτικη πελοποννησος','achaia','achaias','ileia','ilias','messinia','messinias'],
+ 'eastern peloponnese':['eastern peloponnese','east peloponnese','anatoliki peloponnisos','ανατολικη πελοποννησος','argolida','arkadia','arcadia','korinthia','lakonia'],
  'attica':['attica','attiki','αττικη','athens'],
- 'peloponnese':['peloponnese','peloponnisos','πελοποννησος'],
- 'north aegean':['north aegean','voreio aigaio','βορειο αιγαιο'],
- 'south aegean':['south aegean','notio aigaio','νοτιο αιγαιο','cyclades','dodecanese'],
- 'crete':['crete','kriti','κρητη']
+ 'cyclades':['cyclades','kyklades','κυκλαδες'],
+ 'crete':['crete','kriti','κρητη'],
+ 'dodecanese':['dodecanese','dodekanisa','δωδεκανησα'],
+ 'northeastern aegean':['northeastern aegean islands','northeast aegean','north eastern aegean','νησια βορειοανατολικου αιγαιου','βορειοανατολικο αιγαιο','lesvos','limnos','ikaria','samos','chios'],
+ 'ionian islands':['ionian islands','ionioi nisoi','νησια ιονιου','ιονια νησια','ιονιο','zakynthos','corfu','kefalonia','lefkada','ithaki']
 };
 function meteoAlarmRegionKey(text){const v=meteoAlarmNormalizeRegionText(text);for(const [key,aliases] of Object.entries(meteoAlarmRegionAliases)){if(aliases.some(a=>v.includes(meteoAlarmNormalizeRegionText(a))))return key;}for(const [key,name] of Object.entries(meteoAlarmRegionNames)){const n=meteoAlarmNormalizeRegionText(name);if(n&&v.includes(n))return key;}return '';}
 function meteoAlarmLevelRank(level){return ({red:4,orange:3,yellow:2,green:1})[level]||0;}
 function meteoAlarmRegionLevel(region){let best='';for(const a of meteoAlarmEntries.filter(x=>meteoAlarmOverlapDay(x,meteoAlarmSelectedDay))){const names=meteoAlarmAreaNames(a.area);if(names.some(n=>meteoAlarmRegionKey(n)===region)&&meteoAlarmLevelRank(a.level)>meteoAlarmLevelRank(best))best=a.level;}return best;}
 function meteoAlarmRegionColor(level){return ({green:'#78d62b',yellow:'#ffdf27',orange:'#f28a16',red:'#ef2929'})[level]||'#35404d';}
 let meteoAlarmEuropeMap=null,meteoAlarmEuropeMarker=null;
-const METEOALARM_GREEK_NUTS2={
- 'EL30':{key:'attica',name:'Αττική'},
- 'EL41':{key:'north aegean',name:'Βόρειο Αιγαίο'},
- 'EL42':{key:'south aegean',name:'Νότιο Αιγαίο'},
- 'EL43':{key:'crete',name:'Κρήτη'},
- 'EL51':{key:'east macedonia and thrace',name:'Ανατολική Μακεδονία και Θράκη'},
- 'EL52':{key:'central macedonia',name:'Κεντρική Μακεδονία'},
- 'EL53':{key:'western macedonia',name:'Δυτική Μακεδονία'},
- 'EL54':{key:'epirus',name:'Ήπειρος'},
- 'EL61':{key:'thessaly',name:'Θεσσαλία'},
- 'EL62':{key:'ionian islands',name:'Ιόνια Νησιά'},
- 'EL63':{key:'western greece',name:'Δυτική Ελλάδα'},
- 'EL64':{key:'central greece',name:'Στερεά Ελλάδα'},
- 'EL65':{key:'peloponnese',name:'Πελοπόννησος'}
+const METEOALARM_GREEK_NUTS3={
+ // Thrace: Evros, Xanthi, Rodopi
+ 'EL511':{key:'thrace',name:'Θράκη'},'EL512':{key:'thrace',name:'Θράκη'},'EL513':{key:'thrace',name:'Θράκη'},
+ // East Macedonia: Drama, Kavala and Thasos
+ 'EL514':{key:'east macedonia',name:'Ανατολική Μακεδονία'},'EL515':{key:'east macedonia',name:'Ανατολική Μακεδονία'},
+ // Central Macedonia
+ 'EL521':{key:'central macedonia',name:'Κεντρική Μακεδονία'},'EL522':{key:'central macedonia',name:'Κεντρική Μακεδονία'},
+ 'EL523':{key:'central macedonia',name:'Κεντρική Μακεδονία'},'EL524':{key:'central macedonia',name:'Κεντρική Μακεδονία'},
+ 'EL525':{key:'central macedonia',name:'Κεντρική Μακεδονία'},'EL526':{key:'central macedonia',name:'Κεντρική Μακεδονία'},
+ 'EL527':{key:'central macedonia',name:'Κεντρική Μακεδονία'},
+ // Western Macedonia
+ 'EL531':{key:'western macedonia',name:'Δυτική Μακεδονία'},'EL532':{key:'western macedonia',name:'Δυτική Μακεδονία'},
+ 'EL533':{key:'western macedonia',name:'Δυτική Μακεδονία'},
+ // Epirus
+ 'EL541':{key:'epirus',name:'Ήπειρος'},'EL542':{key:'epirus',name:'Ήπειρος'},'EL543':{key:'epirus',name:'Ήπειρος'},
+ // Western Sterea (Aitoloakarnania)
+ 'EL631':{key:'western sterea',name:'Δυτική Στερεά'},
+ // Thessaly
+ 'EL611':{key:'thessaly',name:'Θεσσαλία'},'EL612':{key:'thessaly',name:'Θεσσαλία'},'EL613':{key:'thessaly',name:'Θεσσαλία'},
+ // Eastern Sterea and Evia
+ 'EL641':{key:'east sterea evvoia',name:'Ανατολική Στερεά & Εύβοια'},
+ 'EL642':{key:'east sterea evvoia',name:'Ανατολική Στερεά & Εύβοια'},
+ 'EL643':{key:'east sterea evvoia',name:'Ανατολική Στερεά & Εύβοια'},
+ 'EL644':{key:'east sterea evvoia',name:'Ανατολική Στερεά & Εύβοια'},
+ 'EL645':{key:'east sterea evvoia',name:'Ανατολική Στερεά & Εύβοια'},
+ // Western and Eastern Peloponnese
+ 'EL632':{key:'western peloponnese',name:'Δυτική Πελοπόννησος'},
+ 'EL633':{key:'western peloponnese',name:'Δυτική Πελοπόννησος'},
+ 'EL651':{key:'eastern peloponnese',name:'Ανατολική Πελοπόννησος'},
+ 'EL652':{key:'eastern peloponnese',name:'Ανατολική Πελοπόννησος'},
+ // EL653 combines Lakonia and Messinia in NUTS 2024; assigned to the western group
+ // until a finer official boundary dataset is used.
+ 'EL653':{key:'western peloponnese',name:'Δυτική Πελοπόννησος'},
+ // Attica
+ 'EL301':{key:'attica',name:'Αττική'},'EL302':{key:'attica',name:'Αττική'},'EL303':{key:'attica',name:'Αττική'},
+ 'EL304':{key:'attica',name:'Αττική'},'EL305':{key:'attica',name:'Αττική'},'EL306':{key:'attica',name:'Αττική'},
+ 'EL307':{key:'attica',name:'Αττική'},
+ // Cyclades, Crete, Dodecanese, Northeastern Aegean
+ 'EL422':{key:'cyclades',name:'Κυκλάδες'},
+ 'EL431':{key:'crete',name:'Κρήτη'},'EL432':{key:'crete',name:'Κρήτη'},
+ 'EL433':{key:'crete',name:'Κρήτη'},'EL434':{key:'crete',name:'Κρήτη'},
+ 'EL421':{key:'dodecanese',name:'Δωδεκάνησα'},
+ 'EL411':{key:'northeastern aegean',name:'Νησιά Βορειοανατολικού Αιγαίου'},
+ 'EL412':{key:'northeastern aegean',name:'Νησιά Βορειοανατολικού Αιγαίου'},
+ 'EL413':{key:'northeastern aegean',name:'Νησιά Βορειοανατολικού Αιγαίου'},
+ // Ionian Islands
+ 'EL621':{key:'ionian islands',name:'Νησιά Ιονίου'},'EL622':{key:'ionian islands',name:'Νησιά Ιονίου'},
+ 'EL623':{key:'ionian islands',name:'Νησιά Ιονίου'},'EL624':{key:'ionian islands',name:'Νησιά Ιονίου'}
 };
 function meteoAlarmRenderMap(){
  if(!window.L||!$('meteoAlarmMap'))return;
@@ -4761,8 +4811,8 @@ function meteoAlarmRenderMap(){
 } 
 async function meteoAlarmLoadRegions(){
  const urls=[
-  'https://gisco-services.ec.europa.eu/distribution/v2/nuts/geojson/NUTS_RG_01M_2024_4326_LEVL_2.geojson',
-  'https://gisco-services.ec.europa.eu/distribution/v2/nuts/geojson/NUTS_RG_03M_2024_4326_LEVL_2.geojson'
+  'https://gisco-services.ec.europa.eu/distribution/v2/nuts/geojson/NUTS_RG_01M_2024_4326_LEVL_3.geojson',
+  'https://gisco-services.ec.europa.eu/distribution/v2/nuts/geojson/NUTS_RG_03M_2024_4326_LEVL_3.geojson'
  ];
  let data=null;
  for(const url of urls){
@@ -4779,15 +4829,43 @@ async function meteoAlarmLoadRegions(){
   return;
  }
  meteoAlarmRegionFeatures=[];
+ const groupedFeatures={};
  data.features.forEach(feature=>{
   const props=feature.properties||{};
   const code=String(props.NUTS_ID||props.nuts_id||'');
-  const info=METEOALARM_GREEK_NUTS2[code];
+  const info=METEOALARM_GREEK_NUTS3[code];
   if(!info)return;
-  meteoAlarmRegionFeatures.push({key:info.key,name:info.name,feature});
+  if(!groupedFeatures[info.key])groupedFeatures[info.key]={name:info.name,features:[]};
+  groupedFeatures[info.key].features.push(feature);
  });
- if(meteoAlarmRegionFeatures.length!==13){
-  console.warn('MeteoAlarm: expected 13 Greek NUTS-2 regions, received',meteoAlarmRegionFeatures.length);
+ // Merge the detailed administrative polygons into the 16 requested weather regions.
+ // The map's existing Leaflet styling, tooltip, hover lift and click behavior remain unchanged.
+ try{
+  if(!window.turf){
+   await new Promise((resolve,reject)=>{
+    const script=document.createElement('script');
+    script.src='https://cdn.jsdelivr.net/npm/@turf/turf@7/turf.min.js';
+    script.onload=resolve;
+    script.onerror=()=>reject(new Error('Turf unavailable'));
+    document.head.appendChild(script);
+   });
+  }
+  Object.entries(groupedFeatures).forEach(([key,group])=>{
+   const collection=turf.featureCollection(group.features.map(feature=>({
+    type:'Feature',properties:{regionKey:key},geometry:feature.geometry
+   })));
+   const dissolved=turf.dissolve(collection,{propertyName:'regionKey'});
+   dissolved.features.forEach(feature=>meteoAlarmRegionFeatures.push({key,name:group.name,feature}));
+  });
+ }catch(mergeError){
+  console.warn('MeteoAlarm: region dissolve unavailable; drawing mapped NUTS-3 units:',mergeError);
+  Object.entries(groupedFeatures).forEach(([key,group])=>{
+   group.features.forEach(feature=>meteoAlarmRegionFeatures.push({key,name:group.name,feature}));
+  });
+ }
+ const regionKeys=new Set(meteoAlarmRegionFeatures.map(f=>f.key));
+ if(regionKeys.size!==16){
+  console.warn('MeteoAlarm: expected 16 regions, received',regionKeys.size,Array.from(regionKeys));
  }
  meteoAlarmDrawRegions();
  // Fit to Greece, including islands, with useful surrounding European context.
