@@ -2475,6 +2475,191 @@ body[data-theme="weatherlive"] #overview::after{
 }
 </style>
 
+
+<style id="weatherwise-carbon-underline-menu">
+/* Fresh menu concept based only on the latest reference image.
+   The rest of the original WeatherWise project is intentionally untouched. */
+.wl-sitebar .wl-mainnav{display:none!important}
+.shell{display:block!important;min-height:100vh!important}
+#sidebar.sidebar{
+  position:relative!important;top:auto!important;left:auto!important;
+  z-index:120!important;display:flex!important;flex-direction:row!important;
+  align-items:stretch!important;gap:0!important;
+  width:100%!important;max-width:none!important;min-width:0!important;
+  height:78px!important;min-height:78px!important;
+  margin:0!important;padding:0 18px!important;box-sizing:border-box!important;
+  overflow-x:auto!important;overflow-y:hidden!important;
+  border:0!important;border-radius:0!important;border-bottom:1px solid var(--line)!important;
+  background-image:
+    repeating-linear-gradient(135deg,
+      transparent 0,transparent 5px,
+      color-mix(in srgb,var(--text) 5%,transparent) 5px,
+      color-mix(in srgb,var(--text) 5%,transparent) 7px),
+    linear-gradient(180deg,
+      color-mix(in srgb,var(--panel2) 84%,var(--text) 16%),
+      color-mix(in srgb,var(--bg) 86%,var(--panel) 14%))!important;
+  box-shadow:inset 0 1px 0 color-mix(in srgb,var(--text) 10%,transparent),
+    0 3px 12px color-mix(in srgb,var(--bg) 28%,transparent)!important;
+  scrollbar-width:thin!important;
+  scrollbar-color:var(--line) transparent!important
+}
+#sidebar.sidebar .brand,#sidebar.sidebar .group-label,#sidebar.sidebar .side-bottom{display:none!important}
+#sidebar.sidebar .nav{
+  position:relative!important;isolation:isolate!important;
+  display:flex!important;flex:1 1 0!important;min-width:88px!important;
+  max-width:190px!important;height:100%!important;min-height:0!important;
+  margin:0!important;padding:0 10px!important;box-sizing:border-box!important;
+  align-items:center!important;justify-content:center!important;
+  border:0!important;border-radius:0!important;background:transparent!important;
+  color:var(--muted)!important;
+  font-family:"DM Sans",sans-serif!important;font-size:clamp(10px,.9vw,14px)!important;
+  font-weight:750!important;letter-spacing:.055em!important;text-transform:uppercase!important;
+  line-height:1.2!important;text-align:center!important;white-space:normal!important;
+  cursor:pointer!important;transition:color .2s ease,background .2s ease!important
+}
+#sidebar.sidebar .nav .ico{display:none!important}
+#sidebar.sidebar .nav::after{
+  content:"";position:absolute;left:10%;right:10%;bottom:13px;height:4px;
+  border-radius:4px;background:var(--cyan);
+  opacity:0;transform:scaleX(.55);transform-origin:center;
+  box-shadow:0 0 8px color-mix(in srgb,var(--cyan) 68%,transparent),
+    0 0 15px color-mix(in srgb,var(--cyan) 38%,transparent);
+  transition:opacity .18s ease,transform .18s ease
+}
+#sidebar.sidebar .nav:hover{
+  color:var(--text)!important;
+  background:linear-gradient(180deg,
+    color-mix(in srgb,var(--text) 4%,transparent),
+    color-mix(in srgb,var(--text) 1%,transparent))!important
+}
+#sidebar.sidebar .nav.active{
+  color:var(--text)!important;background:transparent!important;
+  box-shadow:none!important
+}
+#sidebar.sidebar .nav.active::after,
+#sidebar.sidebar .nav:hover::after,
+#sidebar.sidebar .nav:focus-visible::after{opacity:1;transform:scaleX(1)}
+#sidebar.sidebar .nav:focus-visible{outline:1px solid var(--cyan)!important;outline-offset:-5px!important}
+.main{max-width:1800px!important;margin:0 auto!important}
+@media(max-width:1100px){
+ #sidebar.sidebar{height:72px!important;min-height:72px!important;padding:0 10px!important}
+ #sidebar.sidebar .nav{flex:0 0 126px!important;min-width:126px!important;font-size:12px!important}
+ #sidebar.sidebar .nav::after{bottom:11px}
+}
+@media(max-width:700px){
+ #sidebar.sidebar{position:relative!important;left:auto!important;width:100%!important;height:66px!important;min-height:66px!important;padding:0 6px!important}
+ #sidebar.sidebar .nav{flex:0 0 112px!important;min-width:112px!important;padding:0 7px!important;font-size:11px!important}
+ #sidebar.sidebar .nav::after{left:13%;right:13%;bottom:9px;height:3px}
+}
+</style>
+
+
+<style id="weatherwise-carbon-menu-typography-hover-refine">
+/* Refinement of the current carbon menu only:
+   labels fit within their tabs, hover gets an underline, active text alone glows. */
+#sidebar.sidebar .nav{
+  flex:1 1 0!important;
+  min-width:0!important;
+  max-width:none!important;
+  padding:0 clamp(3px,.45vw,9px)!important;
+  font-size:clamp(9px,.68vw,12px)!important;
+  line-height:1.12!important;
+  letter-spacing:.025em!important;
+  white-space:normal!important;
+  overflow-wrap:anywhere!important;
+  word-break:normal!important;
+  text-overflow:clip!important;
+  text-shadow:none!important;
+  background:transparent!important;
+}
+#sidebar.sidebar .nav::after{
+  left:12%!important;right:12%!important;bottom:8px!important;
+  height:3px!important;border-radius:3px!important;
+  opacity:0!important;transform:scaleX(.35)!important;
+  box-shadow:0 0 7px var(--cyan),0 0 14px color-mix(in srgb,var(--cyan) 55%,transparent)!important;
+  transition:opacity .18s ease,transform .18s ease!important;
+}
+#sidebar.sidebar .nav:hover::after,
+#sidebar.sidebar .nav:focus-visible::after{
+  opacity:1!important;transform:scaleX(1)!important
+}
+/* The selected tab has no bar or filled background: only its letters illuminate. */
+#sidebar.sidebar .nav.active{
+  color:var(--text)!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  text-shadow:
+    0 0 5px color-mix(in srgb,var(--cyan) 82%,var(--text) 18%),
+    0 0 11px color-mix(in srgb,var(--cyan) 58%,transparent)!important;
+}
+#sidebar.sidebar .nav.active::after{opacity:0!important;transform:scaleX(.35)!important}
+#sidebar.sidebar .nav.active:hover::after{opacity:1!important;transform:scaleX(1)!important}
+#sidebar.sidebar .nav:hover:not(.active){
+  color:var(--text)!important;background:transparent!important;text-shadow:none!important
+}
+@media(max-width:1100px){
+ #sidebar.sidebar .nav{flex:0 0 120px!important;min-width:0!important;font-size:11px!important;padding:0 5px!important}
+}
+@media(max-width:700px){
+ #sidebar.sidebar .nav{flex:0 0 108px!important;font-size:10px!important;padding:0 4px!important}
+ #sidebar.sidebar .nav::after{bottom:7px!important;height:2px!important}
+}
+</style>
+
+
+<style id="weatherwise-carbon-menu-single-bottom-line-regular">
+/* Corrected from the prior bottom-line version:
+   retain one underline at the bottom; remove any extra line and bold weight. */
+#sidebar.sidebar .nav{
+  font-family:"Manrope","DM Sans",Arial,sans-serif!important;
+  font-weight:400!important;
+  letter-spacing:.02em!important;
+  border:0!important;
+  border-bottom:0!important;
+  box-shadow:none!important;
+  text-shadow:none!important;
+  background:transparent!important;
+}
+#sidebar.sidebar .nav::before{display:none!important;content:none!important}
+#sidebar.sidebar .nav::after{
+  content:""!important;display:block!important;
+  position:absolute!important;
+  left:12%!important;right:12%!important;
+  top:auto!important;bottom:8px!important;
+  height:3px!important;border:0!important;border-radius:3px!important;
+  background:var(--cyan)!important;
+  opacity:0!important;transform:scaleX(.35)!important;
+  box-shadow:0 0 7px var(--cyan),
+    0 0 14px color-mix(in srgb,var(--cyan) 55%,transparent)!important;
+  transition:opacity .18s ease,transform .18s ease!important;
+}
+#sidebar.sidebar .nav:hover::after,
+#sidebar.sidebar .nav:focus-visible::after{
+  opacity:1!important;transform:scaleX(1)!important
+}
+/* Selected tab: glowing letters only, no underline unless hovered. */
+#sidebar.sidebar .nav.active{
+  color:var(--text)!important;
+  font-weight:400!important;
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+  text-shadow:0 0 5px color-mix(in srgb,var(--cyan) 72%,var(--text) 28%),
+    0 0 10px color-mix(in srgb,var(--cyan) 42%,transparent)!important;
+}
+#sidebar.sidebar .nav.active::after{opacity:0!important;transform:scaleX(.35)!important}
+#sidebar.sidebar .nav.active:hover::after{opacity:1!important;transform:scaleX(1)!important}
+#sidebar.sidebar .nav:hover:not(.active){
+  color:var(--text)!important;background:transparent!important;text-shadow:none!important
+}
+@media(max-width:1100px){
+ #sidebar.sidebar .nav{font-weight:400!important}
+}
+@media(max-width:700px){
+ #sidebar.sidebar .nav{font-weight:400!important}
+}
+</style>
+
 </head>
 <body>
 <div id="ww-header-spacer" aria-hidden="true"></div>
@@ -4386,16 +4571,23 @@ function meteoAlarmGreekText(value, kind='text'){
  const original=String(value||'').trim();
  if(!original)return '';
  const regions={
-  'central macedonia':'Κεντρική Μακεδονία','east macedonia and thrace':'Ανατολική Μακεδονία και Θράκη',
-  'western macedonia':'Δυτική Μακεδονία','epirus':'Ήπειρος','thessaly':'Θεσσαλία',
-  'ionian islands':'Ιόνια Νησιά','western greece':'Δυτική Ελλάδα','central greece':'Στερεά Ελλάδα',
-  'attica':'Αττική','peloponnese':'Πελοπόννησος','north aegean':'Βόρειο Αιγαίο',
-  'south aegean':'Νότιο Αιγαίο','crete':'Κρήτη','eastern macedonia':'Ανατολική Μακεδονία',
-  'thrace':'Θράκη','aegean sea':'Αιγαίο Πέλαγος','ionian sea':'Ιόνιο Πέλαγος',
+  'central macedonia':'Κεντρική Μακεδονία','east macedonia':'Ανατολική Μακεδονία',
+  'eastern macedonia':'Ανατολική Μακεδονία','thrace':'Θράκη',
+  'western macedonia':'Δυτική Μακεδονία','epirus':'Ήπειρος','western sterea':'Δυτική Στερεά',
+  'west sterea':'Δυτική Στερεά','thessaly':'Θεσσαλία',
+  'east sterea and evvoia':'Ανατολική Στερεά & Εύβοια','eastern sterea and evvoia':'Ανατολική Στερεά & Εύβοια',
+  'central greece':'Ανατολική Στερεά & Εύβοια',
+  'western peloponnese':'Δυτική Πελοπόννησος','west peloponnese':'Δυτική Πελοπόννησος',
+  'eastern peloponnese':'Ανατολική Πελοπόννησος','east peloponnese':'Ανατολική Πελοπόννησος',
+  'attica':'Αττική','cyclades':'Κυκλάδες','crete':'Κρήτη','dodecanese':'Δωδεκάνησα',
+  'northeastern aegean islands':'Νησιά Βορειοανατολικού Αιγαίου',
+  'northeast aegean islands':'Νησιά Βορειοανατολικού Αιγαίου',
+  'ionian islands':'Νησιά Ιονίου',
+  'aegean sea':'Αιγαίο Πέλαγος','ionian sea':'Ιόνιο Πέλαγος',
   'northwest aegean':'Βορειοδυτικό Αιγαίο','northeast aegean':'Βορειοανατολικό Αιγαίο',
   'central aegean':'Κεντρικό Αιγαίο','southeast aegean':'Νοτιοανατολικό Αιγαίο',
   'southwest aegean':'Νοτιοδυτικό Αιγαίο','crete sea':'Θάλασσα της Κρήτης'
- };
+};
  let s=original;
  // Τυπικός τίτλος CAP: "Yellow Rain Warning issued for Greece - Central Macedonia".
  const titleMatch=s.match(/^(Yellow|Orange|Red)\s+(.+?)\s+Warning\s+issued\s+for\s+Greece\s*[-–—:]\s*(.+)$/i);
@@ -4438,9 +4630,14 @@ function meteoAlarmGreekText(value, kind='text'){
 
 let meteoAlarmEntries=[],meteoAlarmSelectedDay=0,meteoAlarmMap=null,meteoAlarmRegionLayer=null,meteoAlarmRegionFeatures=[];
 const meteoAlarmRegionNames={
- 'central macedonia':'Κεντρική Μακεδονία','east macedonia and thrace':'Ανατολική Μακεδονία και Θράκη','eastern macedonia and thrace':'Ανατολική Μακεδονία και Θράκη',
- 'western macedonia':'Δυτική Μακεδονία','epirus':'Ήπειρος','thessaly':'Θεσσαλία','ionian islands':'Ιόνια Νησιά','western greece':'Δυτική Ελλάδα',
- 'central greece':'Στερεά Ελλάδα','attica':'Αττική','peloponnese':'Πελοπόννησος','north aegean':'Βόρειο Αιγαίο','south aegean':'Νότιο Αιγαίο','crete':'Κρήτη'
+ 'thrace':'Θράκη','east macedonia':'Ανατολική Μακεδονία',
+ 'central macedonia':'Κεντρική Μακεδονία','western macedonia':'Δυτική Μακεδονία',
+ 'epirus':'Ήπειρος','western sterea':'Δυτική Στερεά','thessaly':'Θεσσαλία',
+ 'east sterea evvoia':'Ανατολική Στερεά & Εύβοια',
+ 'western peloponnese':'Δυτική Πελοπόννησος','eastern peloponnese':'Ανατολική Πελοπόννησος',
+ 'attica':'Αττική','cyclades':'Κυκλάδες','crete':'Κρήτη',
+ 'dodecanese':'Δωδεκάνησα','northeastern aegean':'Νησιά Βορειοανατολικού Αιγαίου',
+ 'ionian islands':'Νησιά Ιονίου'
 };
 function meteoAlarmDayRange(offset){const now=new Date();const start=new Date(now.getFullYear(),now.getMonth(),now.getDate()+offset);const end=new Date(start.getFullYear(),start.getMonth(),start.getDate()+1);return {start,end};}
 function meteoAlarmDayLabel(offset){const d=meteoAlarmDayRange(offset).start;return new Intl.DateTimeFormat('el-GR',{weekday:'long',day:'2-digit',month:'short',year:'numeric'}).format(d).replace(/\./g,'').toUpperCase();}
@@ -4458,38 +4655,76 @@ function meteoAlarmOverlapDay(a,offset){
 function meteoAlarmAreaNames(area){return String(area||'').split(/[,;|]/).map(x=>x.trim().toLowerCase()).filter(Boolean);}
 function meteoAlarmNormalizeRegionText(text){return String(text||'').toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').replace(/περιφερεια(κη)?/g,'').replace(/region of|region|regional unit of/g,'').replace(/[^a-zα-ω0-9]+/g,' ').trim();}
 const meteoAlarmRegionAliases={
- 'central macedonia':['central macedonia','kentriki makedonia','κεντρικη μακεδονια','θεσσαλονικη'],
- 'east macedonia and thrace':['east macedonia and thrace','eastern macedonia and thrace','anatoliki makedonia kai thraki','ανατολικη μακεδονια και θρακη','thrace'],
+ 'thrace':['thrace','thraki','θρακη'],
+ 'east macedonia':['east macedonia','eastern macedonia','anatoliki makedonia','ανατολικη μακεδονια'],
+ 'central macedonia':['central macedonia','kentriki makedonia','κεντρικη μακεδονια'],
  'western macedonia':['western macedonia','dytiki makedonia','δυτικη μακεδονια'],
- 'epirus':['epirus','ipeiros','ηπειρος'],'thessaly':['thessaly','thessalia','θεσσαλια'],
- 'ionian islands':['ionian islands','ionioi nisoi','ιονια νησια','ιονιο'],
- 'western greece':['western greece','dytiki ellada','δυτικη ελλαδα'],
- 'central greece':['central greece','sterea ellada','στερεα ελλαδα','east sterea & evvoia','east sterea and evvoia','eastern sterea & evvoia','eastern sterea and evvoia','sterea & evvoia','sterea and evvoia','evvoia','euboea','east central greece','ανατολικη στερεα και ευβοια','στερεα και ευβοια','ευβοια'],
+ 'epirus':['epirus','ipeiros','ηπειρος'],
+ 'western sterea':['west sterea','western sterea','dytiki sterea','δυτικη στερεα','aitoloakarnania','αιτωλοακαρνανια'],
+ 'thessaly':['thessaly','thessalia','θεσσαλια'],
+ 'east sterea evvoia':['east sterea and evvoia','east sterea & evvoia','eastern sterea and evvoia','eastern sterea & evvoia','sterea and evvoia','sterea & evvoia','central greece','east central greece','ανατολικη στερεα και ευβοια','ανατολικη στερεα & ευβοια','ευβοια','euboea','evvoia'],
+ 'western peloponnese':['western peloponnese','west peloponnese','dytiki peloponnisos','δυτικη πελοποννησος','achaia','achaias','ileia','ilias','messinia','messinias'],
+ 'eastern peloponnese':['eastern peloponnese','east peloponnese','anatoliki peloponnisos','ανατολικη πελοποννησος','argolida','arkadia','arcadia','korinthia','lakonia'],
  'attica':['attica','attiki','αττικη','athens'],
- 'peloponnese':['peloponnese','peloponnisos','πελοποννησος'],
- 'north aegean':['north aegean','voreio aigaio','βορειο αιγαιο'],
- 'south aegean':['south aegean','notio aigaio','νοτιο αιγαιο','cyclades','dodecanese'],
- 'crete':['crete','kriti','κρητη']
+ 'cyclades':['cyclades','kyklades','κυκλαδες'],
+ 'crete':['crete','kriti','κρητη'],
+ 'dodecanese':['dodecanese','dodekanisa','δωδεκανησα'],
+ 'northeastern aegean':['northeastern aegean islands','northeast aegean','north eastern aegean','νησια βορειοανατολικου αιγαιου','βορειοανατολικο αιγαιο','lesvos','limnos','ikaria','samos','chios'],
+ 'ionian islands':['ionian islands','ionioi nisoi','νησια ιονιου','ιονια νησια','ιονιο','zakynthos','corfu','kefalonia','lefkada','ithaki']
 };
 function meteoAlarmRegionKey(text){const v=meteoAlarmNormalizeRegionText(text);for(const [key,aliases] of Object.entries(meteoAlarmRegionAliases)){if(aliases.some(a=>v.includes(meteoAlarmNormalizeRegionText(a))))return key;}for(const [key,name] of Object.entries(meteoAlarmRegionNames)){const n=meteoAlarmNormalizeRegionText(name);if(n&&v.includes(n))return key;}return '';}
 function meteoAlarmLevelRank(level){return ({red:4,orange:3,yellow:2,green:1})[level]||0;}
 function meteoAlarmRegionLevel(region){let best='';for(const a of meteoAlarmEntries.filter(x=>meteoAlarmOverlapDay(x,meteoAlarmSelectedDay))){const names=meteoAlarmAreaNames(a.area);if(names.some(n=>meteoAlarmRegionKey(n)===region)&&meteoAlarmLevelRank(a.level)>meteoAlarmLevelRank(best))best=a.level;}return best;}
 function meteoAlarmRegionColor(level){return ({green:'#78d62b',yellow:'#ffdf27',orange:'#f28a16',red:'#ef2929'})[level]||'#35404d';}
 let meteoAlarmEuropeMap=null,meteoAlarmEuropeMarker=null;
-const METEOALARM_GREEK_NUTS2={
- 'EL30':{key:'attica',name:'Αττική'},
- 'EL41':{key:'north aegean',name:'Βόρειο Αιγαίο'},
- 'EL42':{key:'south aegean',name:'Νότιο Αιγαίο'},
- 'EL43':{key:'crete',name:'Κρήτη'},
- 'EL51':{key:'east macedonia and thrace',name:'Ανατολική Μακεδονία και Θράκη'},
- 'EL52':{key:'central macedonia',name:'Κεντρική Μακεδονία'},
- 'EL53':{key:'western macedonia',name:'Δυτική Μακεδονία'},
- 'EL54':{key:'epirus',name:'Ήπειρος'},
- 'EL61':{key:'thessaly',name:'Θεσσαλία'},
- 'EL62':{key:'ionian islands',name:'Ιόνια Νησιά'},
- 'EL63':{key:'western greece',name:'Δυτική Ελλάδα'},
- 'EL64':{key:'central greece',name:'Στερεά Ελλάδα'},
- 'EL65':{key:'peloponnese',name:'Πελοπόννησος'}
+const METEOALARM_GREEK_NUTS3={
+ // Thrace: Evros, Xanthi, Rodopi
+ 'EL511':{key:'thrace',name:'Θράκη'},'EL512':{key:'thrace',name:'Θράκη'},'EL513':{key:'thrace',name:'Θράκη'},
+ // East Macedonia: Drama, Kavala and Thasos
+ 'EL514':{key:'east macedonia',name:'Ανατολική Μακεδονία'},'EL515':{key:'east macedonia',name:'Ανατολική Μακεδονία'},
+ // Central Macedonia
+ 'EL521':{key:'central macedonia',name:'Κεντρική Μακεδονία'},'EL522':{key:'central macedonia',name:'Κεντρική Μακεδονία'},
+ 'EL523':{key:'central macedonia',name:'Κεντρική Μακεδονία'},'EL524':{key:'central macedonia',name:'Κεντρική Μακεδονία'},
+ 'EL525':{key:'central macedonia',name:'Κεντρική Μακεδονία'},'EL526':{key:'central macedonia',name:'Κεντρική Μακεδονία'},
+ 'EL527':{key:'central macedonia',name:'Κεντρική Μακεδονία'},
+ // Western Macedonia
+ 'EL531':{key:'western macedonia',name:'Δυτική Μακεδονία'},'EL532':{key:'western macedonia',name:'Δυτική Μακεδονία'},
+ 'EL533':{key:'western macedonia',name:'Δυτική Μακεδονία'},
+ // Epirus
+ 'EL541':{key:'epirus',name:'Ήπειρος'},'EL542':{key:'epirus',name:'Ήπειρος'},'EL543':{key:'epirus',name:'Ήπειρος'},
+ // Western Sterea (Aitoloakarnania)
+ 'EL631':{key:'western sterea',name:'Δυτική Στερεά'},
+ // Thessaly
+ 'EL611':{key:'thessaly',name:'Θεσσαλία'},'EL612':{key:'thessaly',name:'Θεσσαλία'},'EL613':{key:'thessaly',name:'Θεσσαλία'},
+ // Eastern Sterea and Evia
+ 'EL641':{key:'east sterea evvoia',name:'Ανατολική Στερεά & Εύβοια'},
+ 'EL642':{key:'east sterea evvoia',name:'Ανατολική Στερεά & Εύβοια'},
+ 'EL643':{key:'east sterea evvoia',name:'Ανατολική Στερεά & Εύβοια'},
+ 'EL644':{key:'east sterea evvoia',name:'Ανατολική Στερεά & Εύβοια'},
+ 'EL645':{key:'east sterea evvoia',name:'Ανατολική Στερεά & Εύβοια'},
+ // Western and Eastern Peloponnese
+ 'EL632':{key:'western peloponnese',name:'Δυτική Πελοπόννησος'},
+ 'EL633':{key:'western peloponnese',name:'Δυτική Πελοπόννησος'},
+ 'EL651':{key:'eastern peloponnese',name:'Ανατολική Πελοπόννησος'},
+ 'EL652':{key:'eastern peloponnese',name:'Ανατολική Πελοπόννησος'},
+ // EL653 combines Lakonia and Messinia in NUTS 2024; assigned to the western group
+ // until a finer official boundary dataset is used.
+ 'EL653':{key:'western peloponnese',name:'Δυτική Πελοπόννησος'},
+ // Attica
+ 'EL301':{key:'attica',name:'Αττική'},'EL302':{key:'attica',name:'Αττική'},'EL303':{key:'attica',name:'Αττική'},
+ 'EL304':{key:'attica',name:'Αττική'},'EL305':{key:'attica',name:'Αττική'},'EL306':{key:'attica',name:'Αττική'},
+ 'EL307':{key:'attica',name:'Αττική'},
+ // Cyclades, Crete, Dodecanese, Northeastern Aegean
+ 'EL422':{key:'cyclades',name:'Κυκλάδες'},
+ 'EL431':{key:'crete',name:'Κρήτη'},'EL432':{key:'crete',name:'Κρήτη'},
+ 'EL433':{key:'crete',name:'Κρήτη'},'EL434':{key:'crete',name:'Κρήτη'},
+ 'EL421':{key:'dodecanese',name:'Δωδεκάνησα'},
+ 'EL411':{key:'northeastern aegean',name:'Νησιά Βορειοανατολικού Αιγαίου'},
+ 'EL412':{key:'northeastern aegean',name:'Νησιά Βορειοανατολικού Αιγαίου'},
+ 'EL413':{key:'northeastern aegean',name:'Νησιά Βορειοανατολικού Αιγαίου'},
+ // Ionian Islands
+ 'EL621':{key:'ionian islands',name:'Νησιά Ιονίου'},'EL622':{key:'ionian islands',name:'Νησιά Ιονίου'},
+ 'EL623':{key:'ionian islands',name:'Νησιά Ιονίου'},'EL624':{key:'ionian islands',name:'Νησιά Ιονίου'}
 };
 function meteoAlarmRenderMap(){
  if(!window.L||!$('meteoAlarmMap'))return;
@@ -4576,8 +4811,8 @@ function meteoAlarmRenderMap(){
 } 
 async function meteoAlarmLoadRegions(){
  const urls=[
-  'https://gisco-services.ec.europa.eu/distribution/v2/nuts/geojson/NUTS_RG_01M_2024_4326_LEVL_2.geojson',
-  'https://gisco-services.ec.europa.eu/distribution/v2/nuts/geojson/NUTS_RG_03M_2024_4326_LEVL_2.geojson'
+  'https://gisco-services.ec.europa.eu/distribution/v2/nuts/geojson/NUTS_RG_01M_2024_4326_LEVL_3.geojson',
+  'https://gisco-services.ec.europa.eu/distribution/v2/nuts/geojson/NUTS_RG_03M_2024_4326_LEVL_3.geojson'
  ];
  let data=null;
  for(const url of urls){
@@ -4594,15 +4829,88 @@ async function meteoAlarmLoadRegions(){
   return;
  }
  meteoAlarmRegionFeatures=[];
+ const groupedFeatures={};
+ const peloponneseNutsCodes=new Set(['EL632','EL633','EL651','EL652','EL653']);
  data.features.forEach(feature=>{
   const props=feature.properties||{};
   const code=String(props.NUTS_ID||props.nuts_id||'');
-  const info=METEOALARM_GREEK_NUTS2[code];
+  // Peloponnese is deliberately omitted here: the NUTS-3 file combines
+  // Messinia and Laconia, so its geometry cannot represent the EMY split.
+  if(peloponneseNutsCodes.has(code))return;
+  const info=METEOALARM_GREEK_NUTS3[code];
   if(!info)return;
-  meteoAlarmRegionFeatures.push({key:info.key,name:info.name,feature});
+  if(!groupedFeatures[info.key])groupedFeatures[info.key]={name:info.name,features:[]};
+  groupedFeatures[info.key].features.push(feature);
  });
- if(meteoAlarmRegionFeatures.length!==13){
-  console.warn('MeteoAlarm: expected 13 Greek NUTS-2 regions, received',meteoAlarmRegionFeatures.length);
+ // Use individual Greek regional-unit polygons for the exact EMY Peloponnese grouping.
+ // Red / Western: Achaia, Ilia, Messinia. Blue / Eastern: Corinthia, Argolis, Arcadia, Laconia.
+ try{
+  const unitsUrl='https://raw.githubusercontent.com/peterdsp/greece-prefectures-and-units/main/greecePrefecturesUnits.geojson';
+  const unitsResponse=await fetch(unitsUrl,{mode:'cors',cache:'force-cache'});
+  if(!unitsResponse.ok)throw new Error('Regional-unit GeoJSON HTTP '+unitsResponse.status);
+  const unitsData=await unitsResponse.json();
+  const peloponneseGroups={
+   'western peloponnese':{name:'Δυτική Πελοπόννησος',need:3,features:[]},
+   'eastern peloponnese':{name:'Ανατολική Πελοπόννησος',need:4,features:[]}
+  };
+  const normalizeRegionName=value=>String(value||'')
+   .normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase()
+   .replace(/Ά/g,'Α').replace(/Έ/g,'Ε').replace(/Ή/g,'Η').replace(/Ί/g,'Ι')
+   .replace(/Ό/g,'Ο').replace(/Ύ/g,'Υ').replace(/Ώ/g,'Ω');
+  unitsData.features.forEach(feature=>{
+   const props=feature.properties||{};
+   const name=normalizeRegionName(props.name_greek||props.NAME_GREEK||props.name||props.NAME||'');
+   let key=null;
+   if(name.includes('ΑΧΑΙ')||name.includes('ΗΛΕΙ')||name.includes('ΜΕΣΣΗΝ')||
+      name.includes('ACHAIA')||name.includes('ILIA')||name.includes('MESSINIA')){
+    key='western peloponnese';
+   }else if(name.includes('ΚΟΡΙΝΘ')||name.includes('ΑΡΓΟΛ')||name.includes('ΑΡΚΑΔ')||name.includes('ΛΑΚΩΝ')||
+            name.includes('KORINTH')||name.includes('CORINTH')||name.includes('ARGOL')||name.includes('ARCAD')||name.includes('LAKON')){
+    key='eastern peloponnese';
+   }
+   if(key&&feature.geometry)peloponneseGroups[key].features.push(feature);
+  });
+  for(const [key,group] of Object.entries(peloponneseGroups)){
+   if(group.features.length!==group.need){
+    throw new Error('Βρέθηκαν '+group.features.length+' από τις '+group.need+' περιφερειακές ενότητες για '+group.name);
+   }
+   groupedFeatures[key]=group;
+  }
+  if(!window.turf){
+   await new Promise((resolve,reject)=>{
+    const script=document.createElement('script');
+    script.src='https://cdn.jsdelivr.net/npm/@turf/turf@7/turf.min.js';
+    script.onload=resolve;
+    script.onerror=()=>reject(new Error('Turf unavailable'));
+    document.head.appendChild(script);
+   });
+  }
+  // Dissolve the component county/regional-unit polygons into one outer shape per weather region.
+  for(const [key,group] of Object.entries(groupedFeatures)){
+   const polygons=group.features.map(feature=>turf.feature(feature.geometry,{regionKey:key}));
+   if(!polygons.length)continue;
+   let merged=polygons[0];
+   for(let i=1;i<polygons.length;i++){
+    merged=turf.union(turf.featureCollection([merged,polygons[i]]));
+    if(!merged)throw new Error('Union returned an empty geometry for '+key);
+   }
+   merged.properties={...(merged.properties||{}),regionKey:key};
+   meteoAlarmRegionFeatures.push({key,name:group.name,feature:merged});
+  }
+ }catch(mergeError){
+  console.error('MeteoAlarm: could not build EMY regional boundaries:',mergeError);
+  meteoAlarmRegionFeatures=[];
+  const el=$('meteoAlarmMap');
+  if(el&&!el.querySelector('.ww-map-data-note')){
+   const note=document.createElement('div');note.className='ww-map-data-note';
+   note.textContent='Δεν ήταν δυνατή η φόρτωση/συνένωση των ορίων ΕΜΥ. Ελέγξτε τη σύνδεση και ανανεώστε.';
+   el.appendChild(note);
+  }
+  return;
+ }
+ const regionKeys=new Set(meteoAlarmRegionFeatures.map(f=>f.key));
+ if(regionKeys.size!==16){
+  console.warn('MeteoAlarm: expected 16 regions, received',regionKeys.size,Array.from(regionKeys));
  }
  meteoAlarmDrawRegions();
  // Fit to Greece, including islands, with useful surrounding European context.
