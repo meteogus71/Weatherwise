@@ -2358,6 +2358,27 @@ body{font-size:calc(14px * var(--ww-font-scale,1))}
 }
 </style>
 
+
+<style id="weatherwise-menu-strong-depth">
+/* Stronger dimensional treatment for the main navigation and the four-item popup only. */
+#sidebar.sidebar > .nav,
+#sidebar.sidebar .nav:not(.ww-menu-more-panel .nav){
+  text-shadow:0 1px 1px color-mix(in srgb,var(--bg) 48%,transparent),
+    0 2px 4px color-mix(in srgb,var(--bg) 25%,transparent)!important;
+  transition:transform .18s ease,text-shadow .18s ease,box-shadow .18s ease!important;
+}
+#sidebar.sidebar > .nav:hover,
+#sidebar.sidebar .nav:not(.ww-menu-more-panel .nav):hover{
+  transform:translateY(-2px)!important;
+  text-shadow:0 1px 1px color-mix(in srgb,var(--bg) 62%,transparent),
+    0 3px 7px color-mix(in srgb,var(--bg) 38%,transparent)!important;
+}
+#sidebar.sidebar .nav .ico{
+  filter:drop-shadow(0 2px 2px color-mix(in srgb,var(--bg) 58%,transparent))
+    drop-shadow(0 0 4px color-mix(in srgb,var(--cyan) 24%,transparent))!important;
+}
+</style>
+
 </head>
 <body>
 <div id="ww-header-spacer" aria-hidden="true"></div>

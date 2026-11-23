@@ -2687,21 +2687,46 @@ body[data-theme="weatherlive"] #overview::after{
   border-radius:9px!important;
   background:color-mix(in srgb,var(--panel2) 88%,transparent)!important;
   color:var(--text)!important;cursor:pointer!important;
-  box-shadow:inset 0 1px 0 color-mix(in srgb,var(--text) 10%,transparent),
-    0 2px 7px color-mix(in srgb,var(--bg) 35%,transparent)!important;
-  transition:border-color .18s ease,box-shadow .18s ease,background .18s ease!important;
+  box-shadow:
+    inset 0 2px 0 color-mix(in srgb,var(--text) 22%,transparent),
+    inset 0 -3px 0 color-mix(in srgb,var(--bg) 42%,transparent),
+    0 3px 0 color-mix(in srgb,var(--bg) 62%,transparent),
+    0 7px 13px color-mix(in srgb,var(--bg) 52%,transparent),
+    0 13px 24px color-mix(in srgb,var(--bg) 34%,transparent)!important;
+  transform:translateY(0)!important;
+  transition:border-color .18s ease,box-shadow .18s ease,background .18s ease,transform .18s ease!important;
+}
+#sidebar.sidebar .ww-menu-more-trigger:hover{
+  transform:translateY(-2px)!important;
+  box-shadow:
+    inset 0 2px 0 color-mix(in srgb,var(--text) 26%,transparent),
+    inset 0 -3px 0 color-mix(in srgb,var(--bg) 36%,transparent),
+    0 5px 0 color-mix(in srgb,var(--bg) 58%,transparent),
+    0 10px 18px color-mix(in srgb,var(--bg) 56%,transparent),
+    0 17px 28px color-mix(in srgb,var(--bg) 38%,transparent)!important;
+}
+#sidebar.sidebar .ww-menu-more-trigger:active{
+  transform:translateY(2px)!important;
+  box-shadow:inset 0 2px 5px color-mix(in srgb,var(--bg) 45%,transparent),
+    0 1px 2px color-mix(in srgb,var(--bg) 35%,transparent)!important;
 }
 #sidebar.sidebar .ww-menu-more-trigger span{
   display:block!important;width:20px!important;height:2px!important;
   flex:0 0 2px!important;border-radius:2px!important;
   background:var(--text)!important;
-  box-shadow:0 0 5px color-mix(in srgb,var(--cyan) 22%,transparent)!important;
+  box-shadow:
+    0 1px 0 color-mix(in srgb,var(--bg) 72%,transparent),
+    0 0 7px color-mix(in srgb,var(--cyan) 48%,transparent)!important;
   transition:transform .18s ease,opacity .18s ease!important;
 }
 #sidebar.sidebar .ww-menu-more.is-open .ww-menu-more-trigger{
   border-color:var(--cyan)!important;
-  box-shadow:0 0 0 1px color-mix(in srgb,var(--cyan) 25%,transparent),
-    0 0 13px color-mix(in srgb,var(--cyan) 28%,transparent)!important;
+  box-shadow:
+    inset 0 2px 0 color-mix(in srgb,var(--text) 18%,transparent),
+    0 0 0 1px color-mix(in srgb,var(--cyan) 35%,transparent),
+    0 4px 0 color-mix(in srgb,var(--bg) 55%,transparent),
+    0 9px 20px color-mix(in srgb,var(--bg) 48%,transparent),
+    0 0 20px color-mix(in srgb,var(--cyan) 34%,transparent)!important;
 }
 #sidebar.sidebar .ww-menu-more-panel{
   position:absolute!important;top:calc(100% + 9px)!important;left:0!important;
@@ -2711,8 +2736,12 @@ body[data-theme="weatherlive"] #overview::after{
   border:1px solid var(--line)!important;border-radius:12px!important;
   background:linear-gradient(160deg,var(--panel2),var(--panel))!important;
   color:var(--text)!important;
-  box-shadow:0 14px 36px color-mix(in srgb,var(--bg) 58%,transparent),
-    inset 0 1px 0 color-mix(in srgb,var(--text) 10%,transparent)!important;
+  box-shadow:
+    0 2px 5px color-mix(in srgb,var(--bg) 30%,transparent),
+    0 10px 22px color-mix(in srgb,var(--bg) 48%,transparent),
+    0 22px 48px color-mix(in srgb,var(--bg) 58%,transparent),
+    inset 0 2px 0 color-mix(in srgb,var(--text) 18%,transparent),
+    inset 0 -2px 0 color-mix(in srgb,var(--bg) 24%,transparent)!important;
   z-index:30030!important;
 }
 #sidebar.sidebar .ww-menu-more-panel[hidden]{display:none!important}
@@ -2733,13 +2762,17 @@ body[data-theme="weatherlive"] #overview::after{
   font-family:"Manrope","DM Sans",sans-serif!important;
   font-size:13px!important;font-weight:500!important;line-height:1.25!important;
   letter-spacing:0!important;text-align:left!important;white-space:normal!important;
-  cursor:pointer!important;box-shadow:none!important;text-shadow:none!important;
+  cursor:pointer!important;
+  text-shadow:0 1px 1px color-mix(in srgb,var(--bg) 70%,transparent)!important;
+  box-shadow:inset 0 1px 0 color-mix(in srgb,var(--text) 7%,transparent)!important;
+  transition:transform .16s ease,background .16s ease,border-color .16s ease,box-shadow .16s ease!important;
 }
 #sidebar.sidebar .ww-menu-more-panel .nav .ico{
   display:inline-flex!important;flex:0 0 20px!important;
   width:20px!important;height:20px!important;
   align-items:center!important;justify-content:center!important;
   margin:0!important;font-size:16px!important;color:var(--cyan)!important;
+  filter:drop-shadow(0 2px 2px color-mix(in srgb,var(--bg) 62%,transparent))!important;
 }
 #sidebar.sidebar .ww-menu-more-panel .nav::after{display:none!important}
 #sidebar.sidebar .ww-menu-more-panel .nav:hover,
@@ -2747,7 +2780,10 @@ body[data-theme="weatherlive"] #overview::after{
 #sidebar.sidebar .ww-menu-more-panel .nav.active{
   background:color-mix(in srgb,var(--cyan) 13%,var(--panel) 87%)!important;
   border-color:color-mix(in srgb,var(--cyan) 38%,var(--line) 62%)!important;
-  color:var(--text)!important;box-shadow:none!important;text-shadow:none!important;
+  color:var(--text)!important;
+  transform:translateY(-1px)!important;
+  box-shadow:inset 0 1px 0 color-mix(in srgb,var(--text) 15%,transparent),
+    0 3px 8px color-mix(in srgb,var(--bg) 28%,transparent)!important;
 }
 @media(max-width:700px){
  #sidebar.sidebar .ww-menu-more{flex-basis:54px!important;margin-right:4px!important}
@@ -2786,6 +2822,27 @@ body[data-theme="weatherlive"] #overview::after{
 @media(max-width:700px){
  #sidebar.sidebar > .nav{font-size:12px!important}
  #sidebar.sidebar .ww-menu-more-panel .nav{font-size:13px!important}
+}
+</style>
+
+
+<style id="weatherwise-menu-strong-depth">
+/* Stronger dimensional treatment for the main navigation and the four-item popup only. */
+#sidebar.sidebar > .nav,
+#sidebar.sidebar .nav:not(.ww-menu-more-panel .nav){
+  text-shadow:0 1px 1px color-mix(in srgb,var(--bg) 48%,transparent),
+    0 2px 4px color-mix(in srgb,var(--bg) 25%,transparent)!important;
+  transition:transform .18s ease,text-shadow .18s ease,box-shadow .18s ease!important;
+}
+#sidebar.sidebar > .nav:hover,
+#sidebar.sidebar .nav:not(.ww-menu-more-panel .nav):hover{
+  transform:translateY(-2px)!important;
+  text-shadow:0 1px 1px color-mix(in srgb,var(--bg) 62%,transparent),
+    0 3px 7px color-mix(in srgb,var(--bg) 38%,transparent)!important;
+}
+#sidebar.sidebar .nav .ico{
+  filter:drop-shadow(0 2px 2px color-mix(in srgb,var(--bg) 58%,transparent))
+    drop-shadow(0 0 4px color-mix(in srgb,var(--cyan) 24%,transparent))!important;
 }
 </style>
 
