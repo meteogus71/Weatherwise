@@ -3330,11 +3330,12 @@ body[data-theme="weatherlive"] #overview::after{
   <div class="card ww-sat-card">
     <div class="eyebrow">EUMETSAT · METEOSAT THIRD GENERATION</div>
     <h2 style="margin:6px 0 4px">Δορυφορική εικόνα MTG</h2>
-    <p class="small">Εστίαση στην Ελλάδα. Μέγιστη διαθέσιμη ανάλυση MTG FCI HRFI: VIS 0.6 μm στα 500 m την ημέρα και IR 10.5 μm στο 1 km για νυχτερινή απεικόνιση. Πηγή: EUMETSAT.</p>
+    <p class="small">Εστίαση στην Ελλάδα. Αυτόματη επιλογή HRFI VIS 0.6 μm (500 m) την ημέρα και HRFI IR 10.5 μm (1 km) τη νύχτα, με δυνατότητα χειροκίνητης επιλογής. Πηγή: EUMETSAT.</p>
     <div class="ww-sat-toolbar">
       <label class="ww-sat-control">Προϊόν
         <select id="wwSatProduct">
-          <option value="mtg_fd:vis06_hrfi">HRFI VIS 0.6 μm · 500 m (μέγιστη ανάλυση)</option>
+          <option value="auto" selected>Αυτόματη εναλλαγή ημέρας / νύχτας</option>
+          <option value="mtg_fd:vis06_hrfi">HRFI VIS 0.6 μm · 500 m (ημέρα)</option>
           <option value="mtg_fd:ir105_hrfi">HRFI IR 10.5 μm · 1 km (νύχτα)</option>
           <option value="mtg_fd:rgb_geocolour">GeoColour RGB · φυσικά χρώματα</option>
           <option value="mtg_fd:rgb_cloudtype">Cloud Type RGB</option>
@@ -4554,6 +4555,35 @@ function wwSatBuildFrames(){
 function wwSatFormatTime(date){
   return new Intl.DateTimeFormat('el-GR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',timeZone:'UTC',hourCycle:'h23'}).format(date)+' UTC';
 }
+
+// Solar elevation for central Greece; used only to select the best available
+// day/night satellite channel. Manual product selection always overrides it.
+function wwSatIsDaylight(date){
+  const lat=38.5, lon=23.5;
+  const rad=Math.PI/180;
+  const start=new Date(Date.UTC(date.getUTCFullYear(),0,0));
+  const day=Math.floor((date-start)/86400000);
+  const hour=date.getUTCHours()+date.getUTCMinutes()/60+date.getUTCSeconds()/3600;
+  const gamma=2*Math.PI/365*(day-1+(hour-12)/24);
+  const eqtime=229.18*(0.000075+0.001868*Math.cos(gamma)-0.032077*Math.sin(gamma)-0.014615*Math.cos(2*gamma)-0.040849*Math.sin(2*gamma));
+  const decl=0.006918-0.399912*Math.cos(gamma)+0.070257*Math.sin(gamma)-0.006758*Math.cos(2*gamma)+0.000907*Math.sin(2*gamma)-0.002697*Math.cos(3*gamma)+0.00148*Math.sin(3*gamma);
+  const trueSolarMinutes=((hour*60+eqtime+4*lon)%1440+1440)%1440;
+  const ha=(trueSolarMinutes/4-180)*rad;
+  const cosZenith=Math.sin(lat*rad)*Math.sin(decl)+Math.cos(lat*rad)*Math.cos(decl)*Math.cos(ha);
+  const elevation=90-Math.acos(Math.max(-1,Math.min(1,cosZenith)))/rad;
+  return elevation>3; // small twilight buffer avoids switching at the horizon
+}
+function wwSatApplyAutoChannel(force){
+  const select=document.getElementById('wwSatProduct');
+  if(!select || select.value!=='auto' || !wwSatLayer)return;
+  const nextLayer=wwSatIsDaylight(new Date())?'mtg_fd:vis06_hrfi':'mtg_fd:ir105_hrfi';
+  if(force || wwSatLayer.wmsParams.layers!==nextLayer){
+    wwSatLayer.setParams({layers:nextLayer});
+    const label=nextLayer.includes('vis06')?'Ημέρα · HRFI VIS 0.6 · 500 m':'Νύχτα · HRFI IR 10.5 · 1 km';
+    wwSatSetStatus('Αυτόματη επιλογή: '+label+' · Ελλάδα');
+  }
+}
+
 function wwSatSetStatus(message){const el=document.getElementById('wwSatStatus');if(el)el.textContent=message;}
 function wwSatShowFrame(index){
   if(!wwSatFrameTimes.length || !wwSatLayer) return;
@@ -4604,7 +4634,8 @@ function wwSatInit(){
     wwSatLayer.on('tileerror',()=>wwSatSetStatus('Η υπηρεσία EUMETSAT δεν επέστρεψε εικόνα για αυτό το καρέ. Δοκίμασε νεότερο χρόνο ή άλλο προϊόν.'));
     document.getElementById('wwSatProduct')?.addEventListener('change',e=>{
       wwSatStop();
-      wwSatLayer.setParams({layers:e.target.value});
+      if(e.target.value==='auto') wwSatApplyAutoChannel(true);
+      else wwSatLayer.setParams({layers:e.target.value});
       wwSatShowFrame(wwSatFrameIndex);
     });
     document.getElementById('wwSatTimeline')?.addEventListener('input',e=>{wwSatStop();wwSatShowFrame(Number(e.target.value));});
@@ -4615,7 +4646,9 @@ function wwSatInit(){
     document.getElementById('wwSatFit')?.addEventListener('click',()=>wwSatMap.fitBounds([[34.3,19.0],[41.9,29.9]],{padding:[12,12]}));
     wwSatInitialized=true;
     wwSatBuildFrames();
+    wwSatApplyAutoChannel(true);
     wwSatShowFrame(wwSatFrameIndex);
+    setInterval(()=>wwSatApplyAutoChannel(false),60*1000);
     wwSatRefreshTimer=setInterval(()=>{
       if(document.getElementById('satellite')?.classList.contains('active')){
         wwSatBuildFrames();
