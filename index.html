@@ -3311,21 +3311,47 @@ body[data-theme="weatherlive"] #overview::after{
  </div>
 </section>
   <section class="section" id="satellite">
-    <div class="card ww-nasa-sat-card">
-      <div class="ww-nasa-sat-head"><div><h3>Δορυφορική εικόνα NASA</h3><p class="small">NASA GIBS · VIIRS Suomi-NPP · Corrected Reflectance True Color</p></div><span class="ww-nasa-live"><i></i> NASA GIBS</span></div>
-      <div class="ww-nasa-sat-controls">
-        <button class="btn" type="button" id="nasaSatPrev" aria-label="Προηγούμενη ημέρα">‹</button>
-        <button class="btn primary" type="button" id="nasaSatPlay">▶ Αναπαραγωγή</button>
-        <button class="btn" type="button" id="nasaSatNext" aria-label="Επόμενη ημέρα">›</button>
-        <label class="ww-nasa-date-label" for="nasaSatDate">Ημερομηνία εικόνας</label><input id="nasaSatDate" type="date" class="btn">
-        <button class="btn" type="button" id="nasaSatRefresh">↻ Ανανέωση</button>
-      </div>
-      <div class="ww-nasa-map-wrap"><div id="nasaSatelliteMap" role="region" aria-label="Δορυφορικός χάρτης NASA για την Ευρώπη"></div><div class="ww-nasa-map-stamp" id="nasaSatStamp">Φόρτωση δορυφορικής εικόνας…</div></div>
-      <div class="ww-nasa-timeline"><input id="nasaSatTimeline" type="range" min="0" max="6" step="1" value="5" aria-label="Επιλογή ημέρας δορυφορικής εικόνας"><div class="ww-nasa-timeline-labels"><span>Παλαιότερη διαθέσιμη</span><strong id="nasaSatSelectedDate">—</strong><span>Νεότερη</span></div></div>
-      <div class="notice ww-nasa-note" id="nasaSatStatus">Η NASA GIBS παρέχει ημερήσιες εικόνες VIIRS. Η αναπαραγωγή αφορά τις διαθέσιμες ημερήσιες λήψεις, όχι καρέ ανά ώρα.</div>
-      <div class="ww-nasa-attribution">Πηγή: NASA EOSDIS Global Imagery Browse Services (GIBS) · Suomi-NPP VIIRS · True Color</div>
+  <div class="card ww-vc-card">
+    <div class="ww-vc-head">
+      <div><h3>Weather Maps</h3><p class="small">Διαδραστικοί καιρικοί χάρτες Visual Crossing · Ευρώπη</p></div>
+      <div class="ww-vc-status" id="wwVcStatus" role="status">Σύνδεση με Visual Crossing…</div>
     </div>
-  </section>
+    <div class="ww-vc-toolbar">
+      <label>Επίπεδο
+        <select id="wwVcLayer">
+          <option value="precipcomposite">Υετός – Radar / Composite</option>
+          <option value="preciprate">Ρυθμός υετού</option>
+          <option value="preciptype">Τύπος υετού</option>
+          <option value="temp">Θερμοκρασία</option>
+          <option value="wind">Άνεμος – διεύθυνση & ένταση</option>
+          <option value="windspeed">Ταχύτητα ανέμου</option>
+          <option value="winddir">Διεύθυνση ανέμου</option>
+          <option value="lightning">Ηλεκτρικές εκκενώσεις</option>
+          <option value="hail">Χαλάζι</option>
+          <option value="alerts">Προειδοποιήσεις</option>
+        </select>
+      </label>
+      <label>Πηγή υετού
+        <select id="wwVcSource">
+          <option value="">Αυτόματη επιλογή</option>
+          <option value="radar">Radar όπου διατίθεται</option>
+        </select>
+      </label>
+      <label>Χρόνος
+        <select id="wwVcTime">
+          <option value="latest">Πιο πρόσφατα διαθέσιμα</option>
+        </select>
+      </label>
+      <button type="button" id="wwVcRefresh">↻ Ανανέωση</button>
+    </div>
+    <div id="wwVcMap" class="ww-vc-map" aria-label="Διαδραστικός χάρτης καιρού Visual Crossing"></div>
+    <div class="ww-vc-footer">
+      <span id="wwVcLayerName">Υετός – Radar / Composite</span>
+      <span id="wwVcUpdated">Τα δεδομένα φορτώνονται από Visual Crossing</span>
+    </div>
+    <div class="ww-vc-note">Τα επίπεδα είναι καιρικοί χάρτες και όχι δορυφορική φωτογραφία. Η συχνότητα ανανέωσης εξαρτάται από το προϊόν και τη διαθεσιμότητα δεδομένων.</div>
+  </div>
+</section>
   <section class="section" id="rain"><div class="card"><h3>Υετός / Radar</h3><p class="small">Χώρος προβολής radar και προγνωστικών πεδίων υετού.</p><div class="notice">Απαιτείται σύνδεση με πάροχο radar ή αριθμητικό μοντέλο πρόγνωσης για πραγματικά πεδία υετού.</div></div></section>
   <section class="section" id="wind"><div class="card"><h3>Πεδίο ανέμου</h3><p class="small">Χώρος προβολής διεύθυνσης και έντασης ανέμου.</p><div class="notice">Μπορεί να επεκταθεί με πεδίο ανέμου, κινούμενα σωματίδια ροής και ισογραμμές.</div></div></section>
   <section class="section" id="about"><div class="card"><h3>WeatherWise</h3><p>Πλατφόρμα μετεωρολογικής απεικόνισης με διάταξη dashboard, πλευρική πλοήγηση και κεντρικό χώρο εργασίας, βασισμένη στη δομή του αρχείου αναφοράς.</p></div></section>
@@ -6244,6 +6270,85 @@ body[data-theme] .wl-sitebar .wl-brand-mark,
 })();
 </script>
 
+
+<script id="weatherwise-visualcrossing-maps">
+(function(){
+  'use strict';
+  const $=id=>document.getElementById(id);
+  const section=$('satellite'), mapEl=$('wwVcMap');
+  if(!section||!mapEl||!window.L)return;
+  let map=null, weatherLayer=null, refreshTimer=null, activeLayer='precipcomposite';
+  const names={
+    precipcomposite:'Υετός – Radar / Composite',preciprate:'Ρυθμός υετού',
+    preciptype:'Τύπος υετού',temp:'Θερμοκρασία',wind:'Άνεμος – διεύθυνση & ένταση',
+    windspeed:'Ταχύτητα ανέμου',winddir:'Διεύθυνση ανέμου',
+    lightning:'Ηλεκτρικές εκκενώσεις',hail:'Χαλάζι',alerts:'Προειδοποιήσεις'
+  };
+  function status(message,isError){
+    const el=$('wwVcStatus'); if(!el)return;
+    el.textContent=message;
+    el.style.color=isError?'#ff8f8f':'';
+    el.style.borderColor=isError?'rgba(255,90,90,.55)':'';
+  }
+  function tileUrl(){
+    const z='{z}',x='{x}',y='{y}';
+    const params=new URLSearchParams({time:'latest',unitGroup:'metric',format:'webp'});
+    const source=$('wwVcSource').value;
+    if(source && activeLayer==='precipcomposite')params.set('source',source);
+    return `/api/visualcrossing/tile/${activeLayer}/${z}/${x}/${y}?${params.toString()}`;
+  }
+  function refreshLayer(){
+    if(!map)return;
+    activeLayer=$('wwVcLayer').value;
+    if(weatherLayer)map.removeLayer(weatherLayer);
+    weatherLayer=L.tileLayer(tileUrl(),{
+      tileSize:256,minZoom:2,maxZoom:14,opacity:.78,
+      attribution:'Weather data © Visual Crossing',
+      crossOrigin:true
+    });
+    let errors=0,loaded=0;
+    weatherLayer.on('tileload',()=>{loaded++; if(loaded>0)status('Visual Crossing · Ενεργό',false);});
+    weatherLayer.on('tileerror',()=>{
+      errors++;
+      if(errors>=2&&!loaded)status('Δεν φορτώθηκαν τα tiles. Έλεγξε πρόσβαση Weather Maps API / Logs.',true);
+    });
+    weatherLayer.addTo(map);
+    $('wwVcLayerName').textContent=names[activeLayer]||activeLayer;
+    $('wwVcUpdated').textContent='Αίτημα τελευταίων διαθέσιμων δεδομένων';
+    status('Φόρτωση χαρτών…',false);
+    const interval=(activeLayer==='lightning'||activeLayer==='hail'||activeLayer==='alerts'||activeLayer.startsWith('precip'))?10:60;
+    if(refreshTimer)clearInterval(refreshTimer);
+    refreshTimer=setInterval(()=>{
+      if(!map||!section.classList.contains('active'))return;
+      weatherLayer.setUrl(tileUrl());
+      $('wwVcUpdated').textContent='Ανανέωση αιτήθηκε · '+new Date().toLocaleTimeString('el-GR',{hour:'2-digit',minute:'2-digit'});
+    },interval*60*1000);
+  }
+  function init(){
+    if(map||!window.L)return;
+    map=L.map(mapEl,{zoomControl:true,preferCanvas:true}).setView([50,15],4);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{
+      attribution:'© OpenStreetMap © CARTO',subdomains:'abcd',maxZoom:19
+    }).addTo(map);
+    map.fitBounds([[34,-12],[72,35]],{padding:[8,8]});
+    map.on('load',()=>status('Χάρτης έτοιμος',false));
+    refreshLayer();
+    setTimeout(()=>map.invalidateSize(true),250);
+  }
+  $('wwVcLayer').addEventListener('change',()=>{if(!map)init();else refreshLayer();});
+  $('wwVcSource').addEventListener('change',()=>{if(!map)init();else refreshLayer();});
+  $('wwVcRefresh').addEventListener('click',()=>{
+    if(!map)init();
+    if(weatherLayer){weatherLayer.setUrl(tileUrl());weatherLayer.redraw();}
+    $('wwVcUpdated').textContent='Ανανέωση αιτήθηκε · '+new Date().toLocaleTimeString('el-GR',{hour:'2-digit',minute:'2-digit'});
+  });
+  document.querySelectorAll('.nav[data-section="satellite"]').forEach(el=>el.addEventListener('click',()=>setTimeout(()=>{init();if(map)map.invalidateSize(true);},120)));
+  const observer=new MutationObserver(()=>{if(section.classList.contains('active')){init();if(map)setTimeout(()=>map.invalidateSize(true),150);}});
+  observer.observe(section,{attributes:true,attributeFilter:['class','style']});
+  if(section.classList.contains('active'))init();
+})();
+</script>
+
 </body>
 </html>
 
@@ -6694,67 +6799,17 @@ html body #overview .city-current #weatherIcon{
 .ww-region-filter-clear:hover{background:rgba(255,255,255,.14)}
 </style>
 
-<style id="ww-nasa-satellite-style">
-#satellite .ww-nasa-sat-card{padding:20px;overflow:hidden}
-.ww-nasa-sat-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
-.ww-nasa-sat-head h3{margin:0 0 6px}.ww-nasa-sat-head p{margin:0}
-.ww-nasa-live{display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(92,180,220,.35);border-radius:30px;padding:7px 12px;color:#a9dff5;font-size:11px;font-weight:800;letter-spacing:.08em}
-.ww-nasa-live i{width:8px;height:8px;border-radius:50%;background:#54d6a2;box-shadow:0 0 10px #54d6a2}
-.ww-nasa-sat-controls{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:16px 0 12px}
-.ww-nasa-date-label{font-size:12px;color:var(--muted);margin-left:8px}
-#nasaSatDate{min-height:38px;color:var(--text);color-scheme:dark;padding:7px 10px}
-.ww-nasa-map-wrap{position:relative;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#08182b}
-#nasaSatelliteMap{height:min(68vh,690px);min-height:430px;width:100%;background:#0a2037}
-#nasaSatelliteMap .leaflet-control-attribution{background:rgba(4,15,29,.78);color:#dce9f7}
-#nasaSatelliteMap .leaflet-control-attribution a{color:#8fdcff}
-.ww-nasa-map-stamp{position:absolute;z-index:500;right:12px;top:12px;padding:8px 11px;border-radius:9px;background:rgba(4,16,31,.78);border:1px solid rgba(220,238,255,.2);color:#eef7ff;font-size:11px;pointer-events:none;backdrop-filter:blur(8px)}
-.ww-nasa-timeline{padding:14px 4px 2px}.ww-nasa-timeline input{width:100%;accent-color:#4bbfe8;cursor:pointer}
-.ww-nasa-timeline-labels{display:flex;justify-content:space-between;gap:8px;color:var(--muted);font-size:11px;margin-top:7px}.ww-nasa-timeline-labels strong{color:var(--text)}
-.ww-nasa-note{margin-top:12px}.ww-nasa-attribution{margin-top:10px;color:var(--muted);font-size:10px}
-@media(max-width:700px){#nasaSatelliteMap{height:58vh;min-height:360px}.ww-nasa-date-label{margin-left:0}.ww-nasa-sat-controls{gap:7px}}
-</style>
-<script id="ww-nasa-satellite-script">
-(function(){
-  const $id=id=>document.getElementById(id);
-  let satMap=null,satLayer=null,satPlayTimer=null,satDates=[],satIndex=0,satInitialized=false;
-  const layerName='VIIRS_SNPP_CorrectedReflectance_TrueColor';
-  const pad=n=>String(n).padStart(2,'0');
-  const iso=d=>d.getUTCFullYear()+'-'+pad(d.getUTCMonth()+1)+'-'+pad(d.getUTCDate());
-  function makeDates(){const now=new Date();const base=new Date(Date.UTC(now.getUTCFullYear(),now.getUTCMonth(),now.getUTCDate()));base.setUTCDate(base.getUTCDate()-1);satDates=[];for(let i=6;i>=0;i--){const d=new Date(base);d.setUTCDate(d.getUTCDate()-i);satDates.push(iso(d));}}
-  function setStatus(msg){const el=$id('nasaSatStatus');if(el)el.textContent=msg;}
-  function updateDate(){
-    if(!satMap||!satDates.length)return;
-    const date=satDates[satIndex];
-    if(satLayer)satMap.removeLayer(satLayer);
-    const url='https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/'+layerName+'/default/'+date+'/GoogleMapsCompatible_Level9/{z}/{y}/{x}.jpg';
-    satLayer=L.tileLayer(url,{minZoom:2,maxZoom:9,maxNativeZoom:9,tileSize:256,noWrap:true,keepBuffer:3,updateWhenIdle:true,attribution:'Imagery: NASA EOSDIS GIBS / Suomi-NPP VIIRS'});
-    let loaded=0,failed=0;
-    satLayer.on('tileload',()=>{loaded++;if(loaded===1){$id('nasaSatStamp').textContent='NASA VIIRS · '+date;$id('nasaSatStamp').style.color='#eef7ff';setStatus('Εμφανίζεται η εικόνα True Color της '+date+'. Τα δεδομένα VIIRS είναι ημερήσια και ενδέχεται να έχουν χρονική καθυστέρηση επεξεργασίας.');}});
-    satLayer.on('tileerror',()=>{failed++;if(failed>=3&&loaded===0){$id('nasaSatStamp').textContent='Δεν υπάρχουν διαθέσιμα tiles για '+date;$id('nasaSatStamp').style.color='#ffbf9b';setStatus('Η NASA GIBS δεν επέστρεψε εικόνα για αυτή την ημερομηνία. Δοκίμασε προηγούμενη ημέρα από τη χρονογραμμή.');}});
-    satLayer.addTo(satMap);
-    $id('nasaSatDate').value=date;$id('nasaSatTimeline').value=String(satIndex);$id('nasaSatSelectedDate').textContent=date;
-    $id('nasaSatPrev').disabled=satIndex===0;$id('nasaSatNext').disabled=satIndex===satDates.length-1;
-    $id('nasaSatStamp').textContent='Φόρτωση NASA VIIRS · '+date;
-  }
-  function stop(){if(satPlayTimer){clearInterval(satPlayTimer);satPlayTimer=null;}$id('nasaSatPlay').textContent='▶ Αναπαραγωγή';}
-  function start(){if(satPlayTimer){stop();return;}if(satIndex>=satDates.length-1)satIndex=0;$id('nasaSatPlay').textContent='Ⅱ Παύση';satPlayTimer=setInterval(()=>{if(satIndex>=satDates.length-1){stop();return;}satIndex++;updateDate();},1300);}
-  function init(){
-    if(satInitialized||!window.L||!$id('nasaSatelliteMap'))return;
-    satInitialized=true;makeDates();satIndex=satDates.length-2;
-    satMap=L.map('nasaSatelliteMap',{center:[51.2,15],zoom:4,minZoom:2,maxZoom:9,worldCopyJump:false,zoomControl:true,preferCanvas:true});
-    satMap.fitBounds([[34,-12],[72,35]],{padding:[8,8]});
-    updateDate();
-    $id('nasaSatPrev').addEventListener('click',()=>{stop();satIndex=Math.max(0,satIndex-1);updateDate();});
-    $id('nasaSatNext').addEventListener('click',()=>{stop();satIndex=Math.min(satDates.length-1,satIndex+1);updateDate();});
-    $id('nasaSatPlay').addEventListener('click',start);
-    $id('nasaSatTimeline').addEventListener('input',e=>{stop();satIndex=Number(e.target.value);updateDate();});
-    $id('nasaSatDate').addEventListener('change',e=>{stop();const idx=satDates.indexOf(e.target.value);if(idx>=0){satIndex=idx;updateDate();}else{setStatus('Η επιλογή ημερομηνίας περιορίζεται στις τελευταίες 7 ημέρες της χρονογραμμής.');updateDate();}});
-    $id('nasaSatRefresh').addEventListener('click',()=>{makeDates();satIndex=satDates.length-2;updateDate();setStatus('Έγινε ανανέωση του αιτήματος προς NASA GIBS.');});
-    const section=$id('satellite');if(section&&'MutationObserver'in window){new MutationObserver(()=>{if(section.classList.contains('active'))setTimeout(()=>satMap.invalidateSize(),120);}).observe(section,{attributes:true,attributeFilter:['class']});}
-    setInterval(()=>{if(satMap&&$id('satellite').classList.contains('active')){makeDates();if(satIndex>=satDates.length-1)satIndex=satDates.length-2;updateDate();}},30*60*1000);
-  }
-  document.addEventListener('DOMContentLoaded',init);if(document.readyState!=='loading')setTimeout(init,0);
-  document.addEventListener('click',e=>{const nav=e.target.closest('.nav[data-section="satellite"]');if(nav)setTimeout(()=>{init();if(satMap)satMap.invalidateSize();},180);});
-})();
-</script>
 
+/* Visual Crossing Weather Maps */
+.ww-vc-card{overflow:hidden}
+.ww-vc-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.ww-vc-status{font-size:12px;color:var(--muted,#9db0c7);padding:7px 10px;border:1px solid var(--line,rgba(255,255,255,.15));border-radius:9px}
+.ww-vc-toolbar{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;margin:14px 0}
+.ww-vc-toolbar label{display:flex;flex-direction:column;gap:5px;font-size:11px;color:var(--muted,#9db0c7)}
+.ww-vc-toolbar select,.ww-vc-toolbar button{min-height:38px;border:1px solid var(--line,rgba(255,255,255,.18));border-radius:8px;background:var(--panel2,rgba(255,255,255,.06));color:var(--text,inherit);padding:7px 10px;font:inherit;font-size:12px}
+.ww-vc-toolbar button{cursor:pointer}
+.ww-vc-map{height: min(68vh,680px);min-height:420px;width:100%;border-radius:12px;overflow:hidden;background:#dce5eb;border:1px solid var(--line,rgba(255,255,255,.15));z-index:0}
+.ww-vc-map .leaflet-container{width:100%;height:100%}
+.ww-vc-footer{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:10px;font-size:11px;color:var(--muted,#9db0c7)}
+.ww-vc-note{font-size:10px;line-height:1.5;color:var(--muted,#9db0c7);margin-top:9px}
+@media(max-width:700px){.ww-vc-map{height:58vh;min-height:360px}.ww-vc-toolbar label{flex:1 1 44%}.ww-vc-toolbar select{width:100%}}

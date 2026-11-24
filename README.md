@@ -68,3 +68,24 @@ The camera catalogue is supplied by the Windy Webcams API. Create a free Webcams
 The key is used only by `server.js` and is never exposed in the browser. After adding it, redeploy/restart the service. The endpoint `/api/webcams` caches results for 10 minutes. Windy requires attribution and links back to the webcam detail/player. Some entries provide periodically refreshed images or timelapses rather than continuous live video; a live player link is shown only when the provider supplies one.
 
 Without the API key, the map still loads but shows a clear setup message instead of invented camera markers.
+
+
+## Visual Crossing Weather Maps
+
+The `Δορυφορική εικόνα` navigation section now hosts Visual Crossing Weather Maps tiles
+on the existing Leaflet map. The map layer tiles are proxied through the WeatherWise
+Node server so the Visual Crossing API key is never placed in browser HTML.
+
+Optional Render environment variable:
+
+- `VISUALCROSSING_API_KEY` — Visual Crossing Weather Maps / Weather API key.
+
+If the variable is not configured, the server makes anonymous map requests where
+supported by Visual Crossing. If the account requires authenticated Maps API access,
+add the key in Render → Environment and redeploy.
+
+The map uses the latest available time. Tile update intervals vary by layer; the UI
+refreshes precipitation/lightning-related layers every 10 minutes and slower layers
+every 60 minutes. The current Weather Maps tile documentation does not provide a
+timeline-discovery endpoint in this integration, so historical animation is not
+implemented.
