@@ -3420,7 +3420,7 @@ async function loadEuropeWeather(){
   europeRows=europeCities.map((city,i)=>({ ...city,temp:items[i]?.current?.temperature_2m,wind:items[i]?.current?.wind_speed_10m,time:items[i]?.current?.time }))
     .filter(x=>Number.isFinite(x.temp)&&Number.isFinite(x.wind));
   renderEuropeChart();
-  if(statusEl)statusEl.textContent=`Ενημερώθηκαν ${europeRows.length} από ${europeCities.length} πόλεις · ${new Date().toLocaleTimeString('el-GR',{hour:'2-digit',minute:'2-digit'})}`;
+  if(statusEl)statusEl.textContent=`Ενημερώθηκαν ${europeRows.length} από ${europeCities.length} πόλεις · ${new Date().toLocaleTimeString('el-GR',{hour:'2-digit',minute:'2-digit',hourCycle:'h23'})}`;
  }catch(err){if(statusEl)statusEl.textContent='Δεν ήταν δυνατή η λήψη των ευρωπαϊκών μετρήσεων. Δοκίμασε ανανέωση.';console.error(err)}
 }
 function renderEuropeChart(){
@@ -3793,7 +3793,7 @@ function renderForecastDetail(){
   if(!parsed)return '—';
   return dailyMode
    ? parsed.toLocaleDateString('el-GR',{weekday:'short',day:'numeric',month:'short',timeZone:'UTC'})
-   : parsed.toLocaleString('el-GR',{weekday:'short',hour:'2-digit',minute:'2-digit',timeZone:'UTC'});
+   : parsed.toLocaleString('el-GR',{weekday:'short',hour:'2-digit',minute:'2-digit',timeZone:'UTC',hourCycle:'h23'});
  });
  const ds=(label,data,color,fill=false)=>({label,data:data.slice(startIndex,startIndex+n),borderColor:color,backgroundColor:fill?color+'22':'transparent',fill,tension:.28,pointRadius:0,pointHoverRadius:4,borderWidth:2});
  let datasets=[],title='',unit='',note='',type='line';
@@ -3934,7 +3934,7 @@ async function selectLayer(name){
     const data=await (await fetch('https://api.rainviewer.com/public/weather-maps.json')).json();
     const frames=data.radar?.past||[];if(!frames.length)throw Error('No radar frames');
     let idx=0;
-    const show=()=>{if(radarLayer)map.removeLayer(radarLayer);const f=frames[idx];radarLayer=L.tileLayer(`${data.host}${f.path}/256/{z}/{x}/{y}/2/1_0.png`,{tileSize:256,opacity:.72,maxNativeZoom:7,maxZoom:18,attribution:'Radar: <a href="https://www.rainviewer.com/">RainViewer</a>'});radarLayer.addTo(map);status(`Radar τελευταίας διαθέσιμης εικόνας: ${new Date(f.time*1000).toLocaleTimeString('el-GR',{hour:'2-digit',minute:'2-digit'})} UTC · ιστορικά δεδομένα, όχι πρόγνωση.`)};
+    const show=()=>{if(radarLayer)map.removeLayer(radarLayer);const f=frames[idx];radarLayer=L.tileLayer(`${data.host}${f.path}/256/{z}/{x}/{y}/2/1_0.png`,{tileSize:256,opacity:.72,maxNativeZoom:7,maxZoom:18,attribution:'Radar: <a href="https://www.rainviewer.com/">RainViewer</a>'});radarLayer.addTo(map);status(`Radar τελευταίας διαθέσιμης εικόνας: ${new Date(f.time*1000).toLocaleTimeString('el-GR',{hour:'2-digit',minute:'2-digit',hourCycle:'h23'})} UTC · ιστορικά δεδομένα, όχι πρόγνωση.`)};
     show();let n=0;radarTimer=setInterval(()=>{idx=(idx+1)%frames.length;show();n++;if(n>=frames.length-1){clearInterval(radarTimer);radarTimer=null}},800);
     $('layerLegend').textContent='RainViewer · διαθέσιμες ιστορικές εικόνες radar (περίπου 2 ώρες).';return;
    }catch(e){status('Το radar δεν είναι προσωρινά διαθέσιμο από τον πάροχο.');return}
@@ -4111,7 +4111,7 @@ async function drawGfsGrid(targetMap,kind,areaLayer,vectorLayer,statusId,legendI
   }
 
   const parsedTime=validTime?new Date(validTime):null;
-  const stamp=parsedTime&&!isNaN(parsedTime)?parsedTime.toLocaleString('el-GR',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',timeZone:'UTC'})+' UTC':'';
+  const stamp=parsedTime&&!isNaN(parsedTime)?parsedTime.toLocaleString('el-GR',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',timeZone:'UTC',hourCycle:'h23'})+' UTC':'';
   const desc={cloudforecast:'Νεφοκάλυψη',rainforecast:'Υετός',wind:'Άνεμος 10 m','gfs-temp':'Θερμοκρασία στα 2 m','gfs-cape':'Convective Available Potential Energy (CAPE)','gfs-pressure':'Πίεση μέσης στάθμης θάλασσας'};
   const modelLabel=window.weatherwiseForecastModel==='ecmwf'?'ECMWF IFS':'NOAA GFS';
   const layerLabel=kind==='ecmwf-850'?'Θερμοκρασία 850 hPa':kind==='ecmwf-500'?'Θερμοκρασία 500 hPa':(desc[kind]||kind);
@@ -4226,7 +4226,7 @@ async function loadWeather(){
  $('rainStat').innerHTML=`${rainProbability}<span class="unit">%</span>`;
  $('feels').textContent=`Αίσθηση: ${temp(c.apparent_temperature)}°`; $('windDir').textContent=`Διεύθυνση: ${dir(c.wind_direction_10m)} (${c.wind_direction_10m}°)`;
  $('cityName').textContent=city;const forecastLocationLabel=$('forecastLocationLabel');if(forecastLocationLabel)forecastLocationLabel.textContent='Περιοχή πρόγνωσης: '+city;updateCityLandmark(city);$('condition').textContent=codeText(c.weather_code);$('currentTemp').textContent=temp(c.temperature_2m)+'°';
- $('updated').textContent='Ενημέρωση: '+new Date(c.time).toLocaleString('el-GR',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'short'});
+ $('updated').textContent='Ενημέρωση: '+new Date(c.time).toLocaleString('el-GR',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'short',hourCycle:'h23'});
  $('feels2').textContent=temp(c.apparent_temperature)+'°'+(isF?'F':'C');$('dew').textContent=temp(h.dew_point_2m?.[0] ?? c.temperature_2m)+'°'+(isF?'F':'C');$('pressure').textContent=Math.round(c.surface_pressure)+' hPa';$('visibility').textContent='—';
  // Pressure tendency: compare the latest hourly surface pressure with the value ~3 hours earlier.
  const pressureTrendEl=$('pressureTrend');
@@ -4366,7 +4366,7 @@ async function loadWeather(){
    <div class="ww-seven-list">${editorialRows}</div>
   </div>`;
  $('forecastList').innerHTML=editorial;$('forecastList2').innerHTML=outlook;
- const labels=h.time.slice(0,24).map(t=>new Date(t).toLocaleTimeString('el-GR',{hour:'2-digit',minute:'2-digit'})),vals=h.temperature_2m.slice(0,24).map(temp);
+ const labels=h.time.slice(0,24).map(t=>new Date(t).toLocaleTimeString('el-GR',{hour:'2-digit',minute:'2-digit',hourCycle:'h23'})),vals=h.temperature_2m.slice(0,24).map(temp);
  forecastSeries=h&&h.time?{
    time:h.time,
    nowTime:c.time,
@@ -4512,7 +4512,7 @@ function openThreeDayDetail(dateValue){
  const label=d.toLocaleDateString('el-GR',{weekday:'long',day:'numeric',month:'long'});
  const title=document.getElementById('threeDayDetailTitle');if(title)title.textContent=label.charAt(0).toUpperCase()+label.slice(1);
  const subtitle=document.getElementById('threeDayDetailSubtitle');if(subtitle)subtitle.textContent='Ωριαία πρόγνωση για '+city+' · '+indices.length+' χρονικά σημεία';
- const labels=indices.map(i=>{const parsed=parseStamp(forecastSeries.time[i]);return parsed?parsed.toLocaleTimeString('el-GR',{hour:'2-digit',minute:'2-digit',timeZone:'UTC'}):'—';});
+ const labels=indices.map(i=>{const parsed=parseStamp(forecastSeries.time[i]);return parsed?parsed.toLocaleTimeString('el-GR',{hour:'2-digit',minute:'2-digit',timeZone:'UTC',hourCycle:'h23'}):'—';});
  const pick=(arr,convert=x=>x)=>indices.map(i=>arr?.[i]==null?null:convert(Number(arr[i])));
  const common={responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{labels:{color:'#aebed0',usePointStyle:true}},tooltip:{enabled:true}},scales:{x:{ticks:{color:'#8298b0',maxTicksLimit:12,maxRotation:0},grid:{color:'rgba(130,155,180,.12)'}},y:{ticks:{color:'#aebed0'},grid:{color:'rgba(130,155,180,.14)'}}}};
  threeDayCharts.forEach(c=>{try{c.destroy()}catch{}});threeDayCharts=[];
@@ -4552,7 +4552,7 @@ function wwSatBuildFrames(){
   if(slider){slider.min='0';slider.max=String(wwSatFrameTimes.length-1);slider.value=String(wwSatFrameIndex);}
 }
 function wwSatFormatTime(date){
-  return new Intl.DateTimeFormat('el-GR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',timeZone:'UTC',hour12:false}).format(date)+' UTC';
+  return new Intl.DateTimeFormat('el-GR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',timeZone:'UTC',hourCycle:'h23'}).format(date)+' UTC';
 }
 function wwSatSetStatus(message){const el=document.getElementById('wwSatStatus');if(el)el.textContent=message;}
 function wwSatShowFrame(index){
@@ -4844,7 +4844,7 @@ if(reportForm){
  reportForm.addEventListener('submit',e=>{
   e.preventDefault();
   const reports=getCommunityReports();
-  const report={id:Date.now(),location:$('reportLocation').value.trim(),coordinates:reportLocationCoordinates,type:$('reportType').value,intensity:$('reportIntensity').value,observedAt:$('reportObservedAt').value,temperature:$('reportTemperature').value,description:$('reportDescription').value.trim(),photos:reportPhotoData,dateLabel:new Date().toLocaleString('el-GR',{dateStyle:'short',timeStyle:'short'})};
+  const report={id:Date.now(),location:$('reportLocation').value.trim(),coordinates:reportLocationCoordinates,type:$('reportType').value,intensity:$('reportIntensity').value,observedAt:$('reportObservedAt').value,temperature:$('reportTemperature').value,description:$('reportDescription').value.trim(),photos:reportPhotoData,dateLabel:new Date().toLocaleString('el-GR',{dateStyle:'short',timeStyle:'short',hourCycle:'h23'})};
   reports.push(report);
   try{
    localStorage.setItem('weatherwise-community-reports',JSON.stringify(reports));
@@ -4882,7 +4882,7 @@ function meteoAlarmGreekSeverity(value){
 }
 function meteoAlarmDate(value){
  if(!value)return '—';
- const d=new Date(value);return isNaN(d)?value:d.toLocaleString('el-GR',{dateStyle:'short',timeStyle:'short'});
+ const d=new Date(value);return isNaN(d)?value:d.toLocaleString('el-GR',{dateStyle:'short',timeStyle:'short',hourCycle:'h23'});
 }
 function meteoAlarmSafe(value){
  return String(value||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -5513,7 +5513,7 @@ async function loadMeteoAlarmAlerts(){
   console.info('[WeatherWise MeteoAlarm] Ενεργές προειδοποιήσεις και γεωγραφικά scopes:',activeForSelectedDay.map(a=>({area:a.area,areaScopes:a.areaScopes,geocodes:a.geocodes,regions:meteoAlarmAlertRegions(a),level:a.level,expires:a.expires})));
   renderMeteoAlarmAlerts(meteoAlarmEntries);
   statusEl.textContent=feedCacheState==='STALE'?'METEOALARM · ΠΑΛΑΙΑ ΡΟΗ':'METEOALARM · ΕΠΙΣΗΜΗ ΡΟΗ';
-  if(updatedEl)updatedEl.textContent=(feedCacheState==='STALE'?'Παλαιά δεδομένα · τελευταίος έλεγχος: ':'Τελευταίος έλεγχος: ')+new Date().toLocaleString('el-GR',{timeZone:'Europe/Athens'});
+  if(updatedEl)updatedEl.textContent=(feedCacheState==='STALE'?'Παλαιά δεδομένα · τελευταίος έλεγχος: ':'Τελευταίος έλεγχος: ')+new Date().toLocaleString('el-GR',{timeZone:'Europe/Athens',hourCycle:'h23'});
   if(feedCacheState==='STALE'){
    const note=document.createElement('div');note.className='notice';note.textContent='Προσοχή: η επίσημη ροή δεν ανανεώθηκε. Εμφανίζονται μόνο μηνύματα των οποίων η ώρα λήξης δεν έχει παρέλθει· ενδέχεται να μην περιλαμβάνονται νεότερες ακυρώσεις ή ενημερώσεις.';
    host.prepend(note);
@@ -5521,7 +5521,7 @@ async function loadMeteoAlarmAlerts(){
  }catch(error){
   statusEl.textContent='ΜΗ ΔΙΑΘΕΣΙΜΗ ΑΥΤΗ ΤΗ ΣΤΙΓΜΗ';
   host.innerHTML=`<div class="notice">Δεν ήταν δυνατή η ανάκτηση της επίσημης ροής MeteoAlarm (${meteoAlarmSafe(error.message)}). Δεν θα εμφανιστούν παλαιές προειδοποιήσεις ως ενεργές. <a href="https://www.emy.gr/warnings" target="_blank" rel="noopener">Άνοιγμα ΕΜΥ ↗</a></div>`;
-  if(updatedEl)updatedEl.textContent='Τελευταία προσπάθεια: '+new Date().toLocaleString('el-GR',{timeZone:'Europe/Athens'});
+  if(updatedEl)updatedEl.textContent='Τελευταία προσπάθεια: '+new Date().toLocaleString('el-GR',{timeZone:'Europe/Athens',hourCycle:'h23'});
   meteoAlarmEntries=[];
   meteoAlarmDrawRegions();
  }
@@ -5602,14 +5602,14 @@ async function loadPointWeather(latitude,longitude){
   pointSet('pointUV',String(Math.round(day.uv_index_max?.[0]??0)));
   const sunrise=day.sunrise?.[0]?.slice(11,16)||'—',sunset=day.sunset?.[0]?.slice(11,16)||'—';
   pointSet('pointDaylight',sunrise+'–'+sunset);
-  const local=new Intl.DateTimeFormat('en-GB',{weekday:'short',hour:'2-digit',minute:'2-digit',timeZone:d.timezone||'UTC'}).format(new Date(c.time));
+  const local=new Intl.DateTimeFormat('en-GB',{weekday:'short',hour:'2-digit',minute:'2-digit',timeZone:d.timezone||'UTC',hourCycle:'h23'}).format(new Date(c.time));
   pointSet('pointLocalTime','Local time '+local);
   const times=h.time.slice(0,24),temps=h.temperature_2m.slice(0,24);
   if(pointHourlyChart)pointHourlyChart.destroy();
   pointHourlyChart=new Chart($('pointHourlyChart'),{type:'line',data:{labels:times.map(t=>t.slice(11,16)),datasets:[{data:temps,borderColor:'#9bd39d',backgroundColor:'rgba(155,211,157,.16)',fill:true,tension:.35,pointRadius:0,borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${Math.round(ctx.raw)}°C`}}},scales:{x:{display:false,grid:{display:false}},y:{display:false,grid:{display:false}}}}});
   const days=day.time.map((date,i)=>{const dt=new Date(date+'T12:00:00');const name=i===0?'Today':dt.toLocaleDateString('en-GB',{weekday:'short',timeZone:'UTC'});return `<div class="point-day"><div class="point-day-name">${name}</div><div class="point-day-icon">${pointWeatherIcon(day.weather_code[i])}</div><div class="point-day-temps">${Math.round(day.temperature_2m_max[i])}° / ${Math.round(day.temperature_2m_min[i])}°</div><div class="point-day-rain">${Math.round(day.precipitation_probability_max?.[i]??0)}% rain</div></div>`}).join('');
   $('pointDays').innerHTML=days;
-  pointSet('pointStatus',`Open-Meteo · ${d.timezone||'local timezone'} · ${new Date(c.time).toLocaleString()}`);
+  pointSet('pointStatus',`Open-Meteo · ${d.timezone||'local timezone'} · ${new Date(c.time).toLocaleString(undefined,{hourCycle:'h23'})}`);
  }catch(error){if(token!==pointRequestToken)return;pointSet('pointStatus','Δεν ήταν δυνατή η φόρτωση δεδομένων: '+error.message)}
 }
 
@@ -6309,7 +6309,7 @@ body[data-theme] .wl-sitebar .wl-brand-mark,
   box.innerHTML='<div class="ww-weather-loading">Φόρτωση πραγματικών καιρικών συνθηκών…</div>';
   try{
    const url='https://api.open-meteo.com/v1/forecast?latitude='+encodeURIComponent(cam.lat)+'&longitude='+encodeURIComponent(cam.lon)+'&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,weather_code,cloud_cover,pressure_msl,wind_speed_10m,wind_direction_10m,wind_gusts_10m&timezone=auto';
-   const r=await fetch(url);if(!r.ok)throw Error('HTTP '+r.status);const data=await r.json(),c=data.current||{},units=data.current_units||{};const clock=$('wwCameraLocalTime');if(clock){try{clock.textContent=new Intl.DateTimeFormat('el-GR',{dateStyle:'medium',timeStyle:'medium',timeZone:data.timezone||'UTC'}).format(new Date());}catch(e){clock.textContent=c.time||'—';}}
+   const r=await fetch(url);if(!r.ok)throw Error('HTTP '+r.status);const data=await r.json(),c=data.current||{},units=data.current_units||{};const clock=$('wwCameraLocalTime');if(clock){try{clock.textContent=new Intl.DateTimeFormat('el-GR',{dateStyle:'medium',timeStyle:'medium',timeZone:data.timezone||'UTC',hourCycle:'h23'}).format(new Date());}catch(e){clock.textContent=c.time||'—';}}
    const wx={0:'Αίθριος',1:'Κυρίως αίθριος',2:'Μερική νέφωση',3:'Συννεφιά',45:'Ομίχλη',48:'Πάχνη',51:'Ασθενές ψιλόβροχο',53:'Ψιλόβροχο',55:'Έντονο ψιλόβροχο',61:'Ασθενής βροχή',63:'Βροχή',65:'Ισχυρή βροχή',71:'Ασθενές χιόνι',73:'Χιονόπτωση',75:'Ισχυρή χιονόπτωση',80:'Μπόρες',81:'Ισχυρές μπόρες',82:'Έντονες μπόρες',95:'Καταιγίδα',96:'Καταιγίδα με χαλάζι',99:'Ισχυρή καταιγίδα'};
    const rows=[['Θερμοκρασία',c.temperature_2m,'°C'],['Αισθητή θερμοκρασία',c.apparent_temperature,'°C'],['Υγρασία',c.relative_humidity_2m,'%'],['Άνεμος',c.wind_speed_10m,units.wind_speed_10m||'km/h'],['Διεύθυνση ανέμου',c.wind_direction_10m,'°'],['Ριπές',c.wind_gusts_10m,units.wind_speed_10m||'km/h'],['Νέφωση',c.cloud_cover,'%'],['Υετός',c.precipitation,units.precipitation||'mm'],['Πίεση',c.pressure_msl,'hPa']];
    box.innerHTML='<div class="ww-camera-weather-head"><b>ΤΡΕΧΟΥΣΕΣ ΜΕΤΕΩΡΟΛΟΓΙΚΕΣ ΣΥΝΘΗΚΕΣ</b><span>'+esc(c.time||'')+'</span></div><div class="ww-camera-weather-state">'+esc(wx[c.weather_code]||'Καιρικές συνθήκες')+'</div><div class="ww-camera-weather-grid">'+rows.map(x=>'<div><small>'+x[0]+'</small><strong>'+(x[1]??'—')+' '+x[2]+'</strong></div>').join('')+'</div><div class="ww-camera-weather-source">Πηγή: Open-Meteo · Τρέχουσα ανάλυση για τις συντεταγμένες της κάμερας</div>';
@@ -6323,7 +6323,7 @@ body[data-theme] .wl-sitebar .wl-brand-mark,
   const detail=cam.detailUrl?'<a class="ww-camera-source-link" href="'+esc(cam.detailUrl)+'" target="_blank" rel="noopener">Πηγή κάμερας ↗</a>':'';
   const lat=Number(cam.lat),lon=Number(cam.lon);
   detailNode.innerHTML='<div class="ww-camera-detail-content"><div class="ww-camera-selected-tag">ΕΠΙΛΕΓΜΕΝΗ ΚΑΜΕΡΑ</div><h4>'+title+'</h4><div class="ww-camera-detail-location">'+location+'</div><div class="ww-camera-preview">'+image+'</div><div class="ww-camera-detail-actions">'+live+detail+'</div>'+(cam.attribution?'<div class="ww-camera-weather-source">Αναφορά πηγής: '+esc(cam.attribution)+'</div>':'')+'<div class="ww-camera-metadata"><div><small>ΓΕΩΓΡΑΦΙΚΟ ΠΛΑΤΟΣ</small><strong>'+lat.toFixed(5)+'°</strong></div><div><small>ΓΕΩΓΡΑΦΙΚΟ ΜΗΚΟΣ</small><strong>'+lon.toFixed(5)+'°</strong></div><div><small>ΤΟΠΙΚΗ ΩΡΑ ΚΑΜΕΡΑΣ</small><strong id="wwCameraLocalTime">—</strong></div><div><small>ΚΑΤΑΣΤΑΣΗ</small><strong>'+(cam.provider==='SkylineWebcams'?'Preview εικόνας διαθέσιμο':'Live player διαθέσιμο')+'</strong></div></div><div id="wwCameraWeather" class="ww-camera-weather"><div class="ww-weather-loading">Φόρτωση μετεωρολογικών δεδομένων…</div></div></div>';
-  try{$('wwCameraLocalTime').textContent=new Intl.DateTimeFormat('el-GR',{dateStyle:'medium',timeStyle:'medium',timeZone:Intl.DateTimeFormat().resolvedOptions().timeZone}).format(new Date());}catch(e){}
+  try{$('wwCameraLocalTime').textContent=new Intl.DateTimeFormat('el-GR',{dateStyle:'medium',timeStyle:'medium',timeZone:Intl.DateTimeFormat().resolvedOptions().timeZone,hourCycle:'h23'}).format(new Date());}catch(e){}
   loadWeather(cam);
  }
  async function loadCameras(area){
