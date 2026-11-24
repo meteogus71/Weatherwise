@@ -2354,6 +2354,35 @@ body[data-theme="weatherlive"] #overview::after{
 #reportUseLocationBtn:disabled{opacity:.65;cursor:wait}
 @media(max-width:620px){.report-location-row{flex-direction:column}.report-location-row #reportUseLocationBtn{width:100%}}
 
+
+/* Dedicated MTG satellite viewer — isolated from the other WeatherWise maps */
+#satellite .ww-satellite-card{padding:18px}
+.ww-sat-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:14px}
+.ww-sat-head h3{margin:0 0 5px}
+.ww-sat-head .small{margin:0;line-height:1.5}
+.ww-sat-live{display:inline-flex;align-items:center;gap:7px;white-space:nowrap;font-size:11px;font-weight:800;letter-spacing:.12em;padding:7px 10px;border-radius:20px;background:rgba(32,190,132,.12);color:#25c58c}
+.ww-sat-live span{width:7px;height:7px;border-radius:50%;background:#25c58c;box-shadow:0 0 9px #25c58c}
+.ww-sat-map-wrap{position:relative;overflow:hidden;border-radius:13px;background:#071a2c;border:1px solid rgba(255,255,255,.12)}
+#wwSatelliteMap{height: min(68vh,680px);min-height:420px;width:100%;background:#071a2c}
+#wwSatelliteMap .leaflet-control-attribution{font-size:9px;background:rgba(5,13,25,.72);color:#d6e2ef}
+#wwSatelliteMap .leaflet-control-attribution a{color:#9bc8f4}
+#wwSatelliteMap .leaflet-control-zoom a{background:rgba(10,25,43,.9);color:#fff;border-color:#496078}
+.ww-sat-map-label{position:absolute;z-index:500;top:13px;left:13px;padding:7px 10px;border-radius:7px;background:rgba(5,14,27,.78);color:#eaf3ff;font-size:10px;font-weight:800;letter-spacing:.12em;pointer-events:none;backdrop-filter:blur(8px)}
+.ww-sat-controls{padding:14px 2px 2px}
+.ww-sat-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ww-sat-btn{border:1px solid rgba(140,160,185,.35);border-radius:8px;padding:9px 12px;background:rgba(120,145,175,.1);color:inherit;font:inherit;font-size:12px;font-weight:700;cursor:pointer}
+.ww-sat-btn:hover{background:rgba(120,145,175,.2)}
+.ww-sat-btn-primary{background:#d7bd72;color:#172033;border-color:#d7bd72}
+.ww-sat-speed{display:flex;align-items:center;gap:7px;margin-left:auto;font-size:12px}
+.ww-sat-speed select{background:rgba(120,145,175,.1);color:inherit;border:1px solid rgba(140,160,185,.35);border-radius:7px;padding:8px}
+.ww-sat-speed select option{color:#172033}
+.ww-sat-timeline{width:100%;margin:18px 0 5px;accent-color:#d7bd72;cursor:pointer}
+.ww-sat-time-row{display:flex;justify-content:space-between;gap:10px;font-size:11px;opacity:.78}
+.ww-sat-time-row strong{font-size:12px;opacity:1;font-variant-numeric:tabular-nums}
+.ww-sat-status{font-size:11px;opacity:.72;margin-top:10px;min-height:16px}
+.ww-sat-credit{font-size:10px;opacity:.58;line-height:1.5;margin-top:12px}
+@media(max-width:640px){#wwSatelliteMap{height:58vh;min-height:360px}.ww-sat-head{gap:8px}.ww-sat-speed{margin-left:0}.ww-sat-actions{gap:6px}.ww-sat-btn{padding:8px 9px;font-size:11px}}
+
 </style>
 
 <style id="weatherwise-remove-forecast-outer-frame">
@@ -3310,7 +3339,32 @@ body[data-theme="weatherlive"] #overview::after{
   <div class="alert-source-links"><a href="https://www.emy.gr/warnings" target="_blank" rel="noopener">ΕΜΥ – Εθνικός πάροχος ↗</a><a href="https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-atom-greece" target="_blank" rel="noopener">MeteoAlarm – Ροή Ελλάδας ↗</a></div>
  </div>
 </section>
-  <section class="section" id="satellite"><div class="card"><h3>Δορυφορική εικόνα</h3><p class="small">Χώρος προβολής δορυφορικών προϊόντων MTG / EUMETSAT.</p><div class="notice">Η ζωντανή δορυφορική στρώση μπορεί να προστεθεί με έγκυρο WMS endpoint και διαθέσιμη χρονική σήμανση.</div></div></section>
+  <section class="section" id="satellite">
+  <div class="card ww-satellite-card">
+    <div class="ww-sat-head">
+      <div><h3>Δορυφορική εικόνα MTG</h3><p class="small">EUMETSAT · FCI GeoColour RGB · φυσικά χρώματα ημέρας / υπέρυθρη απεικόνιση νύχτας</p></div>
+      <div class="ww-sat-live"><span></span> LIVE</div>
+    </div>
+    <div class="ww-sat-map-wrap">
+      <div id="wwSatelliteMap" role="region" aria-label="Δορυφορικός χάρτης Ευρώπης"></div>
+      <div class="ww-sat-map-label">METEOSAT · 0°</div>
+    </div>
+    <div class="ww-sat-controls">
+      <div class="ww-sat-actions">
+        <button type="button" id="wwSatPlay" class="ww-sat-btn">▶ Αναπαραγωγή</button>
+        <button type="button" id="wwSatLatest" class="ww-sat-btn ww-sat-btn-primary">Τελευταία εικόνα</button>
+        <button type="button" id="wwSatRefresh" class="ww-sat-btn" title="Ανανέωση εικόνας">↻ Ανανέωση</button>
+        <label class="ww-sat-speed">Ταχύτητα
+          <select id="wwSatSpeed"><option value="1200">0.5×</option><option value="700" selected>1×</option><option value="350">2×</option></select>
+        </label>
+      </div>
+      <input id="wwSatTimeline" class="ww-sat-timeline" type="range" min="0" max="36" step="1" value="36" aria-label="Χρονική εξέλιξη τελευταίων 6 ωρών">
+      <div class="ww-sat-time-row"><span>−6 ώρες</span><strong id="wwSatTime">Φόρτωση διαθέσιμης εικόνας…</strong><span>Τελευταία</span></div>
+      <div id="wwSatStatus" class="ww-sat-status">Σύνδεση με EUMETSAT EUMETView…</div>
+    </div>
+    <div class="ww-sat-credit">Πηγή δορυφορικών δεδομένων: EUMETSAT · MTG FCI GeoColour RGB · Ανάλυση προϊόντος 1 km. Η μεγέθυνση του χάρτη δεν αυξάνει την εγγενή ανάλυση.</div>
+  </div>
+</section>
   <section class="section" id="rain"><div class="card"><h3>Υετός / Radar</h3><p class="small">Χώρος προβολής radar και προγνωστικών πεδίων υετού.</p><div class="notice">Απαιτείται σύνδεση με πάροχο radar ή αριθμητικό μοντέλο πρόγνωσης για πραγματικά πεδία υετού.</div></div></section>
   <section class="section" id="wind"><div class="card"><h3>Πεδίο ανέμου</h3><p class="small">Χώρος προβολής διεύθυνσης και έντασης ανέμου.</p><div class="notice">Μπορεί να επεκταθεί με πεδίο ανέμου, κινούμενα σωματίδια ροής και ισογραμμές.</div></div></section>
   <section class="section" id="about"><div class="card"><h3>WeatherWise</h3><p>Πλατφόρμα μετεωρολογικής απεικόνισης με διάταξη dashboard, πλευρική πλοήγηση και κεντρικό χώρο εργασίας, βασισμένη στη δομή του αρχείου αναφοράς.</p></div></section>
@@ -6226,6 +6280,81 @@ body[data-theme] .wl-sitebar .wl-brand-mark,
   document.addEventListener('keydown',function(event){
     if(event.key==='Escape'&&!panel.hidden){setOpen(false);trigger.focus();}
   });
+})();
+</script>
+
+
+<script id="weatherwise-mtg-satellite">
+(function(){
+  const section=document.getElementById('satellite');
+  const mapEl=document.getElementById('wwSatelliteMap');
+  if(!section||!mapEl||!window.L)return;
+  const WMS_URL='https://view.eumetsat.int/geoserver/wms';
+  const LAYER='mtg_fd:rgb_geocolour';
+  const STEP=10*60*1000, WINDOW=6*60*60*1000;
+  let satMap=null,satLayer=null,frames=[],frameIndex=0,playTimer=null,refreshTimer=null,initialized=false;
+  const $=id=>document.getElementById(id);
+  const timeline=$('wwSatTimeline'),timeLabel=$('wwSatTime'),status=$('wwSatStatus');
+  const fmt=t=>new Date(t).toLocaleString('el-GR',{timeZone:'UTC',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false})+' UTC';
+  function setStatus(t){if(status)status.textContent=t;}
+  function stop(){if(playTimer){clearInterval(playTimer);playTimer=null;}$('wwSatPlay').textContent='▶ Αναπαραγωγή';}
+  function buildFrames(){
+    const now=Date.now(),latest=Math.floor(now/STEP)*STEP-2*STEP;
+    const start=latest-WINDOW;
+    frames=[];for(let t=start;t<=latest;t+=STEP)frames.push(t);
+    frameIndex=frames.length-1;
+    timeline.max=String(frames.length-1);timeline.value=String(frameIndex);
+  }
+  function showFrame(i){
+    if(!frames.length)return;
+    frameIndex=Math.max(0,Math.min(frames.length-1,Number(i)||0));
+    const t=frames[frameIndex],iso=new Date(t).toISOString().replace('.000Z','Z');
+    if(satLayer)satMap.removeLayer(satLayer);
+    satLayer=L.tileLayer.wms(WMS_URL,{
+      layers:LAYER,format:'image/png',transparent:false,version:'1.1.1',
+      time:iso,styles:'',opacity:1,tiled:true,uppercase:false,
+      attribution:'© EUMETSAT · MTG FCI GeoColour'
+    }).addTo(satMap);
+    timeline.value=String(frameIndex);timeLabel.textContent=fmt(t);
+    setStatus('Χρονική σήμανση εικόνας: '+fmt(t)+' · Βήμα χρονοσειράς 10 λεπτά');
+  }
+  function init(){
+    if(initialized)return;initialized=true;
+    satMap=L.map(mapEl,{center:[49,10],zoom:4,minZoom:2,maxZoom:9,zoomControl:true,preferCanvas:false,worldCopyJump:true});
+    satMap.fitBounds([[25,-25],[72,45]],{padding:[8,8]});
+    buildFrames();showFrame(frameIndex);
+    setTimeout(()=>satMap.invalidateSize(true),150);
+    refreshTimer=setInterval(()=>{
+      const wasLatest=frameIndex===frames.length-1;
+      buildFrames();
+      if(wasLatest)showFrame(frameIndex);
+      else {timeline.max=String(frames.length-1);timeline.value=String(frameIndex);}
+      setStatus('Αυτόματη ανανέωση χρονοσειράς · '+fmt(frames[frames.length-1]));
+    },10*60*1000);
+  }
+  $('wwSatPlay').addEventListener('click',()=>{
+    if(playTimer){stop();return;}
+    if(frameIndex>=frames.length-1)showFrame(0);
+    $('wwSatPlay').textContent='Ⅱ Παύση';
+    playTimer=setInterval(()=>{
+      if(frameIndex>=frames.length-1){stop();return;}
+      showFrame(frameIndex+1);
+    },Number($('wwSatSpeed').value)||700);
+  });
+  $('wwSatSpeed').addEventListener('change',()=>{
+    if(playTimer){stop();$('wwSatPlay').click();}
+  });
+  timeline.addEventListener('input',()=>{stop();showFrame(timeline.value);});
+  $('wwSatLatest').addEventListener('click',()=>{stop();buildFrames();showFrame(frameIndex);});
+  $('wwSatRefresh').addEventListener('click',()=>{stop();buildFrames();showFrame(frameIndex);setStatus('Χρονοσειρά ανανεώθηκε · '+fmt(frames[frameIndex]));});
+  const observer=new MutationObserver(()=>{
+    if(section.classList.contains('active')||section.classList.contains('show')||getComputedStyle(section).display!=='none'){
+      init();setTimeout(()=>satMap&&satMap.invalidateSize(true),100);
+    }
+  });
+  observer.observe(section,{attributes:true,attributeFilter:['class','style']});
+  document.querySelectorAll('[data-section="satellite"]').forEach(el=>el.addEventListener('click',()=>{init();setTimeout(()=>satMap&&satMap.invalidateSize(true),250);}));
+  if(getComputedStyle(section).display!=='none')init();
 })();
 </script>
 
