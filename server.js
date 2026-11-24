@@ -1190,50 +1190,6 @@ const server = http.createServer(async (req, res) => {
     `http://${req.headers.host || 'localhost'}`
   );
 
-
-  // Visual Crossing Weather Maps tile proxy. The API key stays server-side.
-  if (req.method === 'GET' && url.pathname.startsWith('/api/visualcrossing/tile/')) {
-    try {
-      const match = url.pathname.match(/^\/api\/visualcrossing\/tile\/([a-z]+)\/(\d{1,2})\/(\d{1,8})\/(\d{1,8})$/);
-      const allowedElements = new Set(['precipcomposite','preciprate','preciptype','temp','wind','windspeed','winddir','lightning','hail','alerts']);
-      if (!match || !allowedElements.has(match[1])) {
-        return send(res, 400, 'Invalid Visual Crossing map tile request');
-      }
-      const [, element, z, x, y] = match;
-      const upstreamUrl = new URL(`https://maps.visualcrossing.com/VisualCrossingWebServices/rest/api/v1/map/tile/${element}/${z}/${x}/${y}.webp`);
-      for (const name of ['time','source','unitGroup','lang']) {
-        const value = url.searchParams.get(name);
-        if (value && value.length <= 80) upstreamUrl.searchParams.set(name, value);
-      }
-      const apiKey = process.env.VISUALCROSSING_API_KEY || process.env.VISUAL_CROSSING_API_KEY;
-      if (apiKey) upstreamUrl.searchParams.set('apikey', apiKey);
-      const upstream = await fetch(upstreamUrl, {
-        headers: { 'Accept': 'image/webp,image/*;q=0.8', 'User-Agent': 'WeatherWise/1.0' },
-        signal: AbortSignal.timeout(20000)
-      });
-      if (!upstream.ok) {
-        const detail = (await upstream.text()).slice(0, 500);
-        console.warn(`[Visual Crossing Maps] ${upstream.status}: ${detail}`);
-        return send(res, upstream.status, `Visual Crossing Maps API error (${upstream.status}): ${detail}`, {
-          'Content-Type': 'text/plain; charset=utf-8',
-          'Cache-Control': 'no-store'
-        });
-      }
-      const buffer = Buffer.from(await upstream.arrayBuffer());
-      return send(res, 200, buffer, {
-        'Content-Type': upstream.headers.get('content-type') || 'image/webp',
-        'Cache-Control': url.searchParams.get('time') === 'latest' ? 'public, max-age=120' : 'public, max-age=86400',
-        'Access-Control-Allow-Origin': '*'
-      });
-    } catch (err) {
-      console.error('[Visual Crossing Maps] Proxy error:', err.message);
-      return send(res, 502, 'Visual Crossing Maps proxy error: ' + err.message, {
-        'Content-Type': 'text/plain; charset=utf-8',
-        'Cache-Control': 'no-store'
-      });
-    }
-  }
-
   if (
     req.method === 'GET' &&
     url.pathname === '/health'

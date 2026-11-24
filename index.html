@@ -2846,14 +2846,6 @@ body[data-theme="weatherlive"] #overview::after{
 }
 </style>
 
-
-<style id="ww-vc-animation-fix">
-.ww-vc-animation{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:12px 0;padding:10px 12px;border:1px solid rgba(255,255,255,.12);border-radius:10px;background:rgba(255,255,255,.035)}
-.ww-vc-animation button,.ww-vc-animation select{min-height:34px;border:1px solid rgba(255,255,255,.18);border-radius:7px;background:rgba(255,255,255,.06);color:inherit;padding:6px 10px;cursor:pointer}
-.ww-vc-animation input[type=range]{flex:1;min-width:160px;accent-color:#68b8ee}
-.ww-vc-animation #wwVcTimeLabel{font-size:12px;color:var(--muted,#aeb8c3);min-width:105px}
-.ww-vc-speed-label{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted,#aeb8c3)}
-</style>
 </head>
 <body>
 <div id="ww-header-spacer" aria-hidden="true"></div>
@@ -3318,58 +3310,7 @@ body[data-theme="weatherlive"] #overview::after{
   <div class="alert-source-links"><a href="https://www.emy.gr/warnings" target="_blank" rel="noopener">ΕΜΥ – Εθνικός πάροχος ↗</a><a href="https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-atom-greece" target="_blank" rel="noopener">MeteoAlarm – Ροή Ελλάδας ↗</a></div>
  </div>
 </section>
-  <section class="section" id="satellite">
-  <div class="card ww-vc-card">
-    <div class="ww-vc-head">
-      <div><h3>Weather Maps</h3><p class="small">Διαδραστικοί καιρικοί χάρτες Visual Crossing · Ευρώπη</p></div>
-      <div class="ww-vc-status" id="wwVcStatus" role="status">Σύνδεση με Visual Crossing…</div>
-    </div>
-    <div class="ww-vc-toolbar">
-      <label>Επίπεδο
-        <select id="wwVcLayer">
-          <option value="precipcomposite">Υετός – Radar / Composite</option>
-          <option value="preciprate">Ρυθμός υετού</option>
-          <option value="preciptype">Τύπος υετού</option>
-          <option value="temp">Θερμοκρασία</option>
-          <option value="wind">Άνεμος – διεύθυνση & ένταση</option>
-          <option value="windspeed">Ταχύτητα ανέμου</option>
-          <option value="winddir">Διεύθυνση ανέμου</option>
-          <option value="lightning">Ηλεκτρικές εκκενώσεις</option>
-          <option value="hail">Χαλάζι</option>
-          <option value="alerts">Προειδοποιήσεις</option>
-        </select>
-      </label>
-      <label>Πηγή υετού
-        <select id="wwVcSource">
-          <option value="">Αυτόματη επιλογή</option>
-          <option value="radar">Radar όπου διατίθεται</option>
-        </select>
-      </label>
-      <label>Χρόνος
-        <select id="wwVcTime">
-          <option value="latest">Πιο πρόσφατα διαθέσιμα</option>
-        </select>
-      </label>
-      <button type="button" id="wwVcRefresh">↻ Ανανέωση</button>
-    </div>
-    <div class="ww-vc-animation" id="wwVcAnimation">
-      <button type="button" id="wwVcPlay" aria-pressed="false">▶ Αναπαραγωγή</button>
-      <button type="button" id="wwVcStepBack" aria-label="Προηγούμενο καρέ">−</button>
-      <input id="wwVcTimeline" type="range" min="0" max="6" step="1" value="6" aria-label="Χρόνος καρέ υετού">
-      <button type="button" id="wwVcStepForward" aria-label="Επόμενο καρέ">+</button>
-      <span id="wwVcTimeLabel">Τελευταία διαθέσιμη εικόνα</span>
-      <label class="ww-vc-speed-label">Ταχύτητα
-        <select id="wwVcSpeed"><option value="1000">1×</option><option value="600">1.7×</option><option value="350">3×</option></select>
-      </label>
-    </div>
-    <div id="wwVcMap" class="ww-vc-map" aria-label="Διαδραστικός χάρτης καιρού Visual Crossing"></div>
-    <div class="ww-vc-footer">
-      <span id="wwVcLayerName">Υετός – Radar / Composite</span>
-      <span id="wwVcUpdated">Τα δεδομένα φορτώνονται από Visual Crossing</span>
-    </div>
-    <div class="ww-vc-note">Τα επίπεδα είναι καιρικοί χάρτες και όχι δορυφορική φωτογραφία. Η συχνότητα ανανέωσης εξαρτάται από το προϊόν και τη διαθεσιμότητα δεδομένων.</div>
-  </div>
-</section>
+  <section class="section" id="satellite"><div class="card"><h3>Δορυφορική εικόνα</h3><p class="small">Χώρος προβολής δορυφορικών προϊόντων MTG / EUMETSAT.</p><div class="notice">Η ζωντανή δορυφορική στρώση μπορεί να προστεθεί με έγκυρο WMS endpoint και διαθέσιμη χρονική σήμανση.</div></div></section>
   <section class="section" id="rain"><div class="card"><h3>Υετός / Radar</h3><p class="small">Χώρος προβολής radar και προγνωστικών πεδίων υετού.</p><div class="notice">Απαιτείται σύνδεση με πάροχο radar ή αριθμητικό μοντέλο πρόγνωσης για πραγματικά πεδία υετού.</div></div></section>
   <section class="section" id="wind"><div class="card"><h3>Πεδίο ανέμου</h3><p class="small">Χώρος προβολής διεύθυνσης και έντασης ανέμου.</p><div class="notice">Μπορεί να επεκταθεί με πεδίο ανέμου, κινούμενα σωματίδια ροής και ισογραμμές.</div></div></section>
   <section class="section" id="about"><div class="card"><h3>WeatherWise</h3><p>Πλατφόρμα μετεωρολογικής απεικόνισης με διάταξη dashboard, πλευρική πλοήγηση και κεντρικό χώρο εργασίας, βασισμένη στη δομή του αρχείου αναφοράς.</p></div></section>
@@ -6288,106 +6229,6 @@ body[data-theme] .wl-sitebar .wl-brand-mark,
 })();
 </script>
 
-
-<script id="weatherwise-visualcrossing-maps">
-(function(){
-  'use strict';
-  const $=id=>document.getElementById(id);
-  const section=$('satellite'), mapEl=$('wwVcMap');
-  if(!section||!mapEl)return;
-  let map=null, weatherLayer=null, frameLayers=[], refreshTimer=null, playTimer=null, activeLayer='precipcomposite';
-  let frameTimes=[],frameIndex=6;
-  const names={precipcomposite:'Υετός – Radar / Composite',preciprate:'Ρυθμός υετού',preciptype:'Τύπος υετού',temp:'Θερμοκρασία',wind:'Άνεμος – διεύθυνση & ένταση',windspeed:'Ταχύτητα ανέμου',winddir:'Διεύθυνση ανέμου',lightning:'Ηλεκτρικές εκκενώσεις',hail:'Χαλάζι',alerts:'Προειδοποιήσεις'};
-  function status(message,isError){const el=$('wwVcStatus');if(!el)return;el.textContent=message;el.style.color=isError?'#ff8f8f':'';el.style.borderColor=isError?'rgba(255,90,90,.55)':'';}
-  function buildFrames(){
-    const now=new Date(); now.setUTCSeconds(0,0); now.setUTCMinutes(Math.floor(now.getUTCMinutes()/10)*10);
-    frameTimes=[]; for(let i=6;i>=0;i--)frameTimes.push(new Date(now.getTime()-i*10*60000).toISOString().slice(0,16));
-    frameIndex=6; updateTimeLabel();
-  }
-  function currentTime(){return activeLayer==='precipcomposite'&&frameTimes.length?frameTimes[frameIndex]:'latest';}
-  function tileUrl(timeValue){
-    const params=new URLSearchParams({time:timeValue||currentTime(),unitGroup:'metric',format:'webp'});
-    const source=$('wwVcSource').value; if(source&&activeLayer==='precipcomposite')params.set('source',source);
-    return `/api/visualcrossing/tile/${activeLayer}/{z}/{x}/{y}?${params.toString()}`;
-  }
-  function updateTimeLabel(){
-    const el=$('wwVcTimeLabel'); if(!el)return;
-    const t=frameTimes[frameIndex]; el.textContent=t?new Date(t+'Z').toLocaleTimeString('el-GR',{hour:'2-digit',minute:'2-digit',timeZone:'Europe/Athens'}):'Τελευταία διαθέσιμη εικόνα';
-    $('wwVcTimeline').value=String(frameIndex);
-  }
-  function stopAnimation(){if(playTimer){clearInterval(playTimer);playTimer=null;}const b=$('wwVcPlay');if(b){b.textContent='▶ Αναπαραγωγή';b.setAttribute('aria-pressed','false');}}
-  function setFrame(i){
-    if(!frameTimes.length)buildFrames();
-    frameIndex=Math.max(0,Math.min(frameTimes.length-1,i)); updateTimeLabel();
-    frameLayers.forEach((layer,index)=>layer.setOpacity(index===frameIndex?.82:0));
-    if(weatherLayer)weatherLayer.setUrl(tileUrl('latest'));
-    $('wwVcUpdated').textContent='Χρόνος δεδομένων: '+currentTime()+' UTC';
-  }
-  function clearWeatherLayers(){
-    if(weatherLayer&&map&&map.hasLayer(weatherLayer))map.removeLayer(weatherLayer);
-    weatherLayer=null;
-    frameLayers.forEach(layer=>{if(map&&map.hasLayer(layer))map.removeLayer(layer);});
-    frameLayers=[];
-  }
-  function refreshLayer(){
-    if(!map)return; activeLayer=$('wwVcLayer').value; stopAnimation(); clearWeatherLayers();
-    const anim=$('wwVcAnimation'); if(anim)anim.style.display=activeLayer==='precipcomposite'?'flex':'none';
-    $('wwVcLayerName').textContent=names[activeLayer]||activeLayer;
-    if(activeLayer==='precipcomposite'){
-      buildFrames();
-      frameTimes.forEach((time,index)=>{
-        const layer=L.tileLayer(tileUrl(time),{tileSize:256,minZoom:2,maxNativeZoom:14,maxZoom:19,opacity:index===frameIndex?.82:0,attribution:'Weather data © Visual Crossing',crossOrigin:true});
-        layer.on('tileload',()=>status('Visual Crossing · Ενεργό',false));
-        layer.on('tileerror',()=>status('Δεν φορτώθηκαν τα καιρικά tiles. Έλεγξε Render Logs.',true));
-        layer.addTo(map); frameLayers.push(layer);
-      });
-      updateTimeLabel();
-    }else{
-      weatherLayer=L.tileLayer(tileUrl('latest'),{tileSize:256,minZoom:2,maxNativeZoom:14,maxZoom:19,opacity:.82,attribution:'Weather data © Visual Crossing',crossOrigin:true});
-      weatherLayer.on('tileload',()=>status('Visual Crossing · Ενεργό',false));
-      weatherLayer.on('tileerror',()=>status('Δεν φορτώθηκαν τα καιρικά tiles. Έλεγξε Render Logs.',true));
-      weatherLayer.addTo(map);
-    }
-    $('wwVcUpdated').textContent='Χρόνος δεδομένων: '+(currentTime()==='latest'?'τελευταία διαθέσιμα':currentTime()+' UTC'); status('Φόρτωση χαρτών…',false);
-    const interval=(activeLayer==='lightning'||activeLayer==='hail'||activeLayer==='alerts'||activeLayer.startsWith('precip'))?10:60;
-    if(refreshTimer)clearInterval(refreshTimer);
-    refreshTimer=setInterval(()=>{
-      if(!map||!section.classList.contains('active'))return;
-      if(activeLayer==='precipcomposite'){
-        const wasPlaying=!!playTimer; stopAnimation(); buildFrames();
-        frameLayers.forEach((layer,index)=>layer.setUrl(tileUrl(frameTimes[index])));
-        setFrame(6);
-        if(wasPlaying){const b=$('wwVcPlay');b.click();}
-      }else if(weatherLayer){weatherLayer.setUrl(tileUrl('latest'));}
-      $('wwVcUpdated').textContent='Ανανέωση αιτήθηκε · '+new Date().toLocaleTimeString('el-GR',{hour:'2-digit',minute:'2-digit'});
-    },interval*60000);
-  }
-  function init(){
-    if(map)return;
-    if(!window.L){status('Δεν φορτώθηκε η βιβλιοθήκη Leaflet.',true);return;}
-    map=L.map(mapEl,{zoomControl:true,preferCanvas:true}).setView([50,15],4);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>',subdomains:['a','b','c'],maxZoom:19}).addTo(map);
-    map.fitBounds([[34,-12],[72,35]],{padding:[8,8]}); refreshLayer(); setTimeout(()=>map.invalidateSize(true),250);
-  }
-  $('wwVcLayer').addEventListener('change',()=>{if(!map)init();else refreshLayer();});
-  $('wwVcSource').addEventListener('change',()=>{if(!map)init();else refreshLayer();});
-  $('wwVcRefresh').addEventListener('click',()=>{if(!map)init();else refreshLayer();});
-  $('wwVcTimeline').addEventListener('input',e=>{stopAnimation();setFrame(Number(e.target.value));});
-  $('wwVcStepBack').addEventListener('click',()=>{stopAnimation();setFrame(frameIndex-1);});
-  $('wwVcStepForward').addEventListener('click',()=>{stopAnimation();setFrame(frameIndex+1);});
-  $('wwVcPlay').addEventListener('click',()=>{
-    if(activeLayer!=='precipcomposite'){status('Το animation είναι διαθέσιμο στο επίπεδο Υετός – Radar / Composite.',true);return;}
-    if(playTimer){stopAnimation();return;}
-    if(frameIndex>=frameTimes.length-1)setFrame(0);
-    const b=$('wwVcPlay');b.textContent='Ⅱ Παύση';b.setAttribute('aria-pressed','true');
-    playTimer=setInterval(()=>{if(frameIndex>=frameTimes.length-1){stopAnimation();return;}setFrame(frameIndex+1);},Number($('wwVcSpeed').value));
-  });
-  document.querySelectorAll('.nav[data-section="satellite"]').forEach(el=>el.addEventListener('click',()=>setTimeout(()=>{init();if(map)map.invalidateSize(true);},120)));
-  const observer=new MutationObserver(()=>{if(section.classList.contains('active')){init();if(map)setTimeout(()=>map.invalidateSize(true),150);}});
-  observer.observe(section,{attributes:true,attributeFilter:['class','style']}); if(section.classList.contains('active'))init();
-})();
-</script>
-
 </body>
 </html>
 
@@ -6836,21 +6677,4 @@ html body #overview .city-current #weatherIcon{
 .ww-region-filter-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
 .ww-region-filter-clear{border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.07);color:inherit;border-radius:8px;padding:7px 10px;cursor:pointer;font:inherit;font-size:.85em}
 .ww-region-filter-clear:hover{background:rgba(255,255,255,.14)}
-</style>
-
-
-<style>
-/* Visual Crossing Weather Maps */
-.ww-vc-card{overflow:hidden}
-.ww-vc-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap}
-.ww-vc-status{font-size:12px;color:var(--muted,#9db0c7);padding:7px 10px;border:1px solid var(--line,rgba(255,255,255,.15));border-radius:9px}
-.ww-vc-toolbar{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;margin:14px 0}
-.ww-vc-toolbar label{display:flex;flex-direction:column;gap:5px;font-size:11px;color:var(--muted,#9db0c7)}
-.ww-vc-toolbar select,.ww-vc-toolbar button{min-height:38px;border:1px solid var(--line,rgba(255,255,255,.18));border-radius:8px;background:var(--panel2,rgba(255,255,255,.06));color:var(--text,inherit);padding:7px 10px;font:inherit;font-size:12px}
-.ww-vc-toolbar button{cursor:pointer}
-.ww-vc-map{height: min(68vh,680px);min-height:420px;width:100%;border-radius:12px;overflow:hidden;background:#dce5eb;border:1px solid var(--line,rgba(255,255,255,.15));z-index:0}
-.ww-vc-map .leaflet-container{width:100%;height:100%}
-.ww-vc-footer{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:10px;font-size:11px;color:var(--muted,#9db0c7)}
-.ww-vc-note{font-size:10px;line-height:1.5;color:var(--muted,#9db0c7);margin-top:9px}
-@media(max-width:700px){.ww-vc-map{height:58vh;min-height:360px}.ww-vc-toolbar label{flex:1 1 44%}.ww-vc-toolbar select{width:100%}}
 </style>
