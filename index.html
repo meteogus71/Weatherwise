@@ -6302,7 +6302,7 @@ body[data-theme] .wl-sitebar .wl-brand-mark,
     activeLayer=$('wwVcLayer').value;
     if(weatherLayer)map.removeLayer(weatherLayer);
     weatherLayer=L.tileLayer(tileUrl(),{
-      tileSize:256,minZoom:2,maxZoom:14,opacity:.78,
+      tileSize:256,minZoom:2,maxNativeZoom:14,maxZoom:19,opacity:.78,
       attribution:'Weather data © Visual Crossing',
       crossOrigin:true
     });
