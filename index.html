@@ -3330,18 +3330,18 @@ body[data-theme="weatherlive"] #overview::after{
   <div class="card ww-sat-card">
     <div class="eyebrow">EUMETSAT · METEOSAT THIRD GENERATION</div>
     <h2 style="margin:6px 0 4px">Δορυφορική εικόνα MTG</h2>
-    <p class="small">GeoColour RGB – φυσικά χρώματα την ημέρα και υπέρυθρη απεικόνιση νεφών τη νύχτα. Πηγή: EUMETSAT / NASA.</p>
+    <p class="small">Εστίαση στην Ελλάδα. Μέγιστη διαθέσιμη ανάλυση MTG FCI HRFI: VIS 0.6 μm στα 500 m την ημέρα και IR 10.5 μm στο 1 km για νυχτερινή απεικόνιση. Πηγή: EUMETSAT.</p>
     <div class="ww-sat-toolbar">
       <label class="ww-sat-control">Προϊόν
         <select id="wwSatProduct">
-          <option value="mtg_fd:rgb_geocolour">MTG GeoColour RGB</option>
-          <option value="mtg_fd:rgb_cloudtype">MTG Cloud Type RGB (ημέρα)</option>
-          <option value="mtg_fd:rgb_cloudphase">MTG Cloud Phase RGB</option>
-          <option value="mtg_fd:rgb_dust">MTG Dust RGB (ημέρα / νύχτα)</option>
+          <option value="mtg_fd:vis06_hrfi">HRFI VIS 0.6 μm · 500 m (μέγιστη ανάλυση)</option>
+          <option value="mtg_fd:ir105_hrfi">HRFI IR 10.5 μm · 1 km (νύχτα)</option>
+          <option value="mtg_fd:rgb_geocolour">GeoColour RGB · φυσικά χρώματα</option>
+          <option value="mtg_fd:rgb_cloudtype">Cloud Type RGB</option>
         </select>
       </label>
       <button class="ww-sat-btn" id="wwSatRefresh" type="button">↻ Νεότερη εικόνα</button>
-      <button class="ww-sat-btn" id="wwSatFit" type="button">Ευρώπη</button>
+      <button class="ww-sat-btn" id="wwSatFit" type="button">Ελλάδα</button>
     </div>
     <div id="eumetsatSatelliteMap" class="ww-sat-map" role="img" aria-label="Διαδραστικός χάρτης δορυφορικής εικόνας EUMETSAT MTG"></div>
     <div class="ww-sat-player">
@@ -3352,7 +3352,7 @@ body[data-theme="weatherlive"] #overview::after{
       <span class="ww-sat-time" id="wwSatTime">—</span>
     </div>
     <div class="ww-sat-status" id="wwSatStatus" aria-live="polite">Φόρτωση υπηρεσίας EUMETSAT…</div>
-    <p class="small" style="margin-top:8px">Η χρονογραμμή καλύπτει τις τελευταίες 6 ώρες με βήμα 10 λεπτών. Η διαθεσιμότητα κάθε καρέ εξαρτάται από τη δημοσίευση των αντίστοιχων δεδομένων από την EUMETSAT. Η προβολή MTG GeoColour περιλαμβάνει και στατικό υπόβαθρο NASA τη νύχτα.</p>
+    <p class="small" style="margin-top:8px">Η χρονογραμμή καλύπτει τις τελευταίες 6 ώρες με βήμα 10 λεπτών. Η διαθεσιμότητα κάθε καρέ εξαρτάται από τη δημοσίευση των αντίστοιχων δεδομένων από την EUMETSAT. Το HRFI VIS 0.6 είναι μονόχρωμο κανάλι υψηλής ανάλυσης, όχι φυσικό RGB.</p>
   </div>
 </section>
 
@@ -4583,12 +4583,14 @@ function wwSatInit(){
   const el=document.getElementById('eumetsatSatelliteMap');
   if(!el || typeof L==='undefined')return;
   if(!wwSatMap){
-    wwSatMap=L.map(el,{zoomControl:true,minZoom:2,maxZoom:10,preferCanvas:false}).setView([49,12],4);
+    wwSatMap=L.map(el,{zoomControl:true,minZoom:5,maxZoom:12,preferCanvas:false}).setView([38.5,23.5],6);
+    wwSatMap.setMaxBounds([[33.0,18.0],[43.0,31.0]]);
+    wwSatMap.options.maxBoundsViscosity=0.85;
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
       maxZoom:19,attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     }).addTo(wwSatMap);
     wwSatLayer=L.tileLayer.wms(WW_EUMETSAT_WMS,{
-      layers:'mtg_fd:rgb_geocolour',
+      layers:'mtg_fd:vis06_hrfi',
       styles:'',
       format:'image/png',
       transparent:true,
@@ -4610,7 +4612,7 @@ function wwSatInit(){
     document.getElementById('wwSatStepBack')?.addEventListener('click',()=>{wwSatStop();wwSatShowFrame(wwSatFrameIndex-1);});
     document.getElementById('wwSatStepForward')?.addEventListener('click',()=>{wwSatStop();wwSatShowFrame(wwSatFrameIndex+1);});
     document.getElementById('wwSatRefresh')?.addEventListener('click',()=>{wwSatStop();wwSatBuildFrames();wwSatShowFrame(wwSatFrameIndex);});
-    document.getElementById('wwSatFit')?.addEventListener('click',()=>wwSatMap.fitBounds([[25,-25],[72,45]],{padding:[12,12]}));
+    document.getElementById('wwSatFit')?.addEventListener('click',()=>wwSatMap.fitBounds([[34.3,19.0],[41.9,29.9]],{padding:[12,12]}));
     wwSatInitialized=true;
     wwSatBuildFrames();
     wwSatShowFrame(wwSatFrameIndex);
