@@ -2913,6 +2913,46 @@ body[data-theme="weatherlive"] #overview::after{
     linear-gradient(112deg,rgba(255,255,255,.045) 0%,transparent 38%,rgba(0,0,0,.18) 100%);
   box-shadow:inset -20px -10px 42px rgba(0,0,0,.24),inset 10px 8px 26px rgba(160,220,255,.10);
 }
+
+/* Local current-weather CTA */
+.ww-observatory-actions .ww-local-weather-cta{
+  min-height:76px;
+  padding:0 0 0 30px;
+  gap:0;
+  border-radius:16px;
+  border:1px solid #b97827;
+  background:#c98e36;
+  color:#17243a;
+  box-shadow:0 2px 5px rgba(10,18,30,.16);
+  font:700 clamp(17px,1.55vw,25px) Manrope,sans-serif;
+  overflow:hidden;
+}
+.ww-observatory-actions .ww-local-weather-cta:hover,
+.ww-observatory-actions .ww-local-weather-cta:focus-visible{
+  background:#d59b45;
+  border-color:#ad6b1e;
+  color:#17243a;
+}
+.ww-observatory-actions .ww-local-weather-cta .ww-local-weather-arrow{
+  display:grid;
+  place-items:center;
+  align-self:stretch;
+  min-width:78px;
+  margin-left:24px;
+  border-left:1px solid rgba(23,36,58,.25);
+  font-size:30px;
+  font-weight:400;
+  color:#17243a;
+}
+@media(max-width:560px){
+  .ww-observatory-actions .ww-local-weather-cta{
+    min-height:62px;padding-left:19px;border-radius:13px;
+    font-size:16px;
+  }
+  .ww-observatory-actions .ww-local-weather-cta .ww-local-weather-arrow{
+    min-width:56px;margin-left:15px;font-size:25px;
+  }
+}
 </style>
 
 </head>
@@ -2974,7 +3014,7 @@ body[data-theme="weatherlive"] #overview::after{
         <h1>The sky,<br><em>as it actually is.</em><br><span>Everywhere.</span></h1>
         <p>Real weather conditions, satellite imagery, and forecast charts from the sources the professionals trust — for everybody, in every corner of the world.</p>
         <div class="ww-observatory-actions">
-          <button type="button" class="ww-observatory-primary" onclick="navigateWeatherWiseSection('about')">Send an enquiry <span aria-hidden="true">→</span></button>
+          <button type="button" class="ww-observatory-primary ww-local-weather-cta" onclick="showWeatherAtMyLocation()" aria-label="Δες τις τρέχουσες καιρικές συνθήκες στην τοποθεσία μου">Δες τις συνθήκες τώρα <span class="ww-local-weather-arrow" aria-hidden="true">→</span></button>
           <button type="button" class="ww-observatory-secondary" onclick="document.querySelector('.topbar')?.scrollIntoView({behavior:'smooth',block:'start'})">Explore the data</button>
         </div>
       </div>
@@ -4865,6 +4905,18 @@ function requestUserLocation({automatic=false,fallbackToIp=false}={}){
  },{enableHighAccuracy:false,timeout:12000,maximumAge:300000});
 }
 if(geolocateBtn)geolocateBtn.addEventListener('click',()=>requestUserLocation());
+
+function showWeatherAtMyLocation(){
+ // Open the live conditions panel first, then refresh it with this visitor's location.
+ navigateWeatherWiseSection('overview');
+ const currentConditions=document.querySelector('#overview .city-current');
+ const overview=document.getElementById('overview');
+ const destination=currentConditions||overview;
+ if(destination)destination.scrollIntoView({behavior:'smooth',block:'center'});
+ // Reuse the existing browser GPS lookup and IP fallback; loadWeather() updates all live panels.
+ requestUserLocation({automatic:true,fallbackToIp:true});
+}
+
 const showLocalConditionsBtn=$('showLocalConditionsBtn');
 if(showLocalConditionsBtn){
  showLocalConditionsBtn.addEventListener('click',()=>{
