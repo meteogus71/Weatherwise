@@ -2846,6 +2846,47 @@ body[data-theme="weatherlive"] #overview::after{
 }
 </style>
 
+
+<style id="weatherwise-observatory-hero">
+/* Editorial observatory hero: preserve the rest of the WeatherWise dashboard. */
+.wl-intro.ww-observatory-hero{
+  position:relative;isolation:isolate;overflow:hidden;min-height:clamp(610px,calc(100svh - 76px),790px);
+  display:flex;align-items:center;padding:clamp(54px,7vw,100px) clamp(26px,7vw,120px)!important;
+  border:0!important;border-radius:0!important;margin:0!important;
+  background:
+    radial-gradient(ellipse at 78% 18%,rgba(104,132,157,.22),transparent 39%),
+    radial-gradient(ellipse at 9% 88%,rgba(117,130,139,.13),transparent 34%),
+    radial-gradient(circle at 1px 1px,rgba(202,215,226,.12) .7px,transparent .95px),
+    linear-gradient(112deg,#111a28 0%,#182333 49%,#202c3b 100%)!important;
+  background-size:auto,auto,17px 17px,auto!important;
+}
+.ww-observatory-inner{width:min(1420px,100%);margin:0 auto;display:grid;grid-template-columns:minmax(0,1.08fr) minmax(390px,.92fr);align-items:center;gap:clamp(28px,5vw,90px)}
+.ww-observatory-copy{position:relative;z-index:2;max-width:760px;text-align:left}
+.ww-observatory-kicker{display:inline-flex;align-items:center;gap:12px;padding:11px 19px;border:1px solid rgba(203,169,84,.36);border-radius:999px;background:rgba(255,255,255,.035);color:#e5c878;font:500 12px/1.2 Manrope,sans-serif;letter-spacing:3px}
+.ww-observatory-kicker span{width:7px;height:7px;border-radius:50%;background:#d9b453;box-shadow:0 0 12px #d9b453}
+.ww-observatory-copy h1{margin:34px 0 30px;color:#f3f0e9;font:400 clamp(62px,6vw,104px)/.99 "Bodoni 72", "Didot", "Times New Roman",serif;letter-spacing:-3.5px;text-align:left;max-width:800px}
+.ww-observatory-copy h1 em{color:#e6ca7b;font-weight:400}
+.ww-observatory-copy h1 span{color:transparent;-webkit-text-stroke:1px rgba(197,205,216,.64);font-style:italic}
+.ww-observatory-copy p{max-width:730px;margin:0;color:#d1d8e1;font:400 clamp(16px,1.25vw,21px)/1.72 Manrope,sans-serif;text-align:left}
+.ww-observatory-actions{display:flex;flex-wrap:wrap;gap:18px;margin-top:44px}
+.ww-observatory-actions button{min-height:70px;padding:0 33px;border-radius:999px;font:600 16px Manrope,sans-serif;letter-spacing:.1px;cursor:pointer;transition:transform .25s ease,box-shadow .25s ease,background .25s ease}
+.ww-observatory-actions button:hover{transform:translateY(-3px)}
+.ww-observatory-primary{display:inline-flex;align-items:center;gap:24px;border:1px solid #d7b34f;background:#d7b34f;color:#111a27;box-shadow:0 12px 34px rgba(215,179,79,.2)}
+.ww-observatory-primary span{font-size:21px}
+.ww-observatory-secondary{border:1px solid rgba(207,216,226,.32);background:rgba(255,255,255,.025);color:#f1f1ef}
+.ww-observatory-secondary:hover{background:rgba(255,255,255,.08)}
+.ww-observatory-visual{position:relative;justify-self:center;width:min(100%,min(43vw,540px));aspect-ratio:1;display:grid;place-items:center}
+.ww-observatory-orbit{position:absolute;inset:1%;border-radius:50%;pointer-events:none}
+.ww-observatory-orbit-outer{inset:-7%;border:1px dashed rgba(177,190,204,.17)}
+.ww-observatory-orbit-inner{inset:3%;border:1px solid rgba(199,166,86,.24);box-shadow:0 0 50px rgba(194,170,112,.035)}
+.ww-observatory-earth-frame{position:relative;width:78%;height:78%;border-radius:50%;overflow:hidden;background:#17283a;box-shadow:0 0 0 17px rgba(161,180,198,.035),0 0 70px rgba(104,169,216,.17),inset 0 0 35px rgba(0,0,0,.25)}
+.ww-observatory-earth{display:block;width:100%;height:100%;object-fit:cover;object-position:63% center;border-radius:50%;transform:scale(1.015);}
+.ww-observatory-satellite{position:absolute;z-index:3;top:2%;left:4%;width:13px;height:13px;border-radius:50%;background:#e2c16d;box-shadow:0 0 0 5px rgba(226,193,109,.12),0 0 22px 7px rgba(226,193,109,.42)}
+@media(max-width:900px){.wl-intro.ww-observatory-hero{min-height:auto;padding:66px 28px 74px!important}.ww-observatory-inner{grid-template-columns:1fr;gap:38px}.ww-observatory-copy{max-width:760px}.ww-observatory-copy h1{font-size:clamp(56px,10vw,84px)}.ww-observatory-visual{width:min(72vw,440px);grid-row:1}}
+@media(max-width:560px){.wl-intro.ww-observatory-hero{padding:44px 21px 55px!important}.ww-observatory-inner{gap:26px}.ww-observatory-visual{width:min(78vw,340px)}.ww-observatory-copy h1{font-size:clamp(49px,13vw,68px);letter-spacing:-2px;margin:25px 0 22px}.ww-observatory-kicker{font-size:9px;letter-spacing:2px;padding:9px 13px}.ww-observatory-copy p{font-size:15px;line-height:1.65}.ww-observatory-actions{margin-top:29px;gap:11px}.ww-observatory-actions button{min-height:56px;padding:0 21px;font-size:13px}}
+@media(prefers-reduced-motion:reduce){.ww-observatory-actions button{transition:none}}
+</style>
+
 </head>
 <body>
 <div id="ww-header-spacer" aria-hidden="true"></div>
@@ -2898,18 +2939,26 @@ body[data-theme="weatherlive"] #overview::after{
   <div class="side-bottom">WEATHER INTELLIGENCE<br><span style="color:#526983">Live atmospheric monitoring</span><br><br>Δεδομένα πρόγνωσης: Open-Meteo</div>
 </aside>
 <main class="main">
-  <section class="wl-intro" aria-label="WeatherWise εισαγωγή">
-    <div class="wl-intro-copy">
-      <div class="wl-intro-kicker">Ζωντανά · Μετεωρολογική ενημέρωση</div>
-      <h1>Ο καιρός όπως συμβαίνει, και οι ώρες που έρχονται.</h1>
-      <p>Το WeatherWise συνδυάζει ζωντανές μετρήσεις μετεωρολογικών σταθμών, προγνωστικά μοντέλα και αναφορές ανθρώπων που βρίσκονται έξω, στον καιρό. Αναζητήστε οπουδήποτε στον κόσμο, παρακολουθήστε τις επόμενες ώρες και δείτε τι συμβαίνει πραγματικά στην περιοχή σας.</p>
-      <div class="ww-hero-shortcuts" aria-label="Γρήγορες συντομεύσεις">
-        <button type="button" class="ww-shortcut ww-shortcut-primary" id="showLocalConditionsBtn" aria-label="Δες τις τρέχουσες συνθήκες στην τοποθεσία σου">
-          <span>Δες τις συνθήκες τώρα</span><span class="ww-shortcut-arrow" aria-hidden="true">→</span>
-        </button>
-        <button type="button" class="ww-shortcut ww-shortcut-secondary" id="showCommunityReportBtn" aria-label="Πες τι βλέπεις — άνοιγμα αναφοράς καιρού από την κοινότητα" onclick="navigateWeatherWiseSection('community')">
-          <span>Πες τι βλέπεις</span>
-        </button>
+  <section class="wl-intro ww-observatory-hero" aria-label="WeatherWise Global Weather Observatory">
+    <div class="ww-observatory-inner">
+      <div class="ww-observatory-copy">
+        <div class="ww-observatory-kicker"><span aria-hidden="true"></span> GLOBAL WEATHER OBSERVATORY</div>
+        <h1>The sky,<br><em>as it actually is.</em><br><span>Everywhere.</span></h1>
+        <p>Real weather conditions, satellite imagery, and forecast charts from the sources the professionals trust — for everybody, in every corner of the world.</p>
+        <div class="ww-observatory-actions">
+          <button type="button" class="ww-observatory-primary" onclick="navigateWeatherWiseSection('about')">Send an enquiry <span aria-hidden="true">→</span></button>
+          <button type="button" class="ww-observatory-secondary" onclick="document.querySelector('.topbar')?.scrollIntoView({behavior:'smooth',block:'start'})">Explore the data</button>
+        </div>
+      </div>
+      <div class="ww-observatory-visual" aria-label="Περιστρεφόμενος πλανήτης Γη">
+        <div class="ww-observatory-orbit ww-observatory-orbit-outer"></div>
+        <div class="ww-observatory-orbit ww-observatory-orbit-inner"></div>
+        <span class="ww-observatory-satellite" aria-hidden="true"></span>
+        <div class="ww-observatory-earth-frame">
+          <video class="ww-observatory-earth" autoplay muted loop playsinline webkit-playsinline preload="metadata" poster="/assets/weatherwise-earth-poster.jpg" aria-label="Κινούμενη υδρόγειος που περιστρέφεται αργά">
+            <source src="/assets/weatherwise-earth.mp4" type="video/mp4">
+          </video>
+        </div>
       </div>
     </div>
   </section>
