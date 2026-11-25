@@ -2912,6 +2912,28 @@ body[data-theme="weatherlive"] #overview::after{
     linear-gradient(112deg,rgba(255,255,255,.045) 0%,transparent 38%,rgba(0,0,0,.18) 100%);
   box-shadow:inset -20px -10px 42px rgba(0,0,0,.24),inset 10px 8px 26px rgba(160,220,255,.10);
 }
+
+/* Flat, full-bleed Earth: no 3D shading, no empty rim, no stray starfield */
+.ww-observatory-earth-frame{
+  position:relative!important;
+  width:100%!important;height:100%!important;
+  border-radius:50%!important;overflow:hidden!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  isolation:isolate;
+}
+.ww-observatory-earth{
+  display:block!important;
+  width:100%!important;height:100%!important;
+  object-fit:cover!important;object-position:50% 50%!important;
+  border-radius:50%!important;
+  transform:none!important;
+  filter:none!important;
+}
+.ww-observatory-earth-frame::before,
+.ww-observatory-earth-frame::after{
+  content:none!important;display:none!important;
+}
 </style>
 </head>
 <body>
