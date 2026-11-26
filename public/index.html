@@ -2999,6 +2999,54 @@ html body section.wl-intro.ww-observatory-hero > * {
 /* All other page regions retain their own theme backgrounds. */
 </style>
 
+
+<style id="weatherwise-atmospheric-details-unified-background">
+/* Keep one continuous surface behind the six atmospheric metric tiles. */
+body[data-theme] #overview > .weather-layout > .atmospheric-card {
+  background:var(--panel)!important;
+  background-color:var(--panel)!important;
+}
+body[data-theme] #overview > .weather-layout > .atmospheric-card > .details,
+body[data-theme] #overview > .weather-layout > .atmospheric-card .details {
+  background:transparent!important;
+  background-color:transparent!important;
+  background-image:none!important;
+  box-shadow:none!important;
+  outline:0!important;
+}
+body[data-surface-style="glass"] #overview > .weather-layout > .atmospheric-card > .details,
+body[data-surface-style="solid"] #overview > .weather-layout > .atmospheric-card > .details {
+  background:transparent!important;
+  background-color:transparent!important;
+  background-image:none!important;
+}
+</style>
+
+
+<style id="weatherwise-atmospheric-card-uniform-surface-final">
+/* The six-tile area and the surrounding atmospheric panel share one continuous surface.
+   Remove tile drop-shadow halos that were creating uneven patches in the gaps. */
+html body[data-theme] #overview > .weather-layout > .atmospheric-card {
+  background:var(--panel)!important;
+  background-color:var(--panel)!important;
+  background-image:none!important;
+}
+html body[data-theme] #overview > .weather-layout > .atmospheric-card > .details,
+html body[data-theme] #overview > .weather-layout > .atmospheric-card > .details::before,
+html body[data-theme] #overview > .weather-layout > .atmospheric-card > .details::after {
+  background:var(--panel)!important;
+  background-color:var(--panel)!important;
+  background-image:none!important;
+  box-shadow:none!important;
+  filter:none!important;
+}
+html body[data-theme] #overview > .weather-layout > .atmospheric-card > .details > .detail {
+  box-shadow:none!important;
+  filter:none!important;
+}
+/* Keep the individual six tile fills, borders, typography and icons unchanged. */
+</style>
+
 </head>
 <body>
 <div id="ww-header-spacer" aria-hidden="true"></div>
