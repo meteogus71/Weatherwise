@@ -7150,4 +7150,546 @@ html body .wl-intro .ww-observatory-copy h1 .ww-hero-line-three{
   font-size:1.08em!important;
 }
 </style>
+<style id="weatherwise-light-themes-hero-contrast">
+/* Light themes only: stronger contrast and a deeper theme-matched Observatory hero.
+   Dark themes are deliberately not targeted by any selector in this block. */
+html body[data-theme="arctic"] section.wl-intro.ww-observatory-hero,
+html body[data-theme="sandstone"] section.wl-intro.ww-observatory-hero,
+html body[data-theme="slate-light"] section.wl-intro.ww-observatory-hero,
+html body[data-theme="mocha-light"] section.wl-intro.ww-observatory-hero,
+html body[data-theme="navy-gold-light"] section.wl-intro.ww-observatory-hero,
+html body[data-theme="berry-light"] section.wl-intro.ww-observatory-hero,
+html body[data-theme="cream-light"] section.wl-intro.ww-observatory-hero,
+html body[data-theme="sage-light"] section.wl-intro.ww-observatory-hero,
+html body[data-theme="sunshine-light"] section.wl-intro.ww-observatory-hero,
+html body[data-theme="lime-light"] section.wl-intro.ww-observatory-hero {
+  background-color:var(--bg)!important;
+  background-image:
+    radial-gradient(ellipse at 79% 18%,
+      color-mix(in srgb,var(--blue) 23%,transparent) 0%,
+      transparent 42%),
+    radial-gradient(ellipse at 10% 88%,
+      color-mix(in srgb,var(--cyan) 15%,transparent) 0%,
+      transparent 38%),
+    radial-gradient(circle at 1px 1px,
+      color-mix(in srgb,var(--text) 19%,transparent) .85px,
+      transparent 1.2px),
+    linear-gradient(112deg,
+      color-mix(in srgb,var(--bg) 84%,var(--text) 16%) 0%,
+      color-mix(in srgb,var(--panel2) 82%,var(--text) 18%) 52%,
+      color-mix(in srgb,var(--bg) 76%,var(--text) 24%) 100%)!important;
+  background-size:100% 100%,100% 100%,17px 17px,100% 100%!important;
+  background-position:center,center,0 0,center!important;
+  background-repeat:no-repeat,no-repeat,repeat,no-repeat!important;
+}
 
+html body[data-theme="arctic"] .ww-observatory-copy h1 .ww-hero-line-one {
+  color:var(--text)!important;
+  -webkit-text-fill-color:var(--text)!important;
+  -webkit-text-stroke:.22px var(--text)!important;
+  text-shadow:0 1px 0 color-mix(in srgb,var(--bg) 45%,transparent)!important;
+}
+html body[data-theme="arctic"] .ww-observatory-copy h1 .ww-hero-line-two {
+  color:color-mix(in srgb,var(--amber) 78%,var(--text) 22%)!important;
+  -webkit-text-fill-color:color-mix(in srgb,var(--amber) 78%,var(--text) 22%)!important;
+}
+html body[data-theme="arctic"] .ww-observatory-copy h1 .ww-hero-line-three {
+  color:transparent!important;
+  -webkit-text-fill-color:transparent!important;
+  -webkit-text-stroke:1.25px color-mix(in srgb,var(--muted) 62%,var(--text) 38%)!important;
+}
+html body[data-theme="arctic"] .ww-observatory-kicker {
+  color:var(--amber)!important;
+  background:color-mix(in srgb,var(--panel) 72%,var(--text) 28%)!important;
+  border-color:color-mix(in srgb,var(--amber) 58%,var(--line))!important;
+  box-shadow:0 5px 20px color-mix(in srgb,var(--text) 12%,transparent)!important;
+}
+html body[data-theme="arctic"] .ww-observatory-kicker span {
+  background:var(--amber)!important;
+  box-shadow:0 0 12px color-mix(in srgb,var(--amber) 65%,transparent)!important;
+}
+html body[data-theme="arctic"] .ww-observatory-copy p {
+  color:color-mix(in srgb,var(--text) 88%,var(--muted) 12%)!important;
+  text-shadow:0 1px 1px color-mix(in srgb,var(--bg) 20%,transparent)!important;
+}
+html body[data-theme="arctic"] .ww-observatory-actions .ww-observatory-secondary {
+  color:var(--text)!important;
+  background:color-mix(in srgb,var(--panel) 78%,var(--text) 22%)!important;
+  border-color:var(--line)!important;
+  box-shadow:0 5px 18px color-mix(in srgb,var(--text) 12%,transparent)!important;
+}
+html body[data-theme="arctic"] .ww-observatory-actions .ww-observatory-secondary:hover {
+  background:color-mix(in srgb,var(--panel2) 70%,var(--text) 30%)!important;
+}
+html body[data-theme="arctic"] .ww-observatory-orbit-outer {
+  border-color:color-mix(in srgb,var(--muted) 42%,transparent)!important;
+}
+html body[data-theme="arctic"] .ww-observatory-orbit-inner {
+  border-color:color-mix(in srgb,var(--amber) 48%,transparent)!important;
+  box-shadow:0 0 42px color-mix(in srgb,var(--amber) 10%,transparent)!important;
+}
+html body[data-theme="arctic"] .ww-observatory-satellite {
+  background:var(--amber)!important;
+  box-shadow:0 0 0 5px color-mix(in srgb,var(--amber) 18%,transparent),
+             0 0 22px 7px color-mix(in srgb,var(--amber) 44%,transparent)!important;
+}
+
+html body[data-theme="sandstone"] .ww-observatory-copy h1 .ww-hero-line-one {
+  color:var(--text)!important;
+  -webkit-text-fill-color:var(--text)!important;
+  -webkit-text-stroke:.22px var(--text)!important;
+  text-shadow:0 1px 0 color-mix(in srgb,var(--bg) 45%,transparent)!important;
+}
+html body[data-theme="sandstone"] .ww-observatory-copy h1 .ww-hero-line-two {
+  color:color-mix(in srgb,var(--amber) 78%,var(--text) 22%)!important;
+  -webkit-text-fill-color:color-mix(in srgb,var(--amber) 78%,var(--text) 22%)!important;
+}
+html body[data-theme="sandstone"] .ww-observatory-copy h1 .ww-hero-line-three {
+  color:transparent!important;
+  -webkit-text-fill-color:transparent!important;
+  -webkit-text-stroke:1.25px color-mix(in srgb,var(--muted) 62%,var(--text) 38%)!important;
+}
+html body[data-theme="sandstone"] .ww-observatory-kicker {
+  color:var(--amber)!important;
+  background:color-mix(in srgb,var(--panel) 72%,var(--text) 28%)!important;
+  border-color:color-mix(in srgb,var(--amber) 58%,var(--line))!important;
+  box-shadow:0 5px 20px color-mix(in srgb,var(--text) 12%,transparent)!important;
+}
+html body[data-theme="sandstone"] .ww-observatory-kicker span {
+  background:var(--amber)!important;
+  box-shadow:0 0 12px color-mix(in srgb,var(--amber) 65%,transparent)!important;
+}
+html body[data-theme="sandstone"] .ww-observatory-copy p {
+  color:color-mix(in srgb,var(--text) 88%,var(--muted) 12%)!important;
+  text-shadow:0 1px 1px color-mix(in srgb,var(--bg) 20%,transparent)!important;
+}
+html body[data-theme="sandstone"] .ww-observatory-actions .ww-observatory-secondary {
+  color:var(--text)!important;
+  background:color-mix(in srgb,var(--panel) 78%,var(--text) 22%)!important;
+  border-color:var(--line)!important;
+  box-shadow:0 5px 18px color-mix(in srgb,var(--text) 12%,transparent)!important;
+}
+html body[data-theme="sandstone"] .ww-observatory-actions .ww-observatory-secondary:hover {
+  background:color-mix(in srgb,var(--panel2) 70%,var(--text) 30%)!important;
+}
+html body[data-theme="sandstone"] .ww-observatory-orbit-outer {
+  border-color:color-mix(in srgb,var(--muted) 42%,transparent)!important;
+}
+html body[data-theme="sandstone"] .ww-observatory-orbit-inner {
+  border-color:color-mix(in srgb,var(--amber) 48%,transparent)!important;
+  box-shadow:0 0 42px color-mix(in srgb,var(--amber) 10%,transparent)!important;
+}
+html body[data-theme="sandstone"] .ww-observatory-satellite {
+  background:var(--amber)!important;
+  box-shadow:0 0 0 5px color-mix(in srgb,var(--amber) 18%,transparent),
+             0 0 22px 7px color-mix(in srgb,var(--amber) 44%,transparent)!important;
+}
+
+html body[data-theme="slate-light"] .ww-observatory-copy h1 .ww-hero-line-one {
+  color:var(--text)!important;
+  -webkit-text-fill-color:var(--text)!important;
+  -webkit-text-stroke:.22px var(--text)!important;
+  text-shadow:0 1px 0 color-mix(in srgb,var(--bg) 45%,transparent)!important;
+}
+html body[data-theme="slate-light"] .ww-observatory-copy h1 .ww-hero-line-two {
+  color:color-mix(in srgb,var(--amber) 78%,var(--text) 22%)!important;
+  -webkit-text-fill-color:color-mix(in srgb,var(--amber) 78%,var(--text) 22%)!important;
+}
+html body[data-theme="slate-light"] .ww-observatory-copy h1 .ww-hero-line-three {
+  color:transparent!important;
+  -webkit-text-fill-color:transparent!important;
+  -webkit-text-stroke:1.25px color-mix(in srgb,var(--muted) 62%,var(--text) 38%)!important;
+}
+html body[data-theme="slate-light"] .ww-observatory-kicker {
+  color:var(--amber)!important;
+  background:color-mix(in srgb,var(--panel) 72%,var(--text) 28%)!important;
+  border-color:color-mix(in srgb,var(--amber) 58%,var(--line))!important;
+  box-shadow:0 5px 20px color-mix(in srgb,var(--text) 12%,transparent)!important;
+}
+html body[data-theme="slate-light"] .ww-observatory-kicker span {
+  background:var(--amber)!important;
+  box-shadow:0 0 12px color-mix(in srgb,var(--amber) 65%,transparent)!important;
+}
+html body[data-theme="slate-light"] .ww-observatory-copy p {
+  color:color-mix(in srgb,var(--text) 88%,var(--muted) 12%)!important;
+  text-shadow:0 1px 1px color-mix(in srgb,var(--bg) 20%,transparent)!important;
+}
+html body[data-theme="slate-light"] .ww-observatory-actions .ww-observatory-secondary {
+  color:var(--text)!important;
+  background:color-mix(in srgb,var(--panel) 78%,var(--text) 22%)!important;
+  border-color:var(--line)!important;
+  box-shadow:0 5px 18px color-mix(in srgb,var(--text) 12%,transparent)!important;
+}
+html body[data-theme="slate-light"] .ww-observatory-actions .ww-observatory-secondary:hover {
+  background:color-mix(in srgb,var(--panel2) 70%,var(--text) 30%)!important;
+}
+html body[data-theme="slate-light"] .ww-observatory-orbit-outer {
+  border-color:color-mix(in srgb,var(--muted) 42%,transparent)!important;
+}
+html body[data-theme="slate-light"] .ww-observatory-orbit-inner {
+  border-color:color-mix(in srgb,var(--amber) 48%,transparent)!important;
+  box-shadow:0 0 42px color-mix(in srgb,var(--amber) 10%,transparent)!important;
+}
+html body[data-theme="slate-light"] .ww-observatory-satellite {
+  background:var(--amber)!important;
+  box-shadow:0 0 0 5px color-mix(in srgb,var(--amber) 18%,transparent),
+             0 0 22px 7px color-mix(in srgb,var(--amber) 44%,transparent)!important;
+}
+
+html body[data-theme="mocha-light"] .ww-observatory-copy h1 .ww-hero-line-one {
+  color:var(--text)!important;
+  -webkit-text-fill-color:var(--text)!important;
+  -webkit-text-stroke:.22px var(--text)!important;
+  text-shadow:0 1px 0 color-mix(in srgb,var(--bg) 45%,transparent)!important;
+}
+html body[data-theme="mocha-light"] .ww-observatory-copy h1 .ww-hero-line-two {
+  color:color-mix(in srgb,var(--amber) 78%,var(--text) 22%)!important;
+  -webkit-text-fill-color:color-mix(in srgb,var(--amber) 78%,var(--text) 22%)!important;
+}
+html body[data-theme="mocha-light"] .ww-observatory-copy h1 .ww-hero-line-three {
+  color:transparent!important;
+  -webkit-text-fill-color:transparent!important;
+  -webkit-text-stroke:1.25px color-mix(in srgb,var(--muted) 62%,var(--text) 38%)!important;
+}
+html body[data-theme="mocha-light"] .ww-observatory-kicker {
+  color:var(--amber)!important;
+  background:color-mix(in srgb,var(--panel) 72%,var(--text) 28%)!important;
+  border-color:color-mix(in srgb,var(--amber) 58%,var(--line))!important;
+  box-shadow:0 5px 20px color-mix(in srgb,var(--text) 12%,transparent)!important;
+}
+html body[data-theme="mocha-light"] .ww-observatory-kicker span {
+  background:var(--amber)!important;
+  box-shadow:0 0 12px color-mix(in srgb,var(--amber) 65%,transparent)!important;
+}
+html body[data-theme="mocha-light"] .ww-observatory-copy p {
+  color:color-mix(in srgb,var(--text) 88%,var(--muted) 12%)!important;
+  text-shadow:0 1px 1px color-mix(in srgb,var(--bg) 20%,transparent)!important;
+}
+html body[data-theme="mocha-light"] .ww-observatory-actions .ww-observatory-secondary {
+  color:var(--text)!important;
+  background:color-mix(in srgb,var(--panel) 78%,var(--text) 22%)!important;
+  border-color:var(--line)!important;
+  box-shadow:0 5px 18px color-mix(in srgb,var(--text) 12%,transparent)!important;
+}
+html body[data-theme="mocha-light"] .ww-observatory-actions .ww-observatory-secondary:hover {
+  background:color-mix(in srgb,var(--panel2) 70%,var(--text) 30%)!important;
+}
+html body[data-theme="mocha-light"] .ww-observatory-orbit-outer {
+  border-color:color-mix(in srgb,var(--muted) 42%,transparent)!important;
+}
+html body[data-theme="mocha-light"] .ww-observatory-orbit-inner {
+  border-color:color-mix(in srgb,var(--amber) 48%,transparent)!important;
+  box-shadow:0 0 42px color-mix(in srgb,var(--amber) 10%,transparent)!important;
+}
+html body[data-theme="mocha-light"] .ww-observatory-satellite {
+  background:var(--amber)!important;
+  box-shadow:0 0 0 5px color-mix(in srgb,var(--amber) 18%,transparent),
+             0 0 22px 7px color-mix(in srgb,var(--amber) 44%,transparent)!important;
+}
+
+html body[data-theme="navy-gold-light"] .ww-observatory-copy h1 .ww-hero-line-one {
+  color:var(--text)!important;
+  -webkit-text-fill-color:var(--text)!important;
+  -webkit-text-stroke:.22px var(--text)!important;
+  text-shadow:0 1px 0 color-mix(in srgb,var(--bg) 45%,transparent)!important;
+}
+html body[data-theme="navy-gold-light"] .ww-observatory-copy h1 .ww-hero-line-two {
+  color:color-mix(in srgb,var(--amber) 78%,var(--text) 22%)!important;
+  -webkit-text-fill-color:color-mix(in srgb,var(--amber) 78%,var(--text) 22%)!important;
+}
+html body[data-theme="navy-gold-light"] .ww-observatory-copy h1 .ww-hero-line-three {
+  color:transparent!important;
+  -webkit-text-fill-color:transparent!important;
+  -webkit-text-stroke:1.25px color-mix(in srgb,var(--muted) 62%,var(--text) 38%)!important;
+}
+html body[data-theme="navy-gold-light"] .ww-observatory-kicker {
+  color:var(--amber)!important;
+  background:color-mix(in srgb,var(--panel) 72%,var(--text) 28%)!important;
+  border-color:color-mix(in srgb,var(--amber) 58%,var(--line))!important;
+  box-shadow:0 5px 20px color-mix(in srgb,var(--text) 12%,transparent)!important;
+}
+html body[data-theme="navy-gold-light"] .ww-observatory-kicker span {
+  background:var(--amber)!important;
+  box-shadow:0 0 12px color-mix(in srgb,var(--amber) 65%,transparent)!important;
+}
+html body[data-theme="navy-gold-light"] .ww-observatory-copy p {
+  color:color-mix(in srgb,var(--text) 88%,var(--muted) 12%)!important;
+  text-shadow:0 1px 1px color-mix(in srgb,var(--bg) 20%,transparent)!important;
+}
+html body[data-theme="navy-gold-light"] .ww-observatory-actions .ww-observatory-secondary {
+  color:var(--text)!important;
+  background:color-mix(in srgb,var(--panel) 78%,var(--text) 22%)!important;
+  border-color:var(--line)!important;
+  box-shadow:0 5px 18px color-mix(in srgb,var(--text) 12%,transparent)!important;
+}
+html body[data-theme="navy-gold-light"] .ww-observatory-actions .ww-observatory-secondary:hover {
+  background:color-mix(in srgb,var(--panel2) 70%,var(--text) 30%)!important;
+}
+html body[data-theme="navy-gold-light"] .ww-observatory-orbit-outer {
+  border-color:color-mix(in srgb,var(--muted) 42%,transparent)!important;
+}
+html body[data-theme="navy-gold-light"] .ww-observatory-orbit-inner {
+  border-color:color-mix(in srgb,var(--amber) 48%,transparent)!important;
+  box-shadow:0 0 42px color-mix(in srgb,var(--amber) 10%,transparent)!important;
+}
+html body[data-theme="navy-gold-light"] .ww-observatory-satellite {
+  background:var(--amber)!important;
+  box-shadow:0 0 0 5px color-mix(in srgb,var(--amber) 18%,transparent),
+             0 0 22px 7px color-mix(in srgb,var(--amber) 44%,transparent)!important;
+}
+
+html body[data-theme="berry-light"] .ww-observatory-copy h1 .ww-hero-line-one {
+  color:var(--text)!important;
+  -webkit-text-fill-color:var(--text)!important;
+  -webkit-text-stroke:.22px var(--text)!important;
+  text-shadow:0 1px 0 color-mix(in srgb,var(--bg) 45%,transparent)!important;
+}
+html body[data-theme="berry-light"] .ww-observatory-copy h1 .ww-hero-line-two {
+  color:color-mix(in srgb,var(--amber) 78%,var(--text) 22%)!important;
+  -webkit-text-fill-color:color-mix(in srgb,var(--amber) 78%,var(--text) 22%)!important;
+}
+html body[data-theme="berry-light"] .ww-observatory-copy h1 .ww-hero-line-three {
+  color:transparent!important;
+  -webkit-text-fill-color:transparent!important;
+  -webkit-text-stroke:1.25px color-mix(in srgb,var(--muted) 62%,var(--text) 38%)!important;
+}
+html body[data-theme="berry-light"] .ww-observatory-kicker {
+  color:var(--amber)!important;
+  background:color-mix(in srgb,var(--panel) 72%,var(--text) 28%)!important;
+  border-color:color-mix(in srgb,var(--amber) 58%,var(--line))!important;
+  box-shadow:0 5px 20px color-mix(in srgb,var(--text) 12%,transparent)!important;
+}
+html body[data-theme="berry-light"] .ww-observatory-kicker span {
+  background:var(--amber)!important;
+  box-shadow:0 0 12px color-mix(in srgb,var(--amber) 65%,transparent)!important;
+}
+html body[data-theme="berry-light"] .ww-observatory-copy p {
+  color:color-mix(in srgb,var(--text) 88%,var(--muted) 12%)!important;
+  text-shadow:0 1px 1px color-mix(in srgb,var(--bg) 20%,transparent)!important;
+}
+html body[data-theme="berry-light"] .ww-observatory-actions .ww-observatory-secondary {
+  color:var(--text)!important;
+  background:color-mix(in srgb,var(--panel) 78%,var(--text) 22%)!important;
+  border-color:var(--line)!important;
+  box-shadow:0 5px 18px color-mix(in srgb,var(--text) 12%,transparent)!important;
+}
+html body[data-theme="berry-light"] .ww-observatory-actions .ww-observatory-secondary:hover {
+  background:color-mix(in srgb,var(--panel2) 70%,var(--text) 30%)!important;
+}
+html body[data-theme="berry-light"] .ww-observatory-orbit-outer {
+  border-color:color-mix(in srgb,var(--muted) 42%,transparent)!important;
+}
+html body[data-theme="berry-light"] .ww-observatory-orbit-inner {
+  border-color:color-mix(in srgb,var(--amber) 48%,transparent)!important;
+  box-shadow:0 0 42px color-mix(in srgb,var(--amber) 10%,transparent)!important;
+}
+html body[data-theme="berry-light"] .ww-observatory-satellite {
+  background:var(--amber)!important;
+  box-shadow:0 0 0 5px color-mix(in srgb,var(--amber) 18%,transparent),
+             0 0 22px 7px color-mix(in srgb,var(--amber) 44%,transparent)!important;
+}
+
+html body[data-theme="cream-light"] .ww-observatory-copy h1 .ww-hero-line-one {
+  color:var(--text)!important;
+  -webkit-text-fill-color:var(--text)!important;
+  -webkit-text-stroke:.22px var(--text)!important;
+  text-shadow:0 1px 0 color-mix(in srgb,var(--bg) 45%,transparent)!important;
+}
+html body[data-theme="cream-light"] .ww-observatory-copy h1 .ww-hero-line-two {
+  color:color-mix(in srgb,var(--amber) 78%,var(--text) 22%)!important;
+  -webkit-text-fill-color:color-mix(in srgb,var(--amber) 78%,var(--text) 22%)!important;
+}
+html body[data-theme="cream-light"] .ww-observatory-copy h1 .ww-hero-line-three {
+  color:transparent!important;
+  -webkit-text-fill-color:transparent!important;
+  -webkit-text-stroke:1.25px color-mix(in srgb,var(--muted) 62%,var(--text) 38%)!important;
+}
+html body[data-theme="cream-light"] .ww-observatory-kicker {
+  color:var(--amber)!important;
+  background:color-mix(in srgb,var(--panel) 72%,var(--text) 28%)!important;
+  border-color:color-mix(in srgb,var(--amber) 58%,var(--line))!important;
+  box-shadow:0 5px 20px color-mix(in srgb,var(--text) 12%,transparent)!important;
+}
+html body[data-theme="cream-light"] .ww-observatory-kicker span {
+  background:var(--amber)!important;
+  box-shadow:0 0 12px color-mix(in srgb,var(--amber) 65%,transparent)!important;
+}
+html body[data-theme="cream-light"] .ww-observatory-copy p {
+  color:color-mix(in srgb,var(--text) 88%,var(--muted) 12%)!important;
+  text-shadow:0 1px 1px color-mix(in srgb,var(--bg) 20%,transparent)!important;
+}
+html body[data-theme="cream-light"] .ww-observatory-actions .ww-observatory-secondary {
+  color:var(--text)!important;
+  background:color-mix(in srgb,var(--panel) 78%,var(--text) 22%)!important;
+  border-color:var(--line)!important;
+  box-shadow:0 5px 18px color-mix(in srgb,var(--text) 12%,transparent)!important;
+}
+html body[data-theme="cream-light"] .ww-observatory-actions .ww-observatory-secondary:hover {
+  background:color-mix(in srgb,var(--panel2) 70%,var(--text) 30%)!important;
+}
+html body[data-theme="cream-light"] .ww-observatory-orbit-outer {
+  border-color:color-mix(in srgb,var(--muted) 42%,transparent)!important;
+}
+html body[data-theme="cream-light"] .ww-observatory-orbit-inner {
+  border-color:color-mix(in srgb,var(--amber) 48%,transparent)!important;
+  box-shadow:0 0 42px color-mix(in srgb,var(--amber) 10%,transparent)!important;
+}
+html body[data-theme="cream-light"] .ww-observatory-satellite {
+  background:var(--amber)!important;
+  box-shadow:0 0 0 5px color-mix(in srgb,var(--amber) 18%,transparent),
+             0 0 22px 7px color-mix(in srgb,var(--amber) 44%,transparent)!important;
+}
+
+html body[data-theme="sage-light"] .ww-observatory-copy h1 .ww-hero-line-one {
+  color:var(--text)!important;
+  -webkit-text-fill-color:var(--text)!important;
+  -webkit-text-stroke:.22px var(--text)!important;
+  text-shadow:0 1px 0 color-mix(in srgb,var(--bg) 45%,transparent)!important;
+}
+html body[data-theme="sage-light"] .ww-observatory-copy h1 .ww-hero-line-two {
+  color:color-mix(in srgb,var(--amber) 78%,var(--text) 22%)!important;
+  -webkit-text-fill-color:color-mix(in srgb,var(--amber) 78%,var(--text) 22%)!important;
+}
+html body[data-theme="sage-light"] .ww-observatory-copy h1 .ww-hero-line-three {
+  color:transparent!important;
+  -webkit-text-fill-color:transparent!important;
+  -webkit-text-stroke:1.25px color-mix(in srgb,var(--muted) 62%,var(--text) 38%)!important;
+}
+html body[data-theme="sage-light"] .ww-observatory-kicker {
+  color:var(--amber)!important;
+  background:color-mix(in srgb,var(--panel) 72%,var(--text) 28%)!important;
+  border-color:color-mix(in srgb,var(--amber) 58%,var(--line))!important;
+  box-shadow:0 5px 20px color-mix(in srgb,var(--text) 12%,transparent)!important;
+}
+html body[data-theme="sage-light"] .ww-observatory-kicker span {
+  background:var(--amber)!important;
+  box-shadow:0 0 12px color-mix(in srgb,var(--amber) 65%,transparent)!important;
+}
+html body[data-theme="sage-light"] .ww-observatory-copy p {
+  color:color-mix(in srgb,var(--text) 88%,var(--muted) 12%)!important;
+  text-shadow:0 1px 1px color-mix(in srgb,var(--bg) 20%,transparent)!important;
+}
+html body[data-theme="sage-light"] .ww-observatory-actions .ww-observatory-secondary {
+  color:var(--text)!important;
+  background:color-mix(in srgb,var(--panel) 78%,var(--text) 22%)!important;
+  border-color:var(--line)!important;
+  box-shadow:0 5px 18px color-mix(in srgb,var(--text) 12%,transparent)!important;
+}
+html body[data-theme="sage-light"] .ww-observatory-actions .ww-observatory-secondary:hover {
+  background:color-mix(in srgb,var(--panel2) 70%,var(--text) 30%)!important;
+}
+html body[data-theme="sage-light"] .ww-observatory-orbit-outer {
+  border-color:color-mix(in srgb,var(--muted) 42%,transparent)!important;
+}
+html body[data-theme="sage-light"] .ww-observatory-orbit-inner {
+  border-color:color-mix(in srgb,var(--amber) 48%,transparent)!important;
+  box-shadow:0 0 42px color-mix(in srgb,var(--amber) 10%,transparent)!important;
+}
+html body[data-theme="sage-light"] .ww-observatory-satellite {
+  background:var(--amber)!important;
+  box-shadow:0 0 0 5px color-mix(in srgb,var(--amber) 18%,transparent),
+             0 0 22px 7px color-mix(in srgb,var(--amber) 44%,transparent)!important;
+}
+
+html body[data-theme="sunshine-light"] .ww-observatory-copy h1 .ww-hero-line-one {
+  color:var(--text)!important;
+  -webkit-text-fill-color:var(--text)!important;
+  -webkit-text-stroke:.22px var(--text)!important;
+  text-shadow:0 1px 0 color-mix(in srgb,var(--bg) 45%,transparent)!important;
+}
+html body[data-theme="sunshine-light"] .ww-observatory-copy h1 .ww-hero-line-two {
+  color:color-mix(in srgb,var(--amber) 78%,var(--text) 22%)!important;
+  -webkit-text-fill-color:color-mix(in srgb,var(--amber) 78%,var(--text) 22%)!important;
+}
+html body[data-theme="sunshine-light"] .ww-observatory-copy h1 .ww-hero-line-three {
+  color:transparent!important;
+  -webkit-text-fill-color:transparent!important;
+  -webkit-text-stroke:1.25px color-mix(in srgb,var(--muted) 62%,var(--text) 38%)!important;
+}
+html body[data-theme="sunshine-light"] .ww-observatory-kicker {
+  color:var(--amber)!important;
+  background:color-mix(in srgb,var(--panel) 72%,var(--text) 28%)!important;
+  border-color:color-mix(in srgb,var(--amber) 58%,var(--line))!important;
+  box-shadow:0 5px 20px color-mix(in srgb,var(--text) 12%,transparent)!important;
+}
+html body[data-theme="sunshine-light"] .ww-observatory-kicker span {
+  background:var(--amber)!important;
+  box-shadow:0 0 12px color-mix(in srgb,var(--amber) 65%,transparent)!important;
+}
+html body[data-theme="sunshine-light"] .ww-observatory-copy p {
+  color:color-mix(in srgb,var(--text) 88%,var(--muted) 12%)!important;
+  text-shadow:0 1px 1px color-mix(in srgb,var(--bg) 20%,transparent)!important;
+}
+html body[data-theme="sunshine-light"] .ww-observatory-actions .ww-observatory-secondary {
+  color:var(--text)!important;
+  background:color-mix(in srgb,var(--panel) 78%,var(--text) 22%)!important;
+  border-color:var(--line)!important;
+  box-shadow:0 5px 18px color-mix(in srgb,var(--text) 12%,transparent)!important;
+}
+html body[data-theme="sunshine-light"] .ww-observatory-actions .ww-observatory-secondary:hover {
+  background:color-mix(in srgb,var(--panel2) 70%,var(--text) 30%)!important;
+}
+html body[data-theme="sunshine-light"] .ww-observatory-orbit-outer {
+  border-color:color-mix(in srgb,var(--muted) 42%,transparent)!important;
+}
+html body[data-theme="sunshine-light"] .ww-observatory-orbit-inner {
+  border-color:color-mix(in srgb,var(--amber) 48%,transparent)!important;
+  box-shadow:0 0 42px color-mix(in srgb,var(--amber) 10%,transparent)!important;
+}
+html body[data-theme="sunshine-light"] .ww-observatory-satellite {
+  background:var(--amber)!important;
+  box-shadow:0 0 0 5px color-mix(in srgb,var(--amber) 18%,transparent),
+             0 0 22px 7px color-mix(in srgb,var(--amber) 44%,transparent)!important;
+}
+
+html body[data-theme="lime-light"] .ww-observatory-copy h1 .ww-hero-line-one {
+  color:var(--text)!important;
+  -webkit-text-fill-color:var(--text)!important;
+  -webkit-text-stroke:.22px var(--text)!important;
+  text-shadow:0 1px 0 color-mix(in srgb,var(--bg) 45%,transparent)!important;
+}
+html body[data-theme="lime-light"] .ww-observatory-copy h1 .ww-hero-line-two {
+  color:color-mix(in srgb,var(--amber) 78%,var(--text) 22%)!important;
+  -webkit-text-fill-color:color-mix(in srgb,var(--amber) 78%,var(--text) 22%)!important;
+}
+html body[data-theme="lime-light"] .ww-observatory-copy h1 .ww-hero-line-three {
+  color:transparent!important;
+  -webkit-text-fill-color:transparent!important;
+  -webkit-text-stroke:1.25px color-mix(in srgb,var(--muted) 62%,var(--text) 38%)!important;
+}
+html body[data-theme="lime-light"] .ww-observatory-kicker {
+  color:var(--amber)!important;
+  background:color-mix(in srgb,var(--panel) 72%,var(--text) 28%)!important;
+  border-color:color-mix(in srgb,var(--amber) 58%,var(--line))!important;
+  box-shadow:0 5px 20px color-mix(in srgb,var(--text) 12%,transparent)!important;
+}
+html body[data-theme="lime-light"] .ww-observatory-kicker span {
+  background:var(--amber)!important;
+  box-shadow:0 0 12px color-mix(in srgb,var(--amber) 65%,transparent)!important;
+}
+html body[data-theme="lime-light"] .ww-observatory-copy p {
+  color:color-mix(in srgb,var(--text) 88%,var(--muted) 12%)!important;
+  text-shadow:0 1px 1px color-mix(in srgb,var(--bg) 20%,transparent)!important;
+}
+html body[data-theme="lime-light"] .ww-observatory-actions .ww-observatory-secondary {
+  color:var(--text)!important;
+  background:color-mix(in srgb,var(--panel) 78%,var(--text) 22%)!important;
+  border-color:var(--line)!important;
+  box-shadow:0 5px 18px color-mix(in srgb,var(--text) 12%,transparent)!important;
+}
+html body[data-theme="lime-light"] .ww-observatory-actions .ww-observatory-secondary:hover {
+  background:color-mix(in srgb,var(--panel2) 70%,var(--text) 30%)!important;
+}
+html body[data-theme="lime-light"] .ww-observatory-orbit-outer {
+  border-color:color-mix(in srgb,var(--muted) 42%,transparent)!important;
+}
+html body[data-theme="lime-light"] .ww-observatory-orbit-inner {
+  border-color:color-mix(in srgb,var(--amber) 48%,transparent)!important;
+  box-shadow:0 0 42px color-mix(in srgb,var(--amber) 10%,transparent)!important;
+}
+html body[data-theme="lime-light"] .ww-observatory-satellite {
+  background:var(--amber)!important;
+  box-shadow:0 0 0 5px color-mix(in srgb,var(--amber) 18%,transparent),
+             0 0 22px 7px color-mix(in srgb,var(--amber) 44%,transparent)!important;
+}
+</style>
