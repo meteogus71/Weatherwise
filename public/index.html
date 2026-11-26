@@ -3047,6 +3047,39 @@ html body[data-theme] #overview > .weather-layout > .atmospheric-card > .details
 /* Keep the individual six tile fills, borders, typography and icons unchanged. */
 </style>
 
+
+<style id="weatherwise-atmospheric-card-shadows-restored">
+/* Keep the six-card area as one continuous surface, while restoring each tile's own shadow. */
+html body[data-theme] #overview > .weather-layout > .atmospheric-card {
+  background:var(--panel)!important;
+  background-color:var(--panel)!important;
+  background-image:none!important;
+}
+html body[data-theme] #overview > .weather-layout > .atmospheric-card > .details,
+html body[data-theme] #overview > .weather-layout > .atmospheric-card > .details::before,
+html body[data-theme] #overview > .weather-layout > .atmospheric-card > .details::after {
+  background:transparent!important;
+  background-color:transparent!important;
+  background-image:none!important;
+  box-shadow:none!important;
+  filter:none!important;
+}
+html body[data-theme] #overview > .weather-layout > .atmospheric-card > .details > .detail {
+  box-shadow:var(--ww-frame-shadow, 0 8px 22px rgba(0,0,0,.20))!important;
+  filter:drop-shadow(0 4px 7px rgba(0,0,0,.10))!important;
+  transition:box-shadow .22s ease,filter .22s ease,transform .22s ease;
+}
+html body[data-theme] #overview > .weather-layout > .atmospheric-card > .details > .detail:hover {
+  box-shadow:var(--ww-frame-shadow, 0 12px 26px rgba(0,0,0,.24))!important;
+  filter:drop-shadow(0 7px 11px rgba(0,0,0,.15))!important;
+  transform:translateY(-2px);
+}
+html body[data-frame-shadow="off"] #overview > .weather-layout > .atmospheric-card > .details > .detail {
+  box-shadow:none!important;
+  filter:none!important;
+}
+</style>
+
 </head>
 <body>
 <div id="ww-header-spacer" aria-hidden="true"></div>
