@@ -2958,6 +2958,49 @@ body[data-theme="weatherlive"] #overview::after{
 }
 </style>
 
+
+
+<style id="weatherwise-observatory-hero-atmosphere-final">
+/* Dedicated atmospheric layer: strictly confined to the opening Observatory panel. */
+html body section.wl-intro.ww-observatory-hero {
+  position:relative!important;
+  isolation:isolate!important;
+  overflow:hidden!important;
+  background-color:var(--bg,#172333)!important;
+  background-image:
+    linear-gradient(112deg,
+      color-mix(in srgb,var(--bg,#172333) 90%,var(--panel,#243448) 10%) 0%,
+      var(--bg,#172333) 49%,
+      color-mix(in srgb,var(--bg,#172333) 78%,var(--panel2,#30465b) 22%) 100%)!important;
+}
+html body section.wl-intro.ww-observatory-hero::before {
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:0;
+  pointer-events:none;
+  background-image:
+    radial-gradient(ellipse at 78% 18%,
+      color-mix(in srgb,var(--blue,#6da8d6) 24%,transparent) 0%,
+      transparent 41%),
+    radial-gradient(ellipse at 9% 88%,
+      color-mix(in srgb,var(--cyan,#65b5d4) 16%,transparent) 0%,
+      transparent 36%),
+    radial-gradient(circle at 1px 1px,
+      color-mix(in srgb,var(--text,#dce6ef) 12%,transparent) .78px,
+      transparent 1.15px);
+  background-size:100% 100%,100% 100%,17px 17px;
+  background-position:center,center,0 0;
+  background-repeat:no-repeat,no-repeat,repeat;
+  opacity:1;
+}
+html body section.wl-intro.ww-observatory-hero > * {
+  position:relative;
+  z-index:1;
+}
+/* All other page regions retain their own theme backgrounds. */
+</style>
+
 </head>
 <body>
 <div id="ww-header-spacer" aria-hidden="true"></div>
