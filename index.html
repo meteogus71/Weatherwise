@@ -5,7 +5,7 @@
 <title>WeatherWise — Μετεωρολογικό Κέντρο</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&family=Bodoni+Moda:opsz,wght@6..96,400..500&family=Playfair+Display:ital,wght@1,400&family=Cormorant+Garamond:ital,wght@1,400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -2864,7 +2864,7 @@ body[data-theme="weatherlive"] #overview::after{
 .ww-observatory-copy{position:relative;z-index:2;max-width:760px;text-align:left}
 .ww-observatory-kicker{display:inline-flex;align-items:center;gap:12px;padding:11px 19px;border:1px solid rgba(203,169,84,.36);border-radius:999px;background:rgba(255,255,255,.035);color:#e5c878;font:500 12px/1.2 Manrope,sans-serif;letter-spacing:3px}
 .ww-observatory-kicker span{width:7px;height:7px;border-radius:50%;background:#d9b453;box-shadow:0 0 12px #d9b453}
-.ww-observatory-copy h1{margin:34px 0 30px;color:#f3f0e9;font:400 clamp(62px,6vw,104px)/.99 "Bodoni 72", "Didot", "Times New Roman",serif;letter-spacing:-3.5px;text-align:left;max-width:800px}
+.ww-observatory-copy h1{margin:34px 0 30px;color:#f3f0e9;font:400 clamp(62px,6vw,104px)/.99 "Bodoni Moda",serif;letter-spacing:-3.5px;text-align:left;max-width:800px}
 .ww-observatory-copy h1 em{color:#e6ca7b;font-weight:400}
 .ww-observatory-copy h1 span{color:transparent;-webkit-text-stroke:1px rgba(197,205,216,.64);font-style:italic}
 .ww-observatory-copy p{max-width:730px;margin:0;color:#d1d8e1;font:400 clamp(16px,1.25vw,21px)/1.72 Manrope,sans-serif;text-align:left}
@@ -2955,6 +2955,24 @@ body[data-theme="weatherlive"] #overview::after{
   .ww-observatory-actions .ww-local-weather-cta .ww-local-weather-arrow{
     min-width:52px;margin-left:14px;font-size:24px;
   }
+}
+
+/* Reference typography: explicit per-line font and appearance, overriding the generic h1 span rule. */
+html body .ww-observatory-copy h1 .ww-hero-line-one{
+  font-family:"Bodoni Moda",serif!important;
+  font-style:normal!important;font-weight:400!important;
+  color:#f3f0e9!important;-webkit-text-stroke:0!important;
+}
+html body .ww-observatory-copy h1 .ww-hero-line-two{
+  font-family:"Playfair Display",serif!important;
+  font-style:italic!important;font-weight:400!important;
+  color:#e6ca7b!important;-webkit-text-stroke:0!important;
+}
+html body .ww-observatory-copy h1 .ww-hero-line-three{
+  font-family:"Cormorant Garamond",serif!important;
+  font-style:italic!important;font-weight:400!important;
+  color:transparent!important;
+  -webkit-text-stroke:1px rgba(197,205,216,.64)!important;
 }
 </style>
 
@@ -3138,8 +3156,8 @@ html body[data-frame-shadow="off"] #overview > .weather-layout > .atmospheric-ca
     <div class="ww-observatory-inner">
       <div class="ww-observatory-copy">
         <div class="ww-observatory-kicker"><span aria-hidden="true"></span> GLOBAL WEATHER OBSERVATORY</div>
-        <h1>The sky,<br><em>as it actually is.</em><br><span>Everywhere.</span></h1>
-        <p>Real weather conditions, satellite imagery, and forecast charts from the sources the professionals trust — for everybody, in every corner of the world.</p>
+        <h1><span class="ww-hero-line-one">The sky,</span><br><em class="ww-hero-line-two">as it actually is.</em><br><span class="ww-hero-line-three">Everywhere.</span></h1>
+        <p>Πραγματικές καιρικές συνθήκες, δορυφορικές εικόνες και γραφήματα πρόγνωσης από τις πηγές που εμπιστεύονται οι επαγγελματίες — για όλους, σε κάθε γωνιά του κόσμου</p>
         <div class="ww-observatory-actions">
           <button type="button" class="ww-observatory-primary ww-local-weather-cta" onclick="showWeatherAtMyLocation()" aria-label="Δες τις τρέχουσες καιρικές συνθήκες στην τοποθεσία μου">Δες τις συνθήκες τώρα <span class="ww-local-weather-arrow" aria-hidden="true">→</span></button>
           <button type="button" class="ww-observatory-secondary" onclick="navigateWeatherWiseSection('community')">Πες τι βλέπεις</button>
@@ -7112,3 +7130,24 @@ html body #overview .city-current #weatherIcon{
 .ww-region-filter-clear{border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.07);color:inherit;border-radius:8px;padding:7px 10px;cursor:pointer;font:inherit;font-size:.85em}
 .ww-region-filter-clear:hover{background:rgba(255,255,255,.14)}
 </style>
+<style id="weatherwise-the-sky-glyph-visibility-fix">
+/* Latest requested fix: improve fine Bodoni Moda strokes on "The sky," only. */
+html body .wl-intro.ww-observatory-hero .ww-observatory-copy h1 .ww-hero-line-one{
+  font-family:"Bodoni Moda",serif!important;
+  font-style:normal!important;
+  font-weight:500!important;
+  color:#f3f0e9!important;
+  -webkit-text-fill-color:#f3f0e9!important;
+  -webkit-text-stroke:.28px #f3f0e9!important;
+  text-shadow:none!important;
+  font-optical-sizing:auto;
+  text-rendering:geometricPrecision;
+}
+</style>
+<style id="weatherwise-everywhere-slightly-larger">
+/* Slightly enlarge only the "Everywhere." hero line. */
+html body .wl-intro .ww-observatory-copy h1 .ww-hero-line-three{
+  font-size:1.08em!important;
+}
+</style>
+
